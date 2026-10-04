@@ -38,6 +38,8 @@ function load(file) {
 const entries = [];
 for (const group of DOCS_NAV) {
   for (const item of group.items) {
+    // Per-operation API pages are generated from openapi.json (file: null); they have no Markdown source.
+    if (!item.file) continue;
     const { title, text } = load(item.file);
     const pageTitle = title ?? item.label;
     const url = `${origin}/${item.path}`;

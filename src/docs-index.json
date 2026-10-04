@@ -1,0 +1,902 @@
+{
+ "source": "https://straitlink.in",
+ "builtFrom": "site/content/docs",
+ "sections": [
+  {
+   "page": "Strait documentation",
+   "group": "Get started",
+   "section": "Start here",
+   "url": "https://straitlink.in/docs/#start-here",
+   "markdown": "- **[Quick start](https://straitlink.in/docs/quick-start/)**: create a workspace, add your app, make a link and test it on a real phone. The dashboard part takes about 10 minutes, the SDK installs from GitHub, and testing deferred links on Android needs a Google Play internal testing build.\n- **[Migrate from Firebase Dynamic Links](https://straitlink.in/docs/migrate-from-firebase/)**: bring your old `page.link` links across.\n- **[Migrate from Branch](https://straitlink.in/docs/migrate-from-branch/)**: import your Branch link export with deep link paths, fallbacks and previews, and plan the cutover.\n- **[Troubleshooting](https://straitlink.in/docs/troubleshooting/)**: the link opened the browser instead of the app? Start here."
+  },
+  {
+   "page": "Strait documentation",
+   "group": "Get started",
+   "section": "Pick your SDK",
+   "url": "https://straitlink.in/docs/#pick-your-sdk",
+   "markdown": "| Platform | Package | Guide |\n|---|---|---|\n| React Native and Expo | `@strait/sdk-react-native` | [React Native and Expo](https://straitlink.in/docs/sdks/react-native/) |\n| Flutter | `strait_sdk` | [Flutter](https://straitlink.in/docs/sdks/flutter/) |\n| Android (Kotlin) | `strait-sdk-android` | [Android](https://straitlink.in/docs/sdks/android/) |\n| iOS (Swift) | `StraitSDK` (Swift Package Manager) | [iOS](https://straitlink.in/docs/sdks/ios/) |\n| Unity (C#) | `strait-sdk-unity` | [Unity](https://straitlink.in/docs/sdks/unity/) |\n| Web | `@strait/sdk-web` | [Web](https://straitlink.in/docs/sdks/web/) |\n| Node (your server) | `@strait/sdk-node` | [Node](https://straitlink.in/docs/sdks/node/) |\n\nThe React Native, iOS (Swift), Flutter and Unity SDKs are at version 0.8.0, the Android SDK at 0.7.2, the Node SDK at 0.6.2 and the web SDK at 0.5.2. The app SDKs follow one shared contract: the same link events, the same app-state labels, the same offline retry for analytics. Each SDK's core is checked against the same shared test files, so a link behaves the same in every one. The Unity guide's engine glue (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor yet; see [Unity](https://straitlink.in/docs/sdks/unity/)."
+  },
+  {
+   "page": "Strait documentation",
+   "group": "Get started",
+   "section": "How the pieces fit",
+   "url": "https://straitlink.in/docs/#how-the-pieces-fit",
+   "markdown": "1. **Your workspace** has a link domain, `<your-handle>.strait.link`, and two keys.\n2. **A link** like `https://acme.strait.link/summer` points at a destination such as `https://shop.example.com/product/42`.\n3. **When someone taps it**, the phone opens your app directly (verified App Links / Universal Links), or our server sends them to the store or your website.\n4. **The SDK in your app** turns the link into a path and parameters you route to, including on the first open after an install, and reports the open for analytics.\n5. **Your server** creates links and sends purchase events with the secret key, and can receive webhooks."
+  },
+  {
+   "page": "Strait documentation",
+   "group": "Get started",
+   "section": "Two keys",
+   "url": "https://straitlink.in/docs/#two-keys",
+   "markdown": "| Key | Looks like | Where it goes | What it can do |\n|---|---|---|---|\n| Publishable key | `st_pub_live_…` | Your app and website | Resolve links, report opens, match installs, send events |\n| Secret key | `st_live_…` | Your server only | Create, list, update and deactivate links, send events |\n\nThe publishable key is in **Dashboard → Get started**. Secret keys are in **Dashboard → Settings → Secret keys**. Never put a secret key in an app or a web page."
+  },
+  {
+   "page": "Strait documentation",
+   "group": "Get started",
+   "section": "Rotating keys",
+   "url": "https://straitlink.in/docs/#rotating-keys",
+   "markdown": "**Publishable key.** Rotate it in **Dashboard → Get started**. You get a new key straight away, and the old one keeps working for **7 days**, so apps already on people's phones keep working while you ship an update with the new key. During those 7 days, responses to the old key carry a `Strait-Key-Deprecated` header with the time it stops working (ISO 8601, for example `2026-01-08T12:00:00.000Z`). After that, the old key gets `401`. If you rotate again within the 7 days, the key from the earlier rotation stops at once: only one old key is honoured.\n\n**Secret keys.** You can have several. Each one in **Dashboard → Settings → Secret keys** shows when it was last used (\"never used\" if it hasn't been), so you can spot a key nothing uses any more before you revoke it. We store only a hash, so a new key is shown once. Revoking a secret key stops it immediately. To replace one without downtime, create the new key, deploy it, check the old key's last-used date has stopped moving, then revoke the old one."
+  },
+  {
+   "page": "Strait documentation",
+   "group": "Get started",
+   "section": "Platform status",
+   "url": "https://straitlink.in/docs/#platform-status",
+   "markdown": "Android and web are live. iPhone support (Universal Links and deferred deep links) is built and covered by automated tests, but hasn't yet been proven on a real iPhone, so it's in **beta**. Live service health is on the [status page](https://status.strait.link)."
+  },
+  {
+   "page": "Quick start",
+   "group": "Get started",
+   "section": "How long it takes",
+   "url": "https://straitlink.in/docs/quick-start/#how-long-it-takes",
+   "markdown": "| Part | What it needs |\n|---|---|\n| Dashboard: workspace, app details, keys, first link (steps 1 to 4) | About 10 minutes |\n| SDK in your app (steps 5 and 6) | About 15 minutes. Install it straight from GitHub; no sign-up or access request |\n| Testing deferred links on Android (step 7, test 2) | A build installed from Google Play internal testing. The first upload and review can take 1 to 2 hours |\n\nDeep links to an installed app can be tested with a local build as soon as steps 1 to 6 are done."
+  },
+  {
+   "page": "Quick start",
+   "group": "Get started",
+   "section": "1. Create a workspace",
+   "url": "https://straitlink.in/docs/quick-start/#1-create-a-workspace",
+   "markdown": "[Sign up](https://app.straitlink.in/?signup=1). Your workspace gets its own link domain:\n\n```txt\nhttps://<your-handle>.strait.link\n```\n\n:::warn Pick your handle before you create a link\nYour handle comes from your workspace name. To change it, go to **Dashboard → Get started** (or **Settings**) before you create any link. After your first link the handle is fixed, because shared links and your app's link setup depend on it. Only the workspace owner can change it.\n:::\n\nIn these docs we use `acme.strait.link`; your own handle is shown in the dashboard. Each workspace has its own subdomain because phones verify **one app per domain**: your subdomain serves your app's verification files, so your links open your app. See [Link domains](https://straitlink.in/docs/link-domains/)."
+  },
+  {
+   "page": "Quick start",
+   "group": "Get started",
+   "section": "2. Tell us about your app",
+   "url": "https://straitlink.in/docs/quick-start/#2-tell-us-about-your-app",
+   "markdown": "In **Dashboard → Settings**, fill in what you have:\n\n| Platform | Fields | Where to find them |\n|---|---|---|\n| Android | Package name, custom scheme, SHA-256 certificate fingerprints | `applicationId` in `build.gradle` (Expo: `android.package` in `app.json`); your scheme (for example `yourapp`); see below for SHA-256 |\n| iPhone | Apple Team ID, bundle ID, App Store ID | Apple Developer → Membership; Xcode target (Expo: `ios.bundleIdentifier`); App Store Connect |\n| Everyone else | Default web URL (`https://` only) | Where desktop visitors and people without the app should go |\n| Branding (optional) | App name, icon URL, brand colour | Shown on the pages people see when a tap can't open your app straight away. See [App Links](https://straitlink.in/docs/app-links/#how-your-link-pages-look) |\n\nAlso choose **when someone without the app taps a link** on Android: Google Play if the app is published, always Google Play (use this while testing with Play internal testers), or always your website.\n\n:::warn Add every SHA-256 you sign with\nAndroid checks the certificate of the build that's installed. Add your **debug** key for local builds, your **upload** key for sideloaded release builds, and the **Play App Signing** key for anything installed from Google Play (Play Console → Test and release → App integrity). Missing the Play key is the most common reason links open the browser instead of the app.\n\nPaste fingerprints in any form: upper or lower case, with or without colons. We save them as uppercase with colons and drop duplicates. Anything that isn't a SHA-256 fingerprint (64 hex characters) is refused with a message saying which entry is wrong.\n:::\n\nFind your fingerprints:\n\n```bash\n# Native Android project (Android Studio's shared debug key)\nkeytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA256\n\n# React Native, or Expo after `npx expo prebuild`: the project's own debug key\nkeytool -list -v -keystore android/app/debug.keystore -storepass android | grep SHA256\n\n# EAS Build: choose Android and your build profile; the keystore's SHA-256 is listed\neas credentials\n```\n\n:::note Testing deferred links on Android\nA link tapped before the app is installed reaches the app through Google Play's install referrer, so test 2 in [step 7](#7-test-on-a-real-phone) needs a build installed from Google Play. Upload a build to **internal testing** in Play Console, add yourself as a tester, add the Play App Signing SHA-256 above, and choose **Always Google Play** for \"when someone without the app taps a link\" while you test. The first upload and review can take 1 to 2 hours.\n:::"
+  },
+  {
+   "page": "Quick start",
+   "group": "Get started",
+   "section": "3. Copy your keys",
+   "url": "https://straitlink.in/docs/quick-start/#3-copy-your-keys",
+   "markdown": "- **Publishable key** (`st_pub_live_…`): in **Dashboard → Get started**. Goes in your app. Safe to ship.\n- **Secret key** (`st_live_…`): create one in **Dashboard → Settings → Secret keys** (Get started links there). It's shown once. Server only: keep it in an environment variable."
+  },
+  {
+   "page": "Quick start",
+   "group": "Get started",
+   "section": "4. Create a link",
+   "url": "https://straitlink.in/docs/quick-start/#4-create-a-link",
+   "markdown": "In **Dashboard → Links**, or from your server:\n\n```bash\nexport SECRET_KEY=st_live_…   # Dashboard → Settings → Secret keys\ncurl https://strait.link/v1/links \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"slug\": \"summer\", \"longUrl\": \"https://shop.example.com/product/42\" }'\n```\n\nYour link is now `https://acme.strait.link/summer`. The destination must be `https://`; your app receives its path (`/product/42`) and query parameters.\n\n:::note No website?\nThe destination can be any `https://` URL on a domain you control, or your default web URL from step 2 with the path you want, such as `https://yourapp.com/product/42`. Only the path and query reach your app. Desktop visitors go to the full URL, and so do people without the app if you chose \"always your website\", so it's best if that page exists.\n:::"
+  },
+  {
+   "page": "Quick start",
+   "group": "Get started",
+   "section": "5. Let the phone open your app",
+   "url": "https://straitlink.in/docs/quick-start/#5-let-the-phone-open-your-app",
+   "markdown": "**Android**: add an App Links intent filter for your link domain, plus your custom scheme (used when a browser hands the link to your app):\n\n```xml title=\"AndroidManifest.xml\"\n<activity android:name=\".MainActivity\" android:launchMode=\"singleTask\" android:exported=\"true\">\n  \n  <intent-filter android:autoVerify=\"true\">\n    <action android:name=\"android.intent.action.VIEW\" />\n    <category android:name=\"android.intent.category.DEFAULT\" />\n    <category android:name=\"android.intent.category.BROWSABLE\" />\n    <data android:scheme=\"https\" android:host=\"acme.strait.link\" />\n  </intent-filter>\n  \n  <intent-filter>\n    <action android:name=\"android.intent.action.VIEW\" />\n    <category android:name=\"android.intent.category.DEFAULT\" />\n    <category android:name=\"android.intent.category.BROWSABLE\" />\n    <data android:scheme=\"yourapp\" />\n  </intent-filter>\n</activity>\n```\n\n**iPhone (beta)**: in Xcode, add the **Associated Domains** capability with `applinks:acme.strait.link`, and register your custom URL scheme under URL Types.\n\n**Expo**: put the same settings in `app.json`. Expo writes them into the native projects when it builds. Replace `acme.strait.link` with your own link domain:\n\n```json title=\"app.json\"\n{\n  \"expo\": {\n    \"scheme\": \"yourapp\",\n    \"android\": {\n      \"package\": \"com.yourcompany.yourapp\",\n      \"intentFilters\": [\n        {\n          \"action\": \"VIEW\",\n          \"autoVerify\": true,\n          \"data\": [{ \"scheme\": \"https\", \"host\": \"acme.strait.link\" }],\n          \"category\": [\"BROWSABLE\", \"DEFAULT\"]\n        }\n      ]\n    },\n    \"ios\": {\n      \"bundleIdentifier\": \"com.yourcompany.yourapp\",\n      \"associatedDomains\": [\"applinks:acme.strait.link\"]\n    }\n  }\n}\n```\n\nWe host the verification files (`/.well-known/assetlinks.json` and `/.well-known/apple-app-site-association`) on your link domain from the details in step 2. See [App Links & Universal Links](https://straitlink.in/docs/app-links/)."
+  },
+  {
+   "page": "Quick start",
+   "group": "Get started",
+   "section": "6. Install the SDK",
+   "url": "https://straitlink.in/docs/quick-start/#6-install-the-sdk",
+   "markdown": "Install the SDK straight from its public GitHub repo; each platform page has the exact command. npm and pub.dev packages are coming soon. For React Native:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nPick your platform: [React Native and Expo](https://straitlink.in/docs/sdks/react-native/) · [Flutter](https://straitlink.in/docs/sdks/flutter/) · [Android](https://straitlink.in/docs/sdks/android/) · [iOS](https://straitlink.in/docs/sdks/ios/) · [Unity](https://straitlink.in/docs/sdks/unity/) · [Web](https://straitlink.in/docs/sdks/web/). The shape is the same everywhere: create the client once with your publishable key and link domain, listen for links, start it.\n\n```ts title=\"links.ts (React Native, @strait/sdk-react-native 0.8.0)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@strait/sdk-react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\nThen send each link to a screen. With Expo Router:\n\n```tsx title=\"app/_layout.tsx\"\nimport { Stack, router, useRootNavigationState, type Href } from 'expo-router';\nimport { useEffect } from 'react';\nimport { links } from '../links';\n\nexport default function RootLayout() {\n  const ready = useRootNavigationState()?.key;\n  useEffect(() => {\n    if (!ready) return;\n    // Opened from a link, or first open after install: same callback.\n    return links.onLink((e) => {\n      if (e.matched && e.path) router.push({ pathname: e.path, params: e.params } as Href);\n    });\n  }, [ready]);\n  return <Stack />;\n}\n```\n\nExpo Router also needs a small `app/+native-intent.tsx`, and React Navigation apps use a navigation ref instead. Both are on the [React Native page](https://straitlink.in/docs/sdks/react-native/#route-links-to-screens).\n\n:::warn Expo Go won't work\nThe setup uses a native module (`react-native-play-install-referrer`) and your app's own link settings, so you need a development build: `npx expo run:android` or `npx expo run:ios`, or a build from EAS Build. In Expo Go, links on your domain don't open your app.\n:::"
+  },
+  {
+   "page": "Quick start",
+   "group": "Get started",
+   "section": "7. Test on a real phone",
+   "url": "https://straitlink.in/docs/quick-start/#7-test-on-a-real-phone",
+   "markdown": "Test from a **chat or email app** (Messages, WhatsApp, Gmail), not by typing the link into the address bar: phones only open apps from links that are tapped.\n\n1. **App installed**: tap the link. The app should open on `/product/42`.\n2. **App not installed**: uninstall, tap the link, install from the store, open the app. It should land on `/product/42` on first open. On Android this needs a build installed from Google Play internal testing, with **Always Google Play** chosen in Settings while you test, because the link travels through the Play install referrer. Setting that up the first time takes 1 to 2 hours (see [step 2](#2-tell-us-about-your-app)).\n3. **Check Analytics** in the dashboard: you should see the tap, the app open and (for test 2) a matched install.\n\nLink opened the browser? See [Troubleshooting](https://straitlink.in/docs/troubleshooting/)."
+  },
+  {
+   "page": "SDKs",
+   "group": "SDKs",
+   "section": "App SDKs",
+   "url": "https://straitlink.in/docs/sdks/#app-sdks",
+   "markdown": "| Platform | Package | What it covers | Guide |\n|---|---|---|---|\n| React Native and Expo | `@strait/sdk-react-native` | Links, deferred links (Play Install Referrer on Android), open reporting. Expo needs a development build | [React Native and Expo](https://straitlink.in/docs/sdks/react-native/) |\n| Flutter | `strait_sdk` | The same, in pure Dart | [Flutter](https://straitlink.in/docs/sdks/flutter/) |\n| Android (Kotlin) | `strait-sdk-android` | Native Android apps | [Android](https://straitlink.in/docs/sdks/android/) |\n| iOS (Swift) | `StraitSDK` | Native iOS apps (beta) | [iOS](https://straitlink.in/docs/sdks/ios/) |\n| Unity (C#) | `strait-sdk-unity` | Games on Android and iOS | [Unity](https://straitlink.in/docs/sdks/unity/) |"
+  },
+  {
+   "page": "SDKs",
+   "group": "SDKs",
+   "section": "Web and server",
+   "url": "https://straitlink.in/docs/sdks/#web-and-server",
+   "markdown": "| Platform | Package | What it covers | Guide |\n|---|---|---|---|\n| Web | `@strait/sdk-web` | Deferred link matching for web apps and PWAs | [Web](https://straitlink.in/docs/sdks/web/) |\n| Node | `@strait/sdk-node` | Create and manage links, send events from your backend | [Node](https://straitlink.in/docs/sdks/node/) |"
+  },
+  {
+   "page": "SDKs",
+   "group": "SDKs",
+   "section": "What's tested",
+   "url": "https://straitlink.in/docs/sdks/#whats-tested",
+   "markdown": "The React Native, iOS (Swift), Flutter and Unity SDKs are at version 0.8.0, the Android SDK at 0.7.2, the Node SDK at 0.6.2 and the web SDK at 0.5.2. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS** is in beta: covered by automated tests, not yet proven on a real iPhone.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet."
+  },
+  {
+   "page": "SDKs",
+   "group": "SDKs",
+   "section": "Install",
+   "url": "https://straitlink.in/docs/sdks/#install",
+   "markdown": "Every SDK installs from its public GitHub repo today; each guide has the exact command. npm, pub.dev, Maven Central and OpenUPM listings are coming soon.\n\nNot using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "Install",
+   "url": "https://straitlink.in/docs/sdks/react-native/#install",
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install), together with the two packages it needs:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nIt installs as `@strait/sdk-react-native`, so imports stay the same once it's on npm. In an Expo project, install the two helper packages with `npx expo install` so Expo picks versions that match your SDK.\n\n`AsyncStorage` keeps the once-per-install flag and any open reports that couldn't be sent yet. The Play Install Referrer module gives Android installs an exact match."
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "Expo",
+   "url": "https://straitlink.in/docs/sdks/react-native/#expo",
+   "markdown": "Everything on this page works in Expo, with two differences.\n\n**You need a development build, not Expo Go.** The setup uses a native module (`react-native-play-install-referrer`) and your app's own link settings. Expo Go can't load that module, and links on your domain open your app, not Expo Go. Build your app with:\n\n```bash\nnpx expo run:android     # or npx expo run:ios; runs prebuild for you\neas build --profile development --platform android   # or build in the cloud with EAS Build\n```\n\n**Link settings go in `app.json`.** Replace `acme.strait.link` with your own link domain, and `yourapp` with your custom scheme (the one in Dashboard → Settings):\n\n```json title=\"app.json\"\n{\n  \"expo\": {\n    \"scheme\": \"yourapp\",\n    \"android\": {\n      \"package\": \"com.yourcompany.yourapp\",\n      \"intentFilters\": [\n        {\n          \"action\": \"VIEW\",\n          \"autoVerify\": true,\n          \"data\": [{ \"scheme\": \"https\", \"host\": \"acme.strait.link\" }],\n          \"category\": [\"BROWSABLE\", \"DEFAULT\"]\n        }\n      ]\n    },\n    \"ios\": {\n      \"bundleIdentifier\": \"com.yourcompany.yourapp\",\n      \"associatedDomains\": [\"applinks:acme.strait.link\"]\n    }\n  }\n}\n```\n\n`scheme` registers `yourapp://` on both platforms (used when a browser hands a link to your app). The intent filter with `autoVerify` makes Android open `https://acme.strait.link/…` links in your app directly, and `associatedDomains` does the same on iPhone.\n\n**SHA-256 fingerprints for Dashboard → Settings:**\n\n```bash\n# Local builds (npx expo run:android): the project's debug key\nkeytool -list -v -keystore android/app/debug.keystore -storepass android | grep SHA256\n\n# EAS builds: choose Android and your build profile; the keystore's SHA-256 is listed\neas credentials\n```\n\nFor builds installed from Google Play, also add the **Play App Signing** key from Play Console → Test and release → App integrity."
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "Set up",
+   "url": "https://straitlink.in/docs/sdks/react-native/#set-up",
+   "markdown": "Create the client once, outside your components, and start it when the app launches.\n\n```ts title=\"links.ts (@strait/sdk-react-native 0.8.0)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@strait/sdk-react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\n`endpoint` is your workspace's link domain. The SDK sends its requests there, and treats links on that host as yours: it looks them up and reports the open. There's also an optional `linkHosts` list for extra hosts that serve your links; with one link domain per workspace you don't need it.\n\nCall `start()` once. `onLink` replays past events to late subscribers, so you won't miss the launch link if your navigator mounts after `start()`."
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "Route links to screens",
+   "url": "https://straitlink.in/docs/sdks/react-native/#route-links-to-screens",
+   "markdown": "`e.path` is the destination's path (`/product/42`) and `e.params` its query parameters. Send them to a screen once your navigator is ready.\n\n### Expo Router\n\n```tsx title=\"app/_layout.tsx\"\nimport { Stack, router, useRootNavigationState, type Href } from 'expo-router';\nimport { useEffect } from 'react';\nimport { links } from '../links';\n\nexport default function RootLayout() {\n  const ready = useRootNavigationState()?.key;\n  useEffect(() => {\n    if (!ready) return;\n    // Opened from a link, or first open after install: same callback.\n    return links.onLink((e) => {\n      if (e.matched && e.path) router.push({ pathname: e.path, params: e.params } as Href);\n    });\n  }, [ready]);\n  return <Stack />;\n}\n```\n\nExpo Router also tries to open every incoming link itself, and `https://acme.strait.link/summer` isn't a screen in your app. Add this file so it opens your first screen instead and lets `onLink` do the routing:\n\n```tsx title=\"app/+native-intent.tsx\"\n// Links reach the app through Strait's onLink (app/_layout.tsx), which knows the\n// real destination. Keep Expo Router from routing the raw link URL.\nexport function redirectSystemPath({ path }: { path: string; initial: boolean }) {\n  return '/';\n}\n```\n\nIf your app has other deep links of its own (for example a sign-in callback), return `path` for those instead of `'/'`.\n\n### React Navigation\n\n```tsx title=\"navigation.ts\"\nimport { createNavigationContainerRef } from '@react-navigation/native';\n\nexport const navigationRef = createNavigationContainerRef<any>();\n\n// Map a link's path to one of your screens.\nexport function openPath(path: string, params: Record<string, string> = {}) {\n  const product = /^\\/product\\/([^/]+)$/.exec(path);\n  if (product) navigationRef.navigate('Product', { id: product[1], ...params });\n  else navigationRef.navigate('Home');\n}\n```\n\n```tsx title=\"App.tsx\"\nimport { NavigationContainer } from '@react-navigation/native';\nimport { links } from './links';\nimport { navigationRef, openPath } from './navigation';\n\nexport default function App() {\n  return (\n    <NavigationContainer\n      ref={navigationRef}\n      onReady={() => links.onLink((e) => e.matched && e.path && openPath(e.path, e.params))}\n    >\n      {/* your navigator */}\n    </NavigationContainer>\n  );\n}\n```\n\nDon't also list your link domain in React Navigation's `linking` option, or each link is handled twice.\n\n### Show a loading state (optional)\n\nA link can take a second or more to resolve on a slow network. `onLinkStart` fires as soon as it arrives:\n\n```tsx title=\"LinkLoading.tsx\"\nimport { useEffect, useState } from 'react';\nimport { ActivityIndicator, StyleSheet } from 'react-native';\nimport { links } from './links';\n\nexport function LinkLoading() {\n  const [opening, setOpening] = useState(false);\n  useEffect(() => {\n    const offStart = links.onLinkStart(() => setOpening(true));\n    const offLink = links.onLink(() => setOpening(false));\n    return () => { offStart(); offLink(); };\n  }, []);\n  return opening ? <ActivityIndicator style={StyleSheet.absoluteFill} size=\"large\" /> : null;\n}\n```"
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "The link event",
+   "url": "https://straitlink.in/docs/sdks/react-native/#the-link-event",
+   "markdown": "| Field | Meaning |\n|---|---|\n| `kind` | `direct` (a link opened the app) or `deferred` (tapped before install) |\n| `route` | `app_link`, `custom_scheme`, `install_referrer` or `fingerprint` |\n| `appState` | `closed` (the link launched the app), `background` or `foreground` |\n| `matched`, `reason` | When `matched` is false: `not_found`, `expired`, `password_protected`, `no_match`, `network` or `invalid_url` |\n| `url`, `path`, `params` | The destination to route to |\n| `linkId`, `id`, `ms`, `at` | Link id, open id, resolve time in ms, arrival time (epoch ms) |"
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "What's reported automatically",
+   "url": "https://straitlink.in/docs/sdks/react-native/#whats-reported-automatically",
+   "markdown": "Every time a link opens the app, the SDK reports it once. You don't write any analytics code for this.\n\n| How the app opened | Joined to |\n|---|---|\n| Verified link tapped in WhatsApp, Gmail, Messages… | The link (also counted as a tap) |\n| Browser handed off to the app (`yourapp://…`) | The exact tap |\n| First open after a Play install | The exact tap that sent the user to the store |\n| First open after an App Store install | The matched tap |\n| Your own https links | Host and path only, never the query |\n\nReports that can't be sent (offline, server busy) are saved and retried on the next start and whenever the app comes back to the foreground, for up to 7 days (100 at most). Each open has an id, so nothing is counted twice. Navigation never waits for a report."
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "Purchases and other events",
+   "url": "https://straitlink.in/docs/sdks/react-native/#purchases-and-other-events",
+   "markdown": "```ts\nimport { links } from './links';\n\nlinks.trackEvent('purchase', { value: 49.99, currency: 'USD' }); // the tap is attached automatically\n```\n\nEvents show up at the bottom of your funnel in Analytics, with revenue. `trackEvent` returns a promise that resolves to `true` when the event was accepted.\n\nThe event carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, a Google Play install, an open from a verified short link, or an iPhone install match. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event."
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "Deferred match only",
+   "url": "https://straitlink.in/docs/sdks/react-native/#deferred-match-only",
+   "markdown": "If you only want the first-open-after-install destination, there's a one-call API. It never throws; on any error it returns `{ matched: false, matchMethod: 'none' }`.\n\n```ts\nimport { resolveDeferredLink, splitUrl } from '@strait/sdk-react-native';\nimport { navigationRef, openPath } from './navigation';\n\nconst result = await resolveDeferredLink({\n  publishableKey: 'st_pub_live_…',\n  endpoint: 'https://acme.strait.link',\n});\nconst dest = result.matched && result.longUrl ? splitUrl(result.longUrl) : null;\nif (dest && navigationRef.isReady()) openPath(dest.path, dest.params);\n```"
+  },
+  {
+   "page": "React Native and Expo",
+   "group": "SDKs",
+   "section": "How installs are matched",
+   "url": "https://straitlink.in/docs/sdks/react-native/#how-installs-are-matched",
+   "markdown": "| Platform | Method | Precision |\n|---|---|---|\n| Android | Play Install Referrer | Exact |\n| iPhone (beta) | Short-lived device match | Probabilistic |\n\nSee [Deferred deep linking](https://straitlink.in/docs/deferred-deep-linking/) for exactly what's collected and how long it's kept."
+  },
+  {
+   "page": "Flutter",
+   "group": "SDKs",
+   "section": "Install",
+   "url": "https://straitlink.in/docs/sdks/flutter/#install",
+   "markdown": "The SDK isn't on pub.dev yet, so add it as a git dependency in `pubspec.yaml`:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk:\n    git:\n      url: https://github.com/bazingga08/strait-sdk-flutter\n      ref: v0.8.0\n```\n\nThen add the helper packages:\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n[`app_links`](https://pub.dev/packages/app_links) delivers links, [`shared_preferences`](https://pub.dev/packages/shared_preferences) stores the once-per-install flag and unsent reports, [`play_install_referrer`](https://pub.dev/packages/play_install_referrer) gives Android installs an exact match, and [`flutter_timezone`](https://pub.dev/packages/flutter_timezone) provides the IANA time zone the iPhone match needs."
+  },
+  {
+   "page": "Flutter",
+   "group": "SDKs",
+   "section": "Set up",
+   "url": "https://straitlink.in/docs/sdks/flutter/#set-up",
+   "markdown": "```dart title=\"links.dart\"\nimport 'dart:async';\nimport 'dart:io' show Platform;\nimport 'dart:ui';\n\nimport 'package:app_links/app_links.dart';\nimport 'package:strait_sdk/strait_sdk.dart';\nimport 'package:flutter/widgets.dart';\nimport 'package:flutter_timezone/flutter_timezone.dart';\nimport 'package:play_install_referrer/play_install_referrer.dart';\nimport 'package:shared_preferences/shared_preferences.dart';\n\n/// Persists the once-per-install flag and unsent open reports.\nclass PrefsStore implements KeyValueStore {\n  PrefsStore(this.prefs);\n  final SharedPreferences prefs;\n  @override\n  Future<String?> get(String key) async => prefs.getString(key);\n  @override\n  Future<void> set(String key, String value) => prefs.setString(key, value);\n}\n\n/// Feeds Flutter lifecycle changes to the SDK.\nclass LifecycleFeed with WidgetsBindingObserver {\n  final _ctl = StreamController<AppLifecycle>.broadcast(sync: true);\n  Stream<AppLifecycle> get stream => _ctl.stream;\n  LifecycleFeed() { WidgetsBinding.instance.addObserver(this); }\n  @override\n  void didChangeAppLifecycleState(AppLifecycleState s) => _ctl.add(switch (s) {\n        AppLifecycleState.resumed => AppLifecycle.active,\n        AppLifecycleState.inactive => AppLifecycle.inactive,\n        _ => AppLifecycle.background,\n      });\n}\n\nFuture<StraitLinks> startLinks() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  final timezone = await FlutterTimezone.getLocalTimezone(); // IANA, e.g. Asia/Kolkata\n  final links = StraitLinks(\n    publishableKey: 'st_pub_live_…',      // Dashboard → Get started\n    endpoint: 'https://acme.strait.link',   // your workspace's link domain\n    platform: Platform.isIOS ? 'ios' : Platform.isAndroid ? 'android' : 'other',\n    storage: PrefsStore(await SharedPreferences.getInstance()),\n    installReferrer: () async =>\n        Platform.isAndroid ? (await PlayInstallReferrer.installReferrer).installReferrer : null,\n    deviceFields: () {\n      final view = PlatformDispatcher.instance.views.first;\n      return DeviceFields(\n        screenWidth: portraitScreenWidth(view.physicalSize.width / view.devicePixelRatio, view.physicalSize.height / view.devicePixelRatio),\n        pixelRatio: view.devicePixelRatio,\n        language: PlatformDispatcher.instance.locale.toLanguageTag(),\n        timezone: timezone,\n      );\n    },\n  );\n\n  // Subscribe before start() (past events replay anyway).\n  links.onLinkStart.listen((s) { /* show \"Opening link…\" */ });\n  links.onLink.listen((e) {\n    if (e.matched && e.path != null) {\n      // navigate to e.path with e.params\n    }\n  });\n\n  final appLinks = AppLinks();\n  await links.start(\n    initialUrl: (await appLinks.getInitialLink())?.toString(),\n    urls: appLinks.uriLinkStream.map((u) => u.toString()),\n    lifecycle: LifecycleFeed().stream,\n  );\n  return links;\n}\n```\n\n:::tip Two things that trip people up\n- **Time zone**: pass the IANA name (`Asia/Kolkata`). `DateTime.timeZoneName` is an abbreviation on some platforms and won't match. With `flutter_timezone` 4.x use `.identifier`.\n- **Launch link twice**: `app_links` 6+ also emits the launch link on `uriLinkStream`. `start()` ignores that first echo, so the launch link is handled once.\n:::"
+  },
+  {
+   "page": "Flutter",
+   "group": "SDKs",
+   "section": "The link event",
+   "url": "https://straitlink.in/docs/sdks/flutter/#the-link-event",
+   "markdown": "| Field | Meaning |\n|---|---|\n| `kind` | `direct` (a link opened the app) or `deferred` (tapped before install) |\n| `route` | `app_link`, `custom_scheme`, `install_referrer`, `fingerprint` (`route.value`) |\n| `appState` | `closed`, `background`, `foreground` |\n| `matched`, `reason` | `not_found`, `expired`, `password_protected`, `no_match`, `network`, `invalid_url` |\n| `rawUrl` | The URL the OS handed the app |\n| `url`, `path`, `params` | The destination to navigate to |\n| `linkId`, `ms`, `at`, `id` | Link id, resolve time, arrival time, id shared with the start signal |"
+  },
+  {
+   "page": "Flutter",
+   "group": "SDKs",
+   "section": "Analytics",
+   "url": "https://straitlink.in/docs/sdks/flutter/#analytics",
+   "markdown": "Every link open is reported once, automatically, including offline opens (saved and retried for up to 7 days). To record purchases:\n\n```dart\nlinks.trackEvent('purchase', value: 49.99, currency: 'USD', linkId: e.linkId);\n```\n\nThe event carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, a Google Play install, an open from a verified short link, or an iPhone install match. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId:`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\nDebugging helpers: `await links.pendingOpenReports()` (count waiting) and `await links.flushOpenReports()` (send now). `links.checkDeferred()` re-runs the deferred check without recording an install."
+  },
+  {
+   "page": "Flutter",
+   "group": "SDKs",
+   "section": "Deferred match only",
+   "url": "https://straitlink.in/docs/sdks/flutter/#deferred-match-only",
+   "markdown": "```dart\nfinal result = await resolveDeferredLink(\n  publishableKey: 'st_pub_live_…',\n  endpoint: 'https://acme.strait.link',\n  platform: Platform.isIOS ? 'ios' : 'android',\n  device: device,            // DeviceFields as above\n  installReferrer: referrer, // Android only; null otherwise\n);\nif (result.matched && result.longUrl != null) { /* route */ }\n```\n\nIt never throws; on any error it returns `MatchResult.none`."
+  },
+  {
+   "page": "Android (Kotlin)",
+   "group": "SDKs",
+   "section": "Install",
+   "url": "https://straitlink.in/docs/sdks/android/#install",
+   "markdown": "The Android SDK (strait-sdk-android 0.7.2) is served by JitPack, built from its public GitHub repo. Add the JitPack repository, then the SDK, Google's Install Referrer library and, if you don't have it, `androidx.lifecycle:lifecycle-process`.\n\n```kotlin title=\"settings.gradle.kts\"\ndependencyResolutionManagement {\n    repositories {\n        google()\n        mavenCentral()\n        maven(\"https://jitpack.io\")\n    }\n}\n```\n\n```kotlin title=\"app/build.gradle.kts\"\ndependencies {\n    implementation(\"com.github.bazingga08:strait-sdk-android:v0.7.2\") // Strait SDK\n    implementation(\"com.android.installreferrer:installreferrer:2.2\")\n    implementation(\"androidx.lifecycle:lifecycle-process:2.8.7\")\n}\n```\n\n**Requirements.** The SDK is plain Kotlin, compiled with Kotlin 1.9.24 to Java 17 bytecode, so build your app with JDK 17 or newer (Android Gradle Plugin 8 already needs it). At runtime it uses the Kotlin standard library and `org.json`, which ships with Android. Everything is in the `dev.strait.sdk` package.\n\n:::note\nNetwork calls block the calling thread. Pass a background `executor` so `start` and `handleUrl` never run on the main thread. Listeners are called on that executor, so post to the main thread before you navigate.\n:::"
+  },
+  {
+   "page": "Android (Kotlin)",
+   "group": "SDKs",
+   "section": "1. Create the client once (Application)",
+   "url": "https://straitlink.in/docs/sdks/android/#1-create-the-client-once-application",
+   "markdown": "```kotlin title=\"App.kt\"\nimport android.app.Application\nimport androidx.lifecycle.Lifecycle\nimport androidx.lifecycle.LifecycleEventObserver\nimport androidx.lifecycle.ProcessLifecycleOwner\nimport dev.strait.sdk.AppLifecycleState\nimport dev.strait.sdk.DeviceFields\nimport dev.strait.sdk.KeyValueStore\nimport dev.strait.sdk.StraitClient\nimport dev.strait.sdk.StraitConfig\nimport dev.strait.sdk.portraitScreenWidth\n\nclass App : Application() {\n    lateinit var links: StraitClient\n\n    override fun onCreate() {\n        super.onCreate()\n        val prefs = getSharedPreferences(\"links\", MODE_PRIVATE)\n        links = StraitClient(StraitConfig(\n            publishableKey = \"st_pub_live_…\",          // Dashboard → Get started\n            endpoint = \"https://acme.strait.link\",       // your workspace's link domain\n            storage = object : KeyValueStore {\n                override fun get(key: String) = prefs.getString(key, null)\n                override fun set(key: String, value: String) { prefs.edit().putString(key, value).apply() }\n            },\n            installReferrer = { readInstallReferrer(this) },\n            device = {\n                val m = resources.displayMetrics\n                DeviceFields(\n                    screenWidth = portraitScreenWidth(m.widthPixels / m.density.toDouble(), m.heightPixels / m.density.toDouble()),\n                    pixelRatio = m.density.toDouble(),\n                    language = java.util.Locale.getDefault().toLanguageTag(),\n                    timezone = java.util.TimeZone.getDefault().id,\n                )\n            },\n            executor = java.util.concurrent.Executors.newSingleThreadExecutor(),\n        ))\n\n        // App state: background vs foreground labels, and retrying saved reports.\n        ProcessLifecycleOwner.get().lifecycle.addObserver(LifecycleEventObserver { _, e ->\n            when (e) {\n                Lifecycle.Event.ON_RESUME -> links.onAppState(AppLifecycleState.ACTIVE)\n                Lifecycle.Event.ON_PAUSE -> links.onAppState(AppLifecycleState.INACTIVE)\n                Lifecycle.Event.ON_STOP -> links.onAppState(AppLifecycleState.BACKGROUND)\n                else -> Unit\n            }\n        })\n    }\n}\n```"
+  },
+  {
+   "page": "Android (Kotlin)",
+   "group": "SDKs",
+   "section": "2. Feed it links (Activity)",
+   "url": "https://straitlink.in/docs/sdks/android/#2-feed-it-links-activity",
+   "markdown": "```kotlin title=\"MainActivity.kt\"\nimport android.content.Intent\nimport android.os.Bundle\nimport androidx.appcompat.app.AppCompatActivity\n\nclass MainActivity : AppCompatActivity() {\n    private val links get() = (application as App).links\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        links.onLinkStart { runOnUiThread { showOpeningLink() } }\n        links.onLink { e -> runOnUiThread { if (e.matched) navigate(e.path, e.params) else hideOpeningLink() } }\n        // Launched from closed: the intent's URL (or null). Runs the deferred check once per install.\n        if (savedInstanceState == null) links.start(intent?.dataString)\n    }\n\n    override fun onNewIntent(intent: Intent) {\n        super.onNewIntent(intent)\n        intent.dataString?.let(links::handleUrl)   // app was already running\n    }\n\n    // Replace these three with your own loading UI and navigation.\n    private fun showOpeningLink() { /* show a spinner */ }\n    private fun hideOpeningLink() { /* hide it */ }\n    private fun navigate(path: String?, params: Map<String, String>?) {\n        hideOpeningLink()\n        val id = path?.removePrefix(\"/product/\")?.takeIf { it != path } ?: return\n        startActivity(Intent(this, ProductActivity::class.java).putExtra(\"id\", id))\n    }\n}\n```\n\nYour manifest needs the App Links intent filter for `acme.strait.link` and your custom scheme; see [Quick start, step 5](https://straitlink.in/docs/quick-start/#5-let-the-phone-open-your-app)."
+  },
+  {
+   "page": "Android (Kotlin)",
+   "group": "SDKs",
+   "section": "3. Read the Play Install Referrer",
+   "url": "https://straitlink.in/docs/sdks/android/#3-read-the-play-install-referrer",
+   "markdown": "```kotlin title=\"InstallReferrer.kt\"\nimport android.content.Context\nimport com.android.installreferrer.api.InstallReferrerClient\nimport com.android.installreferrer.api.InstallReferrerStateListener\n\nfun readInstallReferrer(context: Context): String? {\n    val latch = java.util.concurrent.CountDownLatch(1)\n    var result: String? = null\n    val client = InstallReferrerClient.newBuilder(context).build()\n    try {\n        client.startConnection(object : InstallReferrerStateListener {\n            override fun onInstallReferrerSetupFinished(code: Int) {\n                if (code == InstallReferrerClient.InstallReferrerResponse.OK) {\n                    result = runCatching { client.installReferrer.installReferrer }.getOrNull()\n                }\n                latch.countDown()\n            }\n            override fun onInstallReferrerServiceDisconnected() { latch.countDown() }\n        })\n        latch.await(5, java.util.concurrent.TimeUnit.SECONDS)\n    } catch (_: Exception) {\n    } finally {\n        runCatching { client.endConnection() }\n    }\n    return result\n}\n```\n\nWhen someone without your app taps a link, we send them to Google Play with the link in the install referrer. On first open the SDK reads it and resolves the exact link and tap. No guessing."
+  },
+  {
+   "page": "Android (Kotlin)",
+   "group": "SDKs",
+   "section": "4. Events (off the main thread)",
+   "url": "https://straitlink.in/docs/sdks/android/#4-events-off-the-main-thread",
+   "markdown": "```kotlin\nlinks.trackEvent(\"purchase\", value = 49.99, currency = \"USD\", linkId = lastLinkId)\nlinks.checkDeferred()   // re-run the deferred check (debugging; never records an install)\n```\n\nThe event carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, a Google Play install, or an open from a verified short link. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId =`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\n`LinkEvent` fields: `id, kind (direct|deferred), route (app_link|custom_scheme|install_referrer|fingerprint), appState (closed|background|foreground), matched, reason, rawUrl, url, path, params, linkId, ms, at`. `onLink` replays past events to late subscribers; both `onLink` and `onLinkStart` return an unsubscribe function."
+  },
+  {
+   "page": "Android (Kotlin)",
+   "group": "SDKs",
+   "section": "What's reported automatically",
+   "url": "https://straitlink.in/docs/sdks/android/#whats-reported-automatically",
+   "markdown": "Every link open is reported once, joined to its tap where possible: verified links from chat apps, browser hand-offs, the first open after a Play install, and your own https links (host and path only). Reports that can't be sent are saved under `storage` and retried on the next `start`, whenever `onAppState(ACTIVE)` is called, and after any report that gets through, for up to 7 days (100 at most).\n\nHTTP uses `HttpURLConnection` by default. To use OkHttp, implement `HttpTransport`: throw on network failure and return every HTTP status as an `HttpResponse`."
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "SDKs",
+   "section": null,
+   "url": "https://straitlink.in/docs/sdks/ios/",
+   "markdown": ":::warn Beta\nThe iOS SDK is tested in CI against the same shared test files as every other SDK, but deferred deep linking hasn't yet been proven on a real iPhone. Use it, tell us what you see, and keep a fallback in mind for launch-critical flows.\n:::"
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "SDKs",
+   "section": "Install (Swift Package Manager)",
+   "url": "https://straitlink.in/docs/sdks/ios/#install-swift-package-manager",
+   "markdown": "In Xcode: **File → Add Package Dependencies…**, paste `https://github.com/bazingga08/strait-sdk-swift` and pick version 0.8.0 or later. Or in `Package.swift`:\n\n```swift title=\"Package.swift\"\n.package(url: \"https://github.com/bazingga08/strait-sdk-swift\", from: \"0.8.0\")\n// target dependency: .product(name: \"StraitSDK\", package: \"strait-sdk-swift\")\n```\n\nThen in Xcode: **Signing & Capabilities → Associated Domains → `applinks:acme.strait.link`**, and add your custom scheme under **Info → URL Types**. Make sure your Apple Team ID and bundle ID are saved in Dashboard → Settings, so your link domain serves a matching `apple-app-site-association` file."
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "SDKs",
+   "section": "Create the client",
+   "url": "https://straitlink.in/docs/sdks/ios/#create-the-client",
+   "markdown": "Create one client at launch and keep it for the app's lifetime.\n\n```swift\nimport StraitSDK\n\nlet links = StraitLinks(StraitLinksConfig(\n    publishableKey: \"st_pub_live_…\",          // Dashboard → Get started\n    endpoint: \"https://acme.strait.link\"        // your workspace's link domain\n))\n\nlinks.onLinkStart { start in showOpeningLink(start.id) }   // loading state\nlinks.onLink { event in                                    // replays past events\n    guard event.matched, let path = event.path else { return }\n    router.open(path, params: event.params ?? [:])\n}\n```"
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "SDKs",
+   "section": "UIKit with scenes",
+   "url": "https://straitlink.in/docs/sdks/ios/#uikit-with-scenes",
+   "markdown": "```swift title=\"SceneDelegate.swift\"\nfunc scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {\n    // The link that launched the app from closed (Universal Link or custom scheme).\n    let launchURL = options.userActivities.first(where: { $0.activityType == NSUserActivityTypeBrowsingWeb })?.webpageURL\n        ?? options.urlContexts.first?.url\n    links.start(initialURL: launchURL)       // also runs the deferred check, once per install\n}\n\nfunc scene(_ scene: UIScene, continue userActivity: NSUserActivity) {\n    links.handle(userActivity: userActivity)  // Universal Link while running\n}\n\nfunc scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {\n    URLContexts.forEach { links.handle(url: $0.url) }   // yourapp://… browser hand-off\n}\n```\n\nWithout scenes, do the same from `application(_:didFinishLaunchingWithOptions:)`, `application(_:continue:restorationHandler:)` and `application(_:open:options:)`."
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "SDKs",
+   "section": "SwiftUI",
+   "url": "https://straitlink.in/docs/sdks/ios/#swiftui",
+   "markdown": "```swift\n@main struct ShopApp: App {\n    init() { links.start() }\n    var body: some Scene {\n        WindowGroup {\n            ContentView()\n                .onOpenURL { links.handle(url: $0) }\n                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { links.handle(userActivity: $0) }\n        }\n    }\n}\n```\n\nSwiftUI delivers the cold-launch URL through `onOpenURL` too, so it's labelled by app state rather than `closed`. If you need `closed` (and the first-launch deferred skip), use a scene delegate and pass the launch URL to `start(initialURL:)`."
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "SDKs",
+   "section": "Events and debugging",
+   "url": "https://straitlink.in/docs/sdks/ios/#events-and-debugging",
+   "markdown": "```swift\nlinks.trackEvent(\"purchase\", value: 49.99, currency: \"USD\", linkId: event.linkId) { ok in }\nlinks.checkDeferred { event in }        // re-run the deferred check (debugging)\nlinks.pendingOpenReports { count in }   // saved reports waiting to be sent\nlinks.flushOpenReports { }              // send them now\n```\n\nThe event carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, an open from a verified short link (Universal Link), or an install match. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId:`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\nThe once-per-install flag and pending open reports live in `UserDefaults.standard` by default; pass any `StraitStorage` to change that. Callbacks run on the main queue."
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "SDKs",
+   "section": "How the iPhone match works",
+   "url": "https://straitlink.in/docs/sdks/ios/#how-the-iphone-match-works",
+   "markdown": "When someone without your app taps a link in Safari, they see a page with a **Get the app** button. Tapping it saves a coarse, short-lived device match (screen width, pixel ratio, language, time zone, plus the network the request came from) and opens the App Store. On first launch the SDK sends the same fields; if they match within **1 hour**, your app gets the link. Nothing is read from the clipboard, so iOS shows no paste banner. Details in [Deferred deep linking](https://straitlink.in/docs/deferred-deep-linking/)."
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "SDKs",
+   "section": "Deferred match only",
+   "url": "https://straitlink.in/docs/sdks/ios/#deferred-match-only",
+   "markdown": "```swift\nlet result = await Strait.resolveDeferredLink(\n    StraitConfig(publishableKey: \"st_pub_live_…\", endpoint: \"https://acme.strait.link\")\n)\nif result.matched, let url = result.longUrl {\n    // route to url\n}\n```"
+  },
+  {
+   "page": "Unity",
+   "group": "SDKs",
+   "section": null,
+   "url": "https://straitlink.in/docs/sdks/unity/",
+   "markdown": ":::warn Check on a device before you ship\nThe library itself is tested in CI. The Unity glue below (MonoBehaviour, PlayerPrefs, AndroidJavaObject, the iOS plugin, UnityWebRequest) hasn't been run in the Unity editor or on a device yet. Treat it as a documented starting point.\n:::"
+  },
+  {
+   "page": "Unity",
+   "group": "SDKs",
+   "section": "Install",
+   "url": "https://straitlink.in/docs/sdks/unity/#install",
+   "markdown": "Requires Unity 2021.2+ with **Api Compatibility Level = .NET Standard 2.1**. In Unity: **Window → Package Manager → + → Add package from git URL…** and paste:\n\n```text\nhttps://github.com/bazingga08/strait-sdk-unity.git?path=src#v0.8.0\n```\n\nThe package lives in the repo's `src/` folder, so keep the `?path=src` part. An OpenUPM listing is coming soon. Without Package Manager, copy the SDK's `src/*.cs` into your project (for example `Assets/Strait/`), or build the project and drop the DLL into `Assets/Plugins/`. Add `com.android.installreferrer:installreferrer:2.2` to your Android Gradle dependencies (custom `mainTemplate.gradle` or EDM4U)."
+  },
+  {
+   "page": "Unity",
+   "group": "SDKs",
+   "section": "Wire it into the game",
+   "url": "https://straitlink.in/docs/sdks/unity/#wire-it-into-the-game",
+   "markdown": "```csharp title=\"LinksBehaviour.cs\"\nusing System.Threading.Tasks;\nusing Strait;\nusing UnityEngine;\n\npublic class LinksBehaviour : MonoBehaviour\n{\n    public static StraitClient Client { get; private set; }\n\n    async void Start()\n    {\n        DontDestroyOnLoad(gameObject);\n        Client = new StraitClient(new StraitConfig\n        {\n            PublishableKey = \"st_pub_live_…\",               // Dashboard → Get started\n            Endpoint = \"https://acme.strait.link\",            // your workspace's link domain\n            Storage = new PlayerPrefsStore(),\n            Platform = Application.platform == RuntimePlatform.Android ? \"android\"\n                     : Application.platform == RuntimePlatform.IPhonePlayer ? \"ios\" : \"other\",\n            DeviceFields = StraitDevice.Collect,\n            InstallReferrer = Application.platform == RuntimePlatform.Android ? PlayReferrer.Get : null,\n            // Transport = new UnityWebRequestTransport(),   // required on WebGL\n        });\n\n        Client.OnLinkStart += s => ShowSpinner();       // a link can take 1–6 s to resolve\n        Client.OnLink += e =>                           // past events are replayed to you\n        {\n            HideSpinner();\n            if (e.Matched) Route(e.Path, e.Params);\n            else Debug.Log($\"Link not matched ({e.Reason})\");\n        };\n\n        Application.deepLinkActivated += url => _ = Client.HandleUrl(url);   // while running\n        await Client.Start(Application.absoluteURL);                         // launch link + deferred check\n    }\n\n    // Coming back to the front also sends open reports saved while offline.\n    void OnApplicationPause(bool paused) => Client?.OnAppState(paused ? AppLifecycle.Background : AppLifecycle.Active);\n    void OnApplicationFocus(bool focused) => Client?.OnAppState(focused ? AppLifecycle.Active : AppLifecycle.Inactive);\n    void OnDestroy() => Client?.Stop();\n\n    void ShowSpinner() { }\n    void HideSpinner() { }\n    void Route(string path, System.Collections.Generic.IReadOnlyDictionary<string, string> query) { }\n}\n```"
+  },
+  {
+   "page": "Unity",
+   "group": "SDKs",
+   "section": "Storage",
+   "url": "https://straitlink.in/docs/sdks/unity/#storage",
+   "markdown": "```csharp\npublic sealed class PlayerPrefsStore : IKeyValueStore\n{\n    public Task<string> GetItemAsync(string key) =>\n        Task.FromResult(PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null);\n    public Task SetItemAsync(string key, string value)\n    {\n        PlayerPrefs.SetString(key, value);\n        PlayerPrefs.Save();   // the deferred flag and saved reports must survive a crash\n        return Task.CompletedTask;\n    }\n}\n```"
+  },
+  {
+   "page": "Unity",
+   "group": "SDKs",
+   "section": "Device fields",
+   "url": "https://straitlink.in/docs/sdks/unity/#device-fields",
+   "markdown": "The iPhone match compares what the browser saw at tap time with what the game reports, so the values must be the browser's: CSS screen width (portrait, rounded like Chrome) via `StraitCore.PortraitScreenWidth(w, h)` (the shorter side, so a game first opened in landscape still matches), device pixel ratio, locale and IANA time zone. Don't use `Screen.width`, which follows Unity's render scaling. The SDK README has full `StraitDevice.Collect` (Android via `AndroidJavaObject`, iOS via a tiny `.mm` plugin), `PlayReferrer.Get` and `UnityWebRequestTransport` implementations."
+  },
+  {
+   "page": "Unity",
+   "group": "SDKs",
+   "section": "Events",
+   "url": "https://straitlink.in/docs/sdks/unity/#events",
+   "markdown": "```csharp\nawait LinksBehaviour.Client.TrackEvent(\"purchase\", value: 4.99, currency: \"USD\", linkId: lastLink?.LinkId);\n```\n\n`TrackEvent` carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, a Google Play install, an open from a verified short link, or an iPhone install match. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId:`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\n`LinkEvent` has the same fields and values as the other SDKs: `Id, Kind, Route, AppState, Matched, Reason, RawUrl, Url, Path, Params, LinkId, Ms, At`. Call `Start` and `HandleUrl` from the main thread; events fire on Unity's main thread."
+  },
+  {
+   "page": "Web",
+   "group": "SDKs",
+   "section": "Install",
+   "url": "https://straitlink.in/docs/sdks/web/#install",
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@strait/sdk-web`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-web#v0.5.2\n```"
+  },
+  {
+   "page": "Web",
+   "group": "SDKs",
+   "section": "Use",
+   "url": "https://straitlink.in/docs/sdks/web/#use",
+   "markdown": "```ts\nimport { resolveDeferredLink } from '@strait/sdk-web';\n\nconst result = await resolveDeferredLink({\n  publishableKey: 'st_pub_live_…',      // Dashboard → Get started (never the secret key)\n  endpoint: 'https://acme.strait.link',   // your workspace's link domain\n});\n\nif (result.matched && result.longUrl) {\n  const url = new URL(result.longUrl);\n  window.location.assign(url.pathname + url.search); // or your router's navigate()\n}\n```\n\n`resolveDeferredLink` runs **at most once per browser** (it records one install on our side). It never throws: on any error it resolves to `{ matched: false, matchMethod: 'none' }`, so it's safe to await on startup."
+  },
+  {
+   "page": "Web",
+   "group": "SDKs",
+   "section": "What it sends",
+   "url": "https://straitlink.in/docs/sdks/web/#what-it-sends",
+   "markdown": "Coarse device fields only: screen width, pixel ratio, two-letter language and time zone, posted to `/v1/match`. Our server adds the network it sees the request from and computes the match. The browser never sends an IP address, and the match code is never used to identify someone across apps or sites."
+  },
+  {
+   "page": "Web",
+   "group": "SDKs",
+   "section": "Record a conversion",
+   "url": "https://straitlink.in/docs/sdks/web/#record-a-conversion",
+   "markdown": "From a website, send events with your publishable key. When `resolveDeferredLink` matched, its result also has `clickId`, the tap this visit came from; send it with the event so the revenue lands on that tap. The web SDK doesn't remember it for you, so keep it if you send events later.\n\n```ts\nawait fetch('https://strait.link/v1/event', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    publishableKey: 'st_pub_live_…',\n    event: 'purchase',\n    value: 49.99,\n    currency: 'USD',\n    clickId: result.clickId,     // the matched tap, if any\n  }),\n});\n```"
+  },
+  {
+   "page": "Web",
+   "group": "SDKs",
+   "section": "API",
+   "url": "https://straitlink.in/docs/sdks/web/#api",
+   "markdown": "| Export | Purpose |\n|---|---|\n| `resolveDeferredLink(config, opts?)` | The one call you need on launch |\n| `computeSignature(inputs)` | The shared match signature (advanced / testing) |\n| `h32(s)` | The shared hash (advanced / testing) |"
+  },
+  {
+   "page": "Node (server)",
+   "group": "SDKs",
+   "section": "Install",
+   "url": "https://straitlink.in/docs/sdks/node/#install",
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@strait/sdk-node`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-node#v0.6.2\n```"
+  },
+  {
+   "page": "Node (server)",
+   "group": "SDKs",
+   "section": "Use",
+   "url": "https://straitlink.in/docs/sdks/node/#use",
+   "markdown": "```ts\nimport { StraitClient } from '@strait/sdk-node';\n\nconst links = new StraitClient({\n  apiKey: process.env.SECRET_KEY!,   // st_live_… from Dashboard → Get started\n  baseUrl: 'https://strait.link',\n});\n\n// Create a link\nconst link = await links.createLink({\n  slug: 'launch',\n  longUrl: 'https://yourapp.com/launch',\n  tags: ['campaign'],\n});\n\n// List / update / deactivate\nawait links.listLinks();\nawait links.updateLink('launch', { longUrl: 'https://yourapp.com/launch-v2' });\nawait links.deleteLink('launch');\n\n// Send a conversion / revenue event (no publishable key needed server-side)\nawait links.sendEvent({ event: 'purchase', value: 49.99, currency: 'USD' });\n\n// Name the tap it came from, when you know it (for example from a webhook)\nawait links.sendEvent({ event: 'purchase', value: 49.99, currency: 'USD', clickId });\n```\n\nOn a server nothing is remembered for you: `sendEvent` passes `clickId` through only when you give it. Use a tap id you received, such as `clickId` from an `app.opened` or `install.matched` [webhook](https://straitlink.in/docs/webhooks/). The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\nFailures throw a `StraitError` with `.status` and the parsed `.body`.\n\n:::warn Keep the secret key on the server\nThe secret key can create and change links. Store it in an environment variable and never ship it in an app, a web page or a public repository. If it leaks, revoke it in the dashboard and create a new one.\n:::"
+  },
+  {
+   "page": "Node (server)",
+   "group": "SDKs",
+   "section": "Methods",
+   "url": "https://straitlink.in/docs/sdks/node/#methods",
+   "markdown": "| Method | Endpoint |\n|---|---|\n| `createLink(input)` | `POST /v1/links` |\n| `listLinks()` | `GET /v1/links` |\n| `updateLink(slug, fields)` | `PATCH /v1/links/:slug` |\n| `deleteLink(slug)` | `DELETE /v1/links/:slug` |\n| `sendEvent(input)` | `POST /v1/event` |\n\nFull request and response details are in the [REST API reference](https://straitlink.in/docs/api/)."
+  },
+  {
+   "page": "Short links",
+   "group": "Concepts",
+   "section": "Anatomy",
+   "url": "https://straitlink.in/docs/short-links/#anatomy",
+   "markdown": "```txt\nhttps://acme.strait.link/summer   →   https://shop.example.com/product/42\n        └ link domain ┘ └slug┘        └──────── destination ────────┘\n```\n\n- **Slug**: letters, digits, `-` and `_`, up to 64 characters. A few words are reserved (`v1`, `healthz`, `debug`…). If a slug is already taken you get `409`.\n- **Destination** (`longUrl`): must be `https://`. Your app receives its path and query (`/product/42`), so use the same paths your app routes on.\n\n:::note No website?\nThe destination can be any `https://` URL on a domain you control, or your default web URL (Dashboard → Settings) with the path you want, such as `https://yourapp.com/product/42`. Only the path and query reach your app. Desktop visitors go to the full URL, and so do people without the app if you chose \"always your website\", so it's best if that page exists.\n:::"
+  },
+  {
+   "page": "Short links",
+   "group": "Concepts",
+   "section": "What happens on a tap",
+   "url": "https://straitlink.in/docs/short-links/#what-happens-on-a-tap",
+   "markdown": "| Who taps | What happens |\n|---|---|\n| Android, app installed, verified link | The phone opens your app directly. The SDK resolves the link and reports the open. |\n| Android, from a browser page | Our server hands the link to your app with your custom scheme. If the app isn't installed, the phone goes to Google Play (link kept for after install) or your website, as set in Settings. |\n| iPhone, app installed | iOS opens your app directly via Universal Links. |\n| iPhone, app not installed | Safari shows a page with a **Get the app** button that opens the App Store. The tap saves a short-lived match so the first open lands on the right screen (beta). |\n| In-app browsers (Instagram, TikTok, X…) | These block apps and stores, so we show a page that helps the person open the link in their real browser. |\n| Desktop | Redirects to the link's desktop URL, or the destination. |\n| Link-preview robots (WhatsApp, Slack, iMessage…) | Get a preview page with the link's title, description and image. They're never redirected and never counted as taps. |"
+  },
+  {
+   "page": "Short links",
+   "group": "Concepts",
+   "section": "How a tap is handled",
+   "url": "https://straitlink.in/docs/short-links/#how-a-tap-is-handled",
+   "markdown": "Every tap reaches Cloudflare first. What happens next depends on what the tap needs:\n\n- **Plain redirects** are decided at the Cloudflare location nearest the person, without a round trip to our servers. This covers desktop taps, Android browser taps (to your app, Google Play or your website) and iPhone taps that go straight to the website or the App Store. The decision is made by the same code our server runs, so the person lands in the same place either way.\n- **Everything else is served by our server**: pages (the iPhone **Get the app** page, in-app browser pages, password and expired pages), link-preview robots, and links with A/B destinations. A link close to its expiry time also goes to our server, so expiry is exact.\n\nBoth paths record the tap the same way: the same Analytics row, the same billing rules and the same `link.clicked` webhook. For a tap decided at the edge, the webhook is sent when our server receives the tap's record, a moment after the redirect. If that record can't be delivered straight away, it's kept and sent again later."
+  },
+  {
+   "page": "Short links",
+   "group": "Concepts",
+   "section": "When changes take effect",
+   "url": "https://straitlink.in/docs/short-links/#when-changes-take-effect",
+   "markdown": "When you change or deactivate a link, or change your workspace settings, taps follow the new version within 30 seconds. Changes made through the API take effect straight away on our server and at the Cloudflare location that carried the request; other locations, and changes made in the dashboard, can take up to 30 seconds."
+  },
+  {
+   "page": "Short links",
+   "group": "Concepts",
+   "section": "Link controls",
+   "url": "https://straitlink.in/docs/short-links/#link-controls",
+   "markdown": "Each link can also have:\n\n- **Per-platform fallbacks**: `iosFallbackUrl`, `androidFallbackUrl`, `desktopUrl` (all https).\n- **Social preview**: title, description and image for chat-app previews.\n- **Campaign, tags, folders and UTM parameters** to organise links and analytics.\n- **Expiry**: after it, the link stops opening its destination. You choose where taps go instead (see below).\n- **Password**: people must enter it before being redirected. Previews still work.\n- **A/B destinations**: split taps across several destinations. Analytics shows which variant each tap got.\n- **QR code**: download one for any link from the dashboard."
+  },
+  {
+   "page": "Short links",
+   "group": "Concepts",
+   "section": "When a link expires",
+   "url": "https://straitlink.in/docs/short-links/#when-a-link-expires",
+   "markdown": "After its expiry time a link no longer opens its destination. You decide where people go instead. Set the default for every link in **Settings → When a link expires**, and change it for one link in its edit panel (or with the API fields below). A link with no setting of its own follows the workspace default.\n\n| Option | What people see |\n|---|---|\n| **Show an 'expired' page** (default) | A short \"This link has expired\" page with your app's name and a link to your website. HTTP 410. |\n| **Send to the app store** | Google Play on Android, the App Store on iPhone, using your app configuration. On Android the install referrer carries the tap, the same as any store hand-off. Computers, and phones whose store isn't set up, go to your expired-link web page if you set one, otherwise they see the expired page. |\n| **Send to a web page** | Everyone goes to the https page you choose. If it's missing, or fails our phishing and malware check, people see the expired page instead. |\n\nThe store and web page options answer with a plain redirect (HTTP 302). Whichever option you pick, a tap on an expired link is recorded with **Sent to: expired**, plus where it went, and is never billed or sent as a `link.clicked` webhook. The dashboard Playground and `GET /v1/simulate` show the same decision as a real tap.\n\nWith the API, `POST /v1/links` and `PATCH /v1/links/{slug}` accept:\n\n- `expiresAt`: epoch milliseconds or an ISO 8601 date-time (`null` in a PATCH removes the expiry).\n- `expiredAction`: `page`, `store` or `url` (`null` in a PATCH goes back to the workspace default).\n- `expiredUrl`: an https page. Required with `url`. With `store`, it's where computers go.\n\n```bash\ncurl -X PATCH https://strait.link/v1/links/summer \\\n  -H \"Authorization: Bearer $STRAIT_SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"expiredAction\":\"url\",\"expiredUrl\":\"https://yourco.com/offers\"}'\n```"
+  },
+  {
+   "page": "Short links",
+   "group": "Concepts",
+   "section": "Deactivating",
+   "url": "https://straitlink.in/docs/short-links/#deactivating",
+   "markdown": "Deactivating a link (dashboard, or `DELETE /v1/links/{slug}`) stops it resolving. Visitors see a not-found page that links to your website if one is set in Settings."
+  },
+  {
+   "page": "Short links",
+   "group": "Concepts",
+   "section": "Links that break the rules",
+   "url": "https://straitlink.in/docs/short-links/#links-that-break-the-rules",
+   "markdown": "Links used for phishing, malware or spam are disabled under the [Acceptable Use Policy](https://straitlink.in/legal/acceptable-use/). A disabled link shows a warning page instead of redirecting."
+  },
+  {
+   "page": "Link domains",
+   "group": "Concepts",
+   "section": "Why your own subdomain",
+   "url": "https://straitlink.in/docs/link-domains/#why-your-own-subdomain",
+   "markdown": "Android App Links and iPhone Universal Links are verified **per domain**. The phone downloads a small file from the link's domain that says which app may open its links:\n\n- `https://acme.strait.link/.well-known/assetlinks.json` (Android)\n- `https://acme.strait.link/.well-known/apple-app-site-association` (iPhone)\n\nIf every customer shared one domain, that file could only name one app, and everyone else's links would open the browser. So each workspace gets its own subdomain, and we serve your app's files from it, built from the details in **Dashboard → Settings**."
+  },
+  {
+   "page": "Link domains",
+   "group": "Concepts",
+   "section": "Slugs belong to your workspace",
+   "url": "https://straitlink.in/docs/link-domains/#slugs-belong-to-your-workspace",
+   "markdown": "A slug is unique within your workspace, not across Strait. Two workspaces can both have `/summer`: `https://acme.strait.link/summer` and `https://globex.strait.link/summer` are different links that open different apps.\n\nThat's why you should **always share your handle URL**, never the bare `https://strait.link/summer`. The bare `strait.link` root only answers a slug that no other workspace uses, so links shared before workspaces had their own domains keep working. Once a second workspace creates the same slug, the bare address finds nothing. The API returns the right address for every link as `shortUrl`, and the dashboard copies it for you."
+  },
+  {
+   "page": "Link domains",
+   "group": "Concepts",
+   "section": "Your handle",
+   "url": "https://straitlink.in/docs/link-domains/#your-handle",
+   "markdown": "Your handle comes from your workspace name when you sign up (for example \"Acme Inc.\" becomes `acme-inc`). Handles are 3 to 30 characters: lowercase letters, digits and hyphens. Some words, like `www`, `api` and `status`, are reserved for our own use.\n\n:::warn Choose your handle before your first link\nThe workspace owner can rename the handle in **Dashboard → Get started** (or **Settings**) until the workspace creates its first link. After that it's fixed, because links you've shared and the App Links / Universal Links setup in your app depend on it.\n:::\n\nUse your link domain in three places:\n\n1. **The SDK `endpoint`**: `https://acme.strait.link`\n2. **Android**: the `android:host` of your App Links intent filter\n3. **iPhone**: the Associated Domains entry `applinks:acme.strait.link`"
+  },
+  {
+   "page": "Link domains",
+   "group": "Concepts",
+   "section": "Custom domains",
+   "url": "https://straitlink.in/docs/link-domains/#custom-domains",
+   "markdown": "Custom domains: coming soon. Today every workspace gets `<handle>.strait.link`, with HTTPS, on every plan. Serving links on your own domain (such as `links.yourcompany.com`) needs automatic certificates and domain verification, which we haven't built yet. We'll update this page when it's ready.\n\n:::note\nAfter changing your app's signing keys or team ID, phones and Google's verifier re-read the files on their own schedule. We serve them with a short cache (10 minutes), but Android can take longer to re-verify an installed app. Reinstalling the app forces a fresh check.\n:::"
+  },
+  {
+   "page": "App Links & Universal Links",
+   "group": "Concepts",
+   "section": "What we host",
+   "url": "https://straitlink.in/docs/app-links/#what-we-host",
+   "markdown": "From the app details in **Dashboard → Settings**, your link domain serves:\n\n| File | Built from | Used by |\n|---|---|---|\n| `/.well-known/assetlinks.json` | Package name + every SHA-256 fingerprint you list | Android, to verify App Links |\n| `/.well-known/apple-app-site-association` | Apple Team ID + bundle ID | iPhone, to verify Universal Links |\n\nEach file returns `404` until the matching fields are filled in. Check yours:\n\n```bash\ncurl https://acme.strait.link/.well-known/assetlinks.json\ncurl https://acme.strait.link/.well-known/apple-app-site-association\n```\n\nOr paste your link domain into the [App Links checker](https://straitlink.in/tools/app-links-checker/), which checks both files and explains any problem."
+  },
+  {
+   "page": "App Links & Universal Links",
+   "group": "Concepts",
+   "section": "Android",
+   "url": "https://straitlink.in/docs/app-links/#android",
+   "markdown": "1. Add an intent filter with `android:autoVerify=\"true\"` for `https://acme.strait.link` ([example](https://straitlink.in/docs/quick-start/#5-let-the-phone-open-your-app)).\n2. List **every** certificate fingerprint your app is signed with in Settings: debug, upload, and the Play App Signing key from Play Console. A Play-installed app is signed by Google's key, not yours. Fingerprints are checked when you save: each one is stored as 32 uppercase hex pairs joined by colons (`FA:C6:17:…`), duplicates are dropped, and anything that isn't a SHA-256 fingerprint is refused. The package name must look like a Java package (`com.yourco.app`), and the website fallback must be `https://`.\n3. Install the app. Android checks the file at install time.\n\nCheck verification on a connected phone:\n\n```bash\nadb shell pm get-app-links com.yourco.app\n# Look for:  acme.strait.link: verified\n```\n\nIf it says `1024` or `none`, Android couldn't verify. See [Troubleshooting](https://straitlink.in/docs/troubleshooting/#the-link-opens-the-browser-instead-of-the-app)."
+  },
+  {
+   "page": "App Links & Universal Links",
+   "group": "Concepts",
+   "section": "iPhone (beta)",
+   "url": "https://straitlink.in/docs/app-links/#iphone-beta",
+   "markdown": "1. Add the **Associated Domains** capability with `applinks:acme.strait.link`.\n2. Save your Apple Team ID and bundle ID in Settings.\n3. Install the app. iOS fetches the file through Apple's CDN, which can lag behind changes."
+  },
+  {
+   "page": "App Links & Universal Links",
+   "group": "Concepts",
+   "section": "How your link pages look",
+   "url": "https://straitlink.in/docs/app-links/#how-your-link-pages-look",
+   "markdown": "When a tap can't open your app straight away, the person sees one of our pages: the iPhone \"Get the app\" page, the page inside an in-app browser (Instagram, Facebook, WhatsApp…) with **Open in app**, the password page, and the \"not found\" and \"This link has expired\" pages. They lead with your app, not with Strait. Set these optional fields in **Dashboard → Settings → How your link pages look**:\n\n| Field | Rules | Used for |\n|---|---|---|\n| App name | 1 to 60 characters, no line breaks | \"Opens Acme Shop…\", \"Go to Acme Shop's website\" |\n| Icon URL | `https://` only (people's phones load it). Square works best | The icon at the top of each page |\n| Brand colour | A hex colour such as `#7c3aed` (`#abc` is fine too) | The main button. We pick black or white text on it so it stays readable (contrast at least 4.5:1) |\n\nInvalid values are refused when you save, with a message saying why. Leave them empty and the pages use neutral defaults. Every page works in light and dark mode. The page we show for a link we've disabled for safety stays unbranded on purpose. See the [home page](https://straitlink.in/#what-users-see) for real screenshots."
+  },
+  {
+   "page": "App Links & Universal Links",
+   "group": "Concepts",
+   "section": "Custom scheme hand-off",
+   "url": "https://straitlink.in/docs/app-links/#custom-scheme-hand-off",
+   "markdown": "When a tap reaches our server in a browser (for example from a web page, or on Android when the link isn't verified), we hand the link to your app using your custom scheme:\n\n```txt\nyourapp://shop.example.com/product/42?strait_click=<tap id>\n```\n\nThe SDK turns that into the destination `https://shop.example.com/product/42`, removes the tap id before your app sees it, and uses the id to join the app open to the exact tap in Analytics."
+  },
+  {
+   "page": "Deferred deep linking",
+   "group": "Concepts",
+   "section": "Android: the Play Install Referrer (exact)",
+   "url": "https://straitlink.in/docs/deferred-deep-linking/#android-the-play-install-referrer-exact",
+   "markdown": "When someone without your app taps a link on Android, we send them to Google Play with the link attached to the install:\n\n```txt\nhttps://play.google.com/store/apps/details?id=com.yourco.app&referrer=strait_link%3D<link id>%26strait_click%3D<tap id>\n```\n\nGoogle Play keeps that referrer through the install. On first open, the SDK reads it, asks our server for the link (`/v1/referrer`), and routes your app there. It's **deterministic**: no guessing, and the install is joined to the exact tap.\n\nTo test it you need a build installed **from Google Play**. An internal testing track works. Sideloaded builds have no referrer.\n\nIf there's no referrer link (the app was found in a store search, for example), the SDK still checks in once so the install is counted in your match rate. Don't expect a match in that case on Android."
+  },
+  {
+   "page": "Deferred deep linking",
+   "group": "Concepts",
+   "section": "iPhone: a short-lived device match (beta)",
+   "url": "https://straitlink.in/docs/deferred-deep-linking/#iphone-a-short-lived-device-match-beta",
+   "markdown": "iOS doesn't pass anything through the App Store, and reading the clipboard triggers a \"pasted from Safari\" banner. We don't use the clipboard. Instead:\n\n1. Someone without your app taps the link in Safari and sees a page with a **Get the app** button.\n2. Tapping it records a coarse device signature together with the link, then opens the App Store.\n3. On first launch, the SDK sends the same coarse fields to `/v1/match`. If a signature from the last **1 hour** matches, your app gets the link.\n\nThe signature is made from:\n\n| Input | From |\n|---|---|\n| Screen width and pixel ratio | The browser, then the app |\n| Language and time zone | The browser, then the app |\n| iOS major version | The browser's user agent, then the app's |\n| Network: prefix, operator (ASN) and a keyed hash of the full IP | Seen by our server; never sent by the app |\n\nEach saved signature can be matched **once** and expires after one hour. It's never used to identify anyone across apps or sites.\n\n:::warn Probabilistic, and in beta\nTwo people on the same network with the same phone model, language and time zone who tap different links within the hour are **not matched at all**: when taps look alike, we refuse rather than guess, so neither install is sent to the wrong screen. Each match in Analytics shows its method, so you can see how installs were matched. iPhone matching hasn't been proven on a real device yet.\n:::\n\nEither way, a matched install comes back to the app with its tap id, so purchases made afterwards are credited to that tap (see [Purchases](https://straitlink.in/docs/analytics/#purchases))."
+  },
+  {
+   "page": "Deferred deep linking",
+   "group": "Concepts",
+   "section": "Match methods",
+   "url": "https://straitlink.in/docs/deferred-deep-linking/#match-methods",
+   "markdown": "Every install in Analytics shows how it was matched:\n\n| Method | Meaning |\n|---|---|\n| `install_referrer` | Exact, from the Google Play referrer |\n| `exact_ext` | iPhone signature matched on every input |\n| `exact_core` | iPhone signature matched on the core inputs |\n| `none` | No match: organic install, or the match window passed |"
+  },
+  {
+   "page": "Deferred deep linking",
+   "group": "Concepts",
+   "section": "Once per install",
+   "url": "https://straitlink.in/docs/deferred-deep-linking/#once-per-install",
+   "markdown": "The deferred check runs once per install. It's skipped (and marked done) when the first launch was itself opened by a link, so a direct open is never followed by a stale deferred jump. If the phone is offline on first launch, the check runs again next launch."
+  },
+  {
+   "page": "Analytics: how we count",
+   "group": "Concepts",
+   "section": "The funnel",
+   "url": "https://straitlink.in/docs/analytics/#the-funnel",
+   "markdown": "```txt\nTaps  →  Where we sent them  →  App opened  →  Installs  →  Purchases\n```\n\nEach step is joined to the step before it with a tap id, so you can follow one tap all the way to revenue."
+  },
+  {
+   "page": "Analytics: how we count",
+   "group": "Concepts",
+   "section": "Taps",
+   "url": "https://straitlink.in/docs/analytics/#taps",
+   "markdown": "**Taps** are each time someone tapped one of your links.\n\n- Taps that go through our server in a browser are counted when they arrive.\n- A verified link can open your app directly from WhatsApp, Gmail and so on without touching our server. Those are counted when your app reports the open through the SDK.\n- If a browser loads the link and then hands it to your app (Edge does this), it's still one tap.\n- Link-preview robots are never counted.\n\n**Where we sent them** is decided per device: app or store, app or website, store, website, the iPhone \"Get the app\" page, or the in-app-browser page. On Android the phone then makes the final choice: your app if installed, otherwise the store or website."
+  },
+  {
+   "page": "Analytics: how we count",
+   "group": "Concepts",
+   "section": "App opens",
+   "url": "https://straitlink.in/docs/analytics/#app-opens",
+   "markdown": "- **Opened the app**: browser taps where your app then opened and reported that exact tap, plus verified-link opens.\n- **Open rate**: taps that opened the app (directly or via the browser), divided by all taps.\n- **New users**: the first launch after installing the app. **Existing users**: already had it installed.\n- **App state** at open: *closed* (the link launched the app), *background* (it brought the app back), *foreground* (the app was already on screen).\n- **Unresolved opens**: a link opened the app but couldn't be resolved (expired, deleted, wrong workspace), so the person didn't land on the right screen.\n\nOpens are reported once each. If the phone is offline, the SDK saves the report and sends it later (up to 7 days), and duplicates are ignored."
+  },
+  {
+   "page": "Analytics: how we count",
+   "group": "Concepts",
+   "section": "Installs",
+   "url": "https://straitlink.in/docs/analytics/#installs",
+   "markdown": "- **Installs from links**: first launches of a new install that we tied to one of your links.\n- **Joined to the exact tap**: of those, the ones matched to the precise tap (Play install referrer or browser hand-off), not just the link.\n- **Unattributed installs**: first launches no link could be found for: store search, word of mouth, or a match that failed.\n- **Match rate**: installs reconnected to a tap, divided by all attributable installs.\n- **Time to install**: the median time between tap and install, for installs matched to their tap.\n- **Probably reached the store / website**: store-bound browser taps where the app never opened and no install followed. We can't see the store page itself, so these are estimates and labelled as such."
+  },
+  {
+   "page": "Analytics: how we count",
+   "group": "Concepts",
+   "section": "Purchases",
+   "url": "https://straitlink.in/docs/analytics/#purchases",
+   "markdown": "Send events from your app (`trackEvent`) or server (`POST /v1/event`) with an optional value, currency and link id. They appear as the last step of the funnel, with revenue.\n\nEvents can also carry `clickId`, the tap they came from, so revenue lands on that tap's channel and A/B variant. The app SDKs fill it in for you from the most recent link open within 7 days. The tap id reaches the app four ways: in a browser hand-off, in the Google Play install referrer, and in our server's answer when it matches an open from a verified short link or an iPhone install. Each newer open replaces the remembered tap with its own. An explicit `clickId` overrides it. A `clickId` that isn't a tap of your workspace is dropped, and the event is still recorded."
+  },
+  {
+   "page": "Analytics: how we count",
+   "group": "Concepts",
+   "section": "What no one can measure",
+   "url": "https://straitlink.in/docs/analytics/#what-no-one-can-measure",
+   "markdown": "**An install that is never opened.** Until your app launches, no linking product can see it. Only Google Play Console and App Store Connect report raw installs. Expect our install numbers to be lower than the stores' for that reason."
+  },
+  {
+   "page": "Analytics: how we count",
+   "group": "Concepts",
+   "section": "What we store",
+   "url": "https://straitlink.in/docs/analytics/#what-we-store",
+   "markdown": "Taps keep the network prefix (first three parts of the IP address, never the full address), platform, device class and OS version. App opens store the host and path of the URL, never the query string. See the [Privacy Policy](https://straitlink.in/legal/privacy/)."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Base URL",
+   "url": "https://straitlink.in/docs/api/#base-url",
+   "markdown": "```txt\nhttps://strait.link\n```\n\nThe machine-readable description is at `https://strait.link/v1/openapi.json`. Import it into Postman, Insomnia or a code generator."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Authentication",
+   "url": "https://straitlink.in/docs/api/#authentication",
+   "markdown": "| Key | Send it as | Use it for |\n|---|---|---|\n| Secret key `st_live_…` | `Authorization: Bearer st_live_…` header | Link endpoints, and events from your server |\n| Publishable key `st_pub_live_…` | `\"publishableKey\"` in the JSON body | Endpoints your app or website calls |\n\nThe publishable key is in **Dashboard → Get started** and secret keys are in **Dashboard → Settings → Secret keys**. The examples on this page read the secret key from an environment variable:\n\n```bash\nexport SECRET_KEY=st_live_…   # Dashboard → Settings → Secret keys\n```\n\n The publishable key is safe to ship in apps; it can only resolve links, report opens, match installs and send events. Requests with a missing or wrong key get `401`.\n\nAfter you rotate the publishable key, the old key keeps working for 7 days so apps already on people's phones don't break. Responses to the old key carry a `Strait-Key-Deprecated` header with the time it stops working (ISO 8601, for example `Strait-Key-Deprecated: 2026-01-08T12:00:00.000Z`); after that it gets `401`. See [Keys](https://straitlink.in/docs/#rotating-keys)."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Errors and limits",
+   "url": "https://straitlink.in/docs/api/#errors-and-limits",
+   "markdown": "Every error under `/v1` is JSON with an `error` message, never an HTML page:\n\n```json\n{ \"error\": \"slug already exists in this workspace\" }\n```\n\n| Status | When |\n|---|---|\n| `400` | Invalid input, including a body that isn't valid JSON (`{ \"error\": \"malformed JSON body\" }`) |\n| `401` | Missing or wrong key |\n| `402` | Plan limit reached when creating a link. Adds `reason` (`links`, or `clicks` for the monthly tap limit) and `upgradeUrl`; existing links keep working |\n| `404` | Not found, including unknown `/v1` paths (`{ \"error\": \"not found\" }`) |\n| `409` | The slug is already used by an active link in your workspace |\n| `413` | Request body too large |\n| `429` | Rate limited |\n| `500` | Our fault: `{ \"error\": \"internal error\" }`, with no internal details |\n\nSome errors add fields, for example a blocked destination returns `{ \"error\": \"destination_blocked\", \"reason\": \"…\" }`. The endpoints apps call are rate-limited per IP address; normal SDK traffic is far below the limit."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Short URLs and slugs",
+   "url": "https://straitlink.in/docs/api/#short-urls-and-slugs",
+   "markdown": "Slugs are unique within your workspace, not across Strait: another workspace can also have `/summer` on its own link domain. Every link the API returns includes `shortUrl`, the address to share: `https://<your-handle>.strait.link/<slug>`. Always share `shortUrl`. See [Link domains](https://straitlink.in/docs/link-domains/).\n\nFetch one link by its slug with `GET /v1/links/{slug}`."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "When changes take effect",
+   "url": "https://straitlink.in/docs/api/#when-changes-take-effect",
+   "markdown": "Link edits (`PATCH /v1/links/{slug}`) and deactivations (`DELETE /v1/links/{slug}`) apply to taps within 30 seconds. They apply straight away on our server and at the Cloudflare location that carried your request; plain redirects decided at other Cloudflare locations can follow the old version for up to 30 seconds. See [How a tap is handled](https://straitlink.in/docs/short-links/#how-a-tap-is-handled)."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Paging",
+   "url": "https://straitlink.in/docs/api/#paging",
+   "markdown": "`GET /v1/links` without parameters returns every active link as a plain JSON array. Add `limit` (1 to 100, default 50) or `cursor` to page through them instead, newest first:\n\n```bash\ncurl \"https://strait.link/v1/links?limit=50\" \\\n  -H \"Authorization: Bearer $SECRET_KEY\"\n# → { \"links\": [ … ], \"nextCursor\": \"WyIyMDI2…\" }\n\ncurl \"https://strait.link/v1/links?limit=50&cursor=WyIyMDI2…\" \\\n  -H \"Authorization: Bearer $SECRET_KEY\"\n# → { \"links\": [ … ], \"nextCursor\": null }   ← the last page\n```\n\nPass each `nextCursor` back as `cursor` until it is `null`. Treat the cursor as opaque; an invalid one gets `400`."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Try a link without tapping it",
+   "url": "https://straitlink.in/docs/api/#try-a-link-without-tapping-it",
+   "markdown": "`GET /v1/simulate` tells you what a tap would do, without recording a tap, sending webhooks or counting toward your plan. Pass the full short link as `url` and either a raw user agent or one of these presets as `ua`: `android`, `iphone`, `ipad`, `desktop`, `instagram-ios`, `instagram-android`, `facebook-android`, `whatsapp-android`, `bot`.\n\n```bash\ncurl \"https://strait.link/v1/simulate?url=https%3A%2F%2Facme.strait.link%2Fsummer&ua=instagram-android\" \\\n  -H \"Authorization: Bearer $SECRET_KEY\"\n```\n\nThe answer has the `decision` (`redirect`, `interstitial`, `escape`, `preview`, `expired` or `blocked`), `sentTo` (the same values as Analytics, below), the `location` the visitor would be sent to (or the main button's target on a page), and a plain-English `reason`. Hand-off URLs in it carry a placeholder tap id, `00000000-0000-4000-8000-000000000000`. You can also authenticate with `publishableKey=` as a query parameter; the link must belong to the key's workspace. **Dashboard → Playground** runs the same check."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "How taps are labelled",
+   "url": "https://straitlink.in/docs/api/#how-taps-are-labelled",
+   "markdown": "Each tap is recorded with where we sent it, `sent_to` (in the taps export and the `sentTo` webhook field):\n\n| `sent_to` | Meaning |\n|---|---|\n| `app_or_store` | Android: your app if installed, otherwise the store |\n| `app_or_website` | Android: your app if installed, otherwise your website |\n| `store` | Straight to Google Play or the App Store |\n| `website` | Straight to the destination or fallback website |\n| `app_store_page` | The iPhone \"Get the app\" page |\n| `in_app_browser_page` | The page shown inside an in-app browser (Instagram, Facebook, WhatsApp…) with \"Open in app\" |\n| `expired` | The link had expired: the visitor saw \"This link has expired\". Recorded, never billed, no webhook |\n\nTaps decided at Cloudflare's edge and taps served by our server are recorded with the same fields and labels.\n\nA tap's **channel** is the first of these that has a value: the tap URL's `utm_source`, the link destination's `utm_source`, the in-app browser it was tapped in (`whatsapp`, `instagram`…), then the referring site. Taps with none of these are direct.\n\nA link's **campaign** is the `campaign` you set. If you leave it out, it's filled in from the destination's `utm_campaign`, and follows it when you change the destination."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Extra link fields",
+   "url": "https://straitlink.in/docs/api/#extra-link-fields",
+   "markdown": "`POST /v1/links` also accepts these optional fields (all URLs must be https):\n\n| Field | Purpose |\n|---|---|\n| `iosFallbackUrl`, `androidFallbackUrl`, `desktopUrl` | Where to send people on that platform when the app can't open |\n| `title`, `description`, `imageUrl` | The preview shown in chat apps and social posts |\n| `campaign` | Campaign name for analytics (also passed to the App Store as the campaign token). Defaults to the destination's `utm_campaign` |\n| `tags` | Labels for filtering |\n| `expiresAt` | When the link expires: epoch milliseconds or an ISO 8601 date-time |\n| `expiredAction`, `expiredUrl` | Where taps go after expiry: `page`, `store` or `url` (with an https `expiredUrl`). Leave out to use the workspace setting. See [When a link expires](https://straitlink.in/docs/short-links/#when-a-link-expires) |\n\n`PATCH /v1/links/{slug}` changes `longUrl`, `title`, `tags`, `expiresAt`, `expiredAction` and `expiredUrl`. Send only what changes; `null` clears `expiresAt` (never expires) and `expiredAction` (back to the workspace setting)."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Batch create",
+   "url": "https://straitlink.in/docs/api/#batch-create",
+   "markdown": "`POST /v1/links/batch` creates up to 500 links in one call, for imports and migrations. Send `{ \"links\": [ … ] }`, where each item takes the same fields as `POST /v1/links`. Every item is checked the same way (slug rules, https destinations, the unsafe-destination check, plan limits) and gets its own result, so one bad item never fails the batch:\n\n```bash\ncurl https://strait.link/v1/links/batch \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"links\": [ { \"slug\": \"spring\", \"longUrl\": \"https://shop.example.com/spring\" },\n                  { \"slug\": \"summer\", \"longUrl\": \"https://shop.example.com/summer\", \"campaign\": \"summer_2026\" } ] }'\n# → { \"results\": [ { \"index\": 0, \"ok\": true, \"status\": 201, \"link\": { … } }, … ],\n#     \"summary\": { \"total\": 2, \"created\": 2, \"failed\": 0 } }\n```\n\nThe response is `200` whenever the request itself is valid; read each item's `ok` and `status` (`201`, `400`, `402` or `409`). A slug that already exists, or repeats earlier in the same batch, is a `409` for that item only, so re-running an import is safe. Items past a plan limit get `402`. See [Migrate from Branch](https://straitlink.in/docs/migrate-from-branch/)."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "Export",
+   "url": "https://straitlink.in/docs/api/#export",
+   "markdown": "Export everything in your workspace at any time, on every plan. It gives you what you need to leave, or to keep your links running if Strait ever shuts down. Send your secret key; a publishable key gets `401`.\n\n```txt\nGET https://strait.link/v1/export?part=links|taps|events|webhooks|worker\nAuthorization: Bearer st_live_…\n```\n\n| `part` | What you get |\n|---|---|\n| `links` | NDJSON, one link per line: slug, destination, platform fallbacks and whether it is active |\n| `taps` | CSV of every tap, joined to the app opens and installs that came from it. No date cap; add optional `from` and `to` (ISO dates) to narrow it |\n| `events` | CSV of every conversion event (signups, purchases, revenue): `created_at, name, value, currency, platform, link_id, slug, click_id, channel, campaign, variant`. `channel`, `campaign` and `variant` come from the tap the event is attributed to, when it has a `click_id`. Oldest first, no date cap; optional `from` and `to` |\n| `webhooks` | JSON of your webhook settings: `url`, `events`, `active` and `createdAt` for each one. Signing secrets are never exported; make new ones when you recreate a webhook |\n| `worker` | A single-file Cloudflare Worker that keeps your links redirecting, with the Android, iPhone and desktop fallbacks built in. Deploy it on your own account |\n\n```bash\ncurl \"https://strait.link/v1/export?part=events&from=2026-01-01\" \\\n  -H \"Authorization: Bearer $SECRET_KEY\" -o events.csv\n```\n\nTaps and events are streamed page by page, so an export of millions of rows starts straight away and never times out on our side.\n\n### Download from the dashboard\n\nOwners and admins can download every part from **Dashboard → Settings → Download everything**: one button per file, no secret key needed. Members and viewers can't, because an export contains all of the workspace's data. The same section keeps the commands above under **Or from your server**.\n\nEach button asks for a one-time download link, then your browser saves the file directly, however large:\n\n```txt\nPOST https://strait.link/v1/export/token      {\"part\": \"events\"}\n→ 201 {\"token\": \"stx_…\", \"expiresAt\": \"…\", \"path\": \"/v1/export?part=events&token=stx_…\"}\nGET  https://strait.link/v1/export?part=events&token=stx_…\n```\n\nThe token works once, for 60 seconds, for that part (and its `from` / `to`) only. Only a hash of it is stored. A used or expired token gets `401`."
+  },
+  {
+   "page": "REST API",
+   "group": "Reference",
+   "section": "SDK endpoints",
+   "url": "https://straitlink.in/docs/api/#sdk-endpoints",
+   "markdown": "The SDKs call the publishable-key endpoints below for you; you only need them if you're writing your own client."
+  },
+  {
+   "page": "Webhooks",
+   "group": "Reference",
+   "section": "Set up",
+   "url": "https://straitlink.in/docs/webhooks/#set-up",
+   "markdown": "In **Dashboard → Settings → Webhooks**, add an `https://` URL and pick events. You'll see the **signing secret** once; store it on your server. Free includes 1 webhook, Starter 3 and Scale 10 ([pricing](https://straitlink.in/pricing/)).\n\nThe URL must be a public `https://` address. When you save it, we refuse:\n\n- `http://` and other schemes, and URLs with a username or password in them\n- `localhost`, and hosts ending in `.localhost`, `.local` or `.internal`\n- IP addresses in private, loopback, link-local, carrier-grade NAT (100.64.0.0/10), multicast and reserved ranges, IPv4 and IPv6\n\nWe check again before every delivery, after looking up the hostname, because DNS can change after you save. A URL that now points at a private address isn't sent to and isn't retried."
+  },
+  {
+   "page": "Webhooks",
+   "group": "Reference",
+   "section": "Send a test event",
+   "url": "https://straitlink.in/docs/webhooks/#send-a-test-event",
+   "markdown": "Press **Send test event** next to a webhook in **Dashboard → Settings → Webhooks**. We send one `ping` event to it straight away, signed like every other delivery, and show what your server answered: the status code, the first 500 characters of the response body and how long it took. It works on a paused webhook too. Test events aren't stored or retried.\n\nFrom your server, call the same thing with your secret key:\n\n```bash\ncurl -X POST https://strait.link/v1/webhooks/<webhook id>/test \\\n  -H \"Authorization: Bearer $SECRET_KEY\"\n```\n\n```json title=\"Response\"\n{\n  \"delivered\": true,\n  \"status\": 204,\n  \"error\": null,\n  \"body\": \"\",\n  \"durationMs\": 182,\n  \"deliveryId\": \"0b9c3f0e-5a7d-4a51-9a2e-3f1c8d2b6e47\",\n  \"event\": \"ping\"\n}\n```\n\nWhen the delivery fails, `delivered` is `false` and `error` says why: `HTTP 500` (your server's status), `timeout` (no answer within 5 seconds) or `unsafe_target` (the URL resolves to a private address). An unknown webhook id, or one from another workspace, gets `404`."
+  },
+  {
+   "page": "Webhooks",
+   "group": "Reference",
+   "section": "Events",
+   "url": "https://straitlink.in/docs/webhooks/#events",
+   "markdown": "| Event | Sent when | `data` fields |\n|---|---|---|\n| `link.clicked` | Someone taps a link (browser taps, and verified-link opens your app reports) | `linkId`, `slug`, `platform`, `clickId`, `sentTo`, `deviceClass`, `variant`, `source` |\n| `install.matched` | A first launch after install is matched to a link | `linkId`, `clickId`, `matchMethod`, `platform` |\n| `app.opened` | A link opens your app | `linkId`, `clickId`, `kind`, `route`, `appState`, `isInstall`, `matched`, `platform` |\n| `ping` | You send a test event | `webhookId`, `message` |\n\nFields that don't apply to an event are left out. Taps on an expired link are recorded in Analytics but don't send `link.clicked`."
+  },
+  {
+   "page": "Webhooks",
+   "group": "Reference",
+   "section": "Payload",
+   "url": "https://straitlink.in/docs/webhooks/#payload",
+   "markdown": "```http title=\"Request we send\"\nPOST /your/webhook HTTP/1.1\nContent-Type: application/json\nX-Strait-Event: install.matched\nX-Strait-Delivery: 7f3e2c1a-9b4d-4e8f-a6c5-2d1b0e9f8a73\nX-Strait-Attempt: 1\nX-Strait-Signature: t=1767225600,v1=6a1f0c3e9b…\n\n{\n  \"id\": \"7f3e2c1a-9b4d-4e8f-a6c5-2d1b0e9f8a73\",\n  \"event\": \"install.matched\",\n  \"createdAt\": \"2026-01-01T00:00:00.000Z\",\n  \"data\": {\n    \"linkId\": \"lnk_123\",\n    \"clickId\": \"c_123\",\n    \"matchMethod\": \"install_referrer\",\n    \"platform\": \"android\"\n  }\n}\n```"
+  },
+  {
+   "page": "Webhooks",
+   "group": "Reference",
+   "section": "Verify the signature",
+   "url": "https://straitlink.in/docs/webhooks/#verify-the-signature",
+   "markdown": "Every delivery carries this header:\n\n```txt\nX-Strait-Signature: t=<unix seconds>,v1=<signature>\n```\n\n`v1` is the hex HMAC-SHA256 of the string `<t>.<raw request body>` (the timestamp, a full stop, then the exact bytes of the body), keyed with your webhook's signing secret. To verify:\n\n1. Read the **raw body** before parsing the JSON. Re-serialised JSON won't match.\n2. Split the header on `,` and each part on the first `=` to get `t` and `v1`.\n3. Refuse the request if `t` is more than **5 minutes** (300 seconds) away from your clock. That stops someone replaying an old delivery.\n4. Compute the HMAC of `t`, `.` and the raw body with your secret, and compare it with `v1` in **constant time**.\n\nReply `401` when any step fails. Make sure your server's clock is set by NTP.\n\n```ts title=\"Node / Express\"\nimport { createHmac, timingSafeEqual } from 'node:crypto';\nimport express from 'express';\n\nconst TOLERANCE_SECONDS = 300;\n\nexport function verifyStraitSignature(secret: string, rawBody: Buffer, header: string | undefined): boolean {\n  if (!header) return false;\n  const parts = new Map(header.split(',').map((p) => {\n    const i = p.indexOf('=');\n    return [p.slice(0, i).trim(), p.slice(i + 1).trim()] as const;\n  }));\n  const t = parts.get('t') ?? '';\n  const v1 = parts.get('v1') ?? '';\n  if (!/^\\d+$/.test(t) || !v1) return false;\n  if (Math.abs(Date.now() / 1000 - Number(t)) > TOLERANCE_SECONDS) return false;\n  const expected = createHmac('sha256', secret).update(`${t}.`).update(rawBody).digest('hex');\n  const a = Buffer.from(expected);\n  const b = Buffer.from(v1);\n  return a.length === b.length && timingSafeEqual(a, b);\n}\n\nconst app = express();\n\napp.post('/webhooks/links', express.raw({ type: 'application/json' }), (req, res) => {\n  if (!verifyStraitSignature(process.env.WEBHOOK_SECRET!, req.body, req.get('X-Strait-Signature'))) {\n    return res.status(401).end();\n  }\n  const event = JSON.parse(req.body.toString('utf8'));\n  // handle event.event / event.data …\n  res.status(204).end();\n});\n```\n\n```python title=\"Python / Flask\"\nimport hashlib\nimport hmac\nimport os\nimport time\nfrom typing import Optional\n\nfrom flask import Flask, abort, request\n\nTOLERANCE_SECONDS = 300\n\ndef verify_strait_signature(secret: str, raw_body: bytes, header: Optional[str]) -> bool:\n    if not header:\n        return False\n    parts = dict(p.strip().split(\"=\", 1) for p in header.split(\",\") if \"=\" in p)\n    t, v1 = parts.get(\"t\", \"\"), parts.get(\"v1\", \"\")\n    if not t.isdigit() or not v1:\n        return False\n    if abs(time.time() - int(t)) > TOLERANCE_SECONDS:\n        return False\n    expected = hmac.new(secret.encode(), t.encode() + b\".\" + raw_body, hashlib.sha256).hexdigest()\n    return hmac.compare_digest(expected, v1)\n\napp = Flask(__name__)\n\n@app.post(\"/webhooks/links\")\ndef strait_webhook():\n    raw = request.get_data()  # the exact bytes we sent\n    if not verify_strait_signature(os.environ[\"WEBHOOK_SECRET\"], raw, request.headers.get(\"X-Strait-Signature\")):\n        abort(401)\n    event = request.get_json()\n    # handle event[\"event\"] / event[\"data\"] …\n    return \"\", 204\n```\n\n```go title=\"Go / net/http\"\npackage webhooks\n\nimport (\n\t\"crypto/hmac\"\n\t\"crypto/sha256\"\n\t\"encoding/hex\"\n\t\"io\"\n\t\"net/http\"\n\t\"os\"\n\t\"strconv\"\n\t\"strings\"\n\t\"time\"\n)\n\nconst toleranceSeconds = 300\n\nfunc VerifyStraitSignature(secret string, body []byte, header string, now time.Time) bool {\n\tvar t, v1 string\n\tfor _, part := range strings.Split(header, \",\") {\n\t\tk, v, _ := strings.Cut(strings.TrimSpace(part), \"=\")\n\t\tswitch k {\n\t\tcase \"t\":\n\t\t\tt = v\n\t\tcase \"v1\":\n\t\t\tv1 = v\n\t\t}\n\t}\n\tts, err := strconv.ParseInt(t, 10, 64)\n\tif err != nil || ts <= 0 || v1 == \"\" {\n\t\treturn false\n\t}\n\tif d := now.Unix() - ts; d > toleranceSeconds || d < -toleranceSeconds {\n\t\treturn false\n\t}\n\tmac := hmac.New(sha256.New, []byte(secret))\n\tmac.Write([]byte(t + \".\"))\n\tmac.Write(body)\n\texpected := hex.EncodeToString(mac.Sum(nil))\n\treturn hmac.Equal([]byte(expected), []byte(v1))\n}\n\nfunc Handler(w http.ResponseWriter, r *http.Request) {\n\tbody, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))\n\tif err != nil || !VerifyStraitSignature(os.Getenv(\"WEBHOOK_SECRET\"), body, r.Header.Get(\"X-Strait-Signature\"), time.Now()) {\n\t\thttp.Error(w, \"invalid signature\", http.StatusUnauthorized)\n\t\treturn\n\t}\n\t// json.Unmarshal(body, &event); handle event.Event / event.Data …\n\tw.WriteHeader(http.StatusNoContent)\n}\n```\n\n:::note Older receivers\nWe no longer send the first-format `X-Strait-Signature-Legacy` header (an HMAC of the body with no timestamp), because a copied delivery could be replayed with it. `X-Strait-Signature` is the only signature header. If your receiver still checks the old header, switch it to the code above.\n:::"
+  },
+  {
+   "page": "Webhooks",
+   "group": "Reference",
+   "section": "Delivery",
+   "url": "https://straitlink.in/docs/webhooks/#delivery",
+   "markdown": "- Each request times out after 5 seconds. Respond quickly with any `2xx` and do the work afterwards.\n- Redirects aren't followed: a `3xx` counts as a failed attempt.\n- **Retries:** anything other than a `2xx` (or no answer) is retried after 30 seconds, 2 minutes, 10 minutes, 1 hour and 6 hours, six attempts in total, then marked failed. Your server can be down for hours without losing events.\n- Each event has a stable id: `X-Strait-Delivery` (the same as `id` in the body) stays the same on every retry, and `X-Strait-Attempt` counts up. Store the ids you've handled and ignore repeats: delivery is **at least once**.\n- Every attempt is signed again with a fresh timestamp, so a retry six hours later still passes the 5-minute check.\n- Addresses that resolve to private networks are never sent to or retried."
+  },
+  {
+   "page": "Webhooks",
+   "group": "Reference",
+   "section": "Delivery history and redelivery",
+   "url": "https://straitlink.in/docs/webhooks/#delivery-history-and-redelivery",
+   "markdown": "Open **Deliveries** under a webhook in **Dashboard → Settings → Webhooks** to see its last 20 deliveries: the event, when it was created, its status (**Delivered**, **Retrying** or **Failed** after all six attempts), how many attempts it took and your server's last answer. A failed delivery, or one waiting for its next retry, has a **Redeliver** button: fix your endpoint (or change the webhook URL), press it, and we send the same event again right away. Owners, admins and members can redeliver; viewers can only look.\n\nThe same from your server, with a secret key:\n\n```txt\nGET https://strait.link/v1/webhooks/{id}/deliveries?limit=20&cursor=…\nAuthorization: Bearer st_live_…\n```\n\n```json\n{\n  \"deliveries\": [\n    {\n      \"id\": \"7f3e2c1a-9b4d-4e8f-a6c5-2d1b0e9f8a73\",\n      \"webhookId\": \"5d0c…\",\n      \"event\": \"link.clicked\",\n      \"status\": \"failed\",\n      \"attempts\": 6,\n      \"lastStatus\": 500,\n      \"lastError\": \"HTTP 500\",\n      \"nextAttemptAt\": null,\n      \"createdAt\": \"2026-10-04T09:12:03.512Z\",\n      \"deliveredAt\": null\n    }\n  ],\n  \"nextCursor\": null\n}\n```\n\nNewest first, `limit` 1 to 100 (default 20); pass `nextCursor` back as `cursor` for the next page. Payloads aren't returned. `nextAttemptAt` is set while a delivery is waiting for a retry.\n\n```txt\nPOST https://strait.link/v1/webhook-deliveries/{id}/redeliver\nAuthorization: Bearer st_live_…\n```\n\nThis queues the delivery again with its attempt count reset, sends it at once to the webhook's **current** URL with the same `X-Strait-Delivery` id, and answers with the delivery after that attempt (same shape as above). If it fails again it gets the full retry schedule. You get `409` when it was already delivered, or while it's being sent (in its first 2 minutes, or claimed by a delivery worker right now): try again shortly. A delivery from another workspace is `404`.\n\nDelivery history is kept for 30 days, then deleted by a nightly job."
+  },
+  {
+   "page": "Migrate from Firebase Dynamic Links",
+   "group": "Guides",
+   "section": "What maps to what",
+   "url": "https://straitlink.in/docs/migrate-from-firebase/#what-maps-to-what",
+   "markdown": "| Firebase Dynamic Links | Strait |\n|---|---|\n| `yourapp.page.link` domain | Your workspace link domain, `<handle>.strait.link`. Custom domains are coming soon |\n| Dynamic Link `link=` parameter (deep link) | The link's destination (`longUrl`) |\n| Android / iOS fallback parameters (`afl`, `ifl`) | `androidFallbackUrl`, `iosFallbackUrl` |\n| Social meta tags (`st`, `sd`, `si`) | `title`, `description`, `imageUrl` |\n| Campaign parameters (`utm_*`) | UTM parameters and `campaign` |\n| `FirebaseDynamicLinks.getDynamicLink()` / pending link on first open | The SDK's `onLink` callback (direct and deferred) |\n| Firebase Analytics link events | Built-in Analytics: taps, opens, installs, purchases |"
+  },
+  {
+   "page": "Migrate from Firebase Dynamic Links",
+   "group": "Guides",
+   "section": "1. Export your links",
+   "url": "https://straitlink.in/docs/migrate-from-firebase/#1-export-your-links",
+   "markdown": "Collect your links in any of these forms, one per line:\n\n- Firebase short links with the long form attached, like `https://yourapp.page.link/abc?link=https%3A%2F%2Fshop.example.com%2Fp%2F42`\n- Plain destination URLs\n- A CSV with a header row. We recognise `link`, `url`, `destination` or `longUrl` for the destination, and `slug`, `short`, `path` or `key` for the slug.\n\n```txt title=\"links.csv\"\nshort,link\nhttps://yourapp.page.link/summer,https://shop.example.com/product/42\nhttps://yourapp.page.link/invite,https://shop.example.com/invite?ref=abc\n```"
+  },
+  {
+   "page": "Migrate from Firebase Dynamic Links",
+   "group": "Guides",
+   "section": "2. Import them",
+   "url": "https://straitlink.in/docs/migrate-from-firebase/#2-import-them",
+   "markdown": "In **Dashboard → Import**, paste the list. We pull the real destination out of each Firebase link's `link=` parameter, keep the old short code as the slug where we can, and show a preview with any rows that can't be imported (and why) before you confirm."
+  },
+  {
+   "page": "Migrate from Firebase Dynamic Links",
+   "group": "Guides",
+   "section": "3. Swap the SDK",
+   "url": "https://straitlink.in/docs/migrate-from-firebase/#3-swap-the-sdk",
+   "markdown": "Remove the Firebase Dynamic Links SDK and add ours ([React Native](https://straitlink.in/docs/sdks/react-native/), [Flutter](https://straitlink.in/docs/sdks/flutter/), [Android](https://straitlink.in/docs/sdks/android/), [iOS](https://straitlink.in/docs/sdks/ios/), [Unity](https://straitlink.in/docs/sdks/unity/)). Route on `e.path` and `e.params` the same way you routed on the dynamic link's deep link.\n\n```diff\n- FirebaseDynamicLinks.instance.onLink.listen((data) => route(data.link));\n+ links.onLink.listen((e) { if (e.matched && e.path != null) route(e.path!, e.params); });\n```"
+  },
+  {
+   "page": "Migrate from Firebase Dynamic Links",
+   "group": "Guides",
+   "section": "4. Update app verification",
+   "url": "https://straitlink.in/docs/migrate-from-firebase/#4-update-app-verification",
+   "markdown": "Replace your `page.link` domain with your link domain:\n\n- **Android**: change the intent filter's `android:host` to `acme.strait.link`, and add your SHA-256 fingerprints in Settings.\n- **iPhone**: change Associated Domains to `applinks:acme.strait.link`, and add your Team ID and bundle ID in Settings."
+  },
+  {
+   "page": "Migrate from Firebase Dynamic Links",
+   "group": "Guides",
+   "section": "5. Update where links are created",
+   "url": "https://straitlink.in/docs/migrate-from-firebase/#5-update-where-links-are-created",
+   "markdown": "Wherever your backend called the Firebase REST API to shorten links, call `POST /v1/links` with your secret key, or use the [Node SDK](https://straitlink.in/docs/sdks/node/).\n\nComing from Branch instead? See [Migrate from Branch](https://straitlink.in/docs/migrate-from-branch/)."
+  },
+  {
+   "page": "Migrate from Firebase Dynamic Links",
+   "group": "Guides",
+   "section": "About old page.link URLs",
+   "url": "https://straitlink.in/docs/migrate-from-firebase/#about-old-pagelink-urls",
+   "markdown": "`page.link` domains belong to Google. Old links printed or posted on that domain can't be redirected by anyone else, so replace them wherever you still control the text (your website, emails, app screens). Links you create on Strait live on your own workspace subdomain, `<handle>.strait.link`, and you can [export them](https://straitlink.in/docs/api/#export) at any time. Custom domains are coming soon."
+  },
+  {
+   "page": "Migrate from Branch",
+   "group": "Guides",
+   "section": "What maps to what",
+   "url": "https://straitlink.in/docs/migrate-from-branch/#what-maps-to-what",
+   "markdown": "| Branch | Strait |\n|---|---|\n| `yourapp.app.link` domain (or your Branch custom domain) | Your workspace link domain, `<handle>.strait.link`. Custom domains are coming soon |\n| Link alias / short path | The link's slug |\n| `$deeplink_path` (what the app routes on) | The path and query of the link's destination (`longUrl`). The SDK hands your app `e.path` and `e.params` |\n| `$canonical_url`, `$fallback_url`, `$desktop_url` | `longUrl` / `desktopUrl` |\n| `$ios_url`, `$android_url` | `iosFallbackUrl`, `androidFallbackUrl` |\n| `$og_title`, `$og_description`, `$og_image_url` | `title`, `description`, `imageUrl` |\n| `~campaign` | `campaign` |\n| `~channel` | `utm_source` on the destination (that's where Strait reads a link's channel from) |\n| `~tags`, `~feature` | `tags` (the feature becomes a `feature:<name>` tag) |\n| `Branch.getAutoInstance()` / `initSession` callback | The SDK's `onLink` callback (direct and deferred) |\n| `BranchEvent` / custom events | `trackEvent` |"
+  },
+  {
+   "page": "Migrate from Branch",
+   "group": "Guides",
+   "section": "1. Export your links from Branch",
+   "url": "https://straitlink.in/docs/migrate-from-branch/#1-export-your-links-from-branch",
+   "markdown": "Download your links from your Branch dashboard's link export, as CSV or JSON. The first row of a CSV must be the header row with Branch's field names (`url`, `alias`, `$canonical_url`, `$deeplink_path`, `~campaign` and so on). JSON can be a list of links, `{ \"links\": [ … ] }`, or one link per line, and link data can sit at the top level or under `data` the way Branch's API returns it.\n\n```txt title=\"branch-links.csv (shortened)\"\nurl,$canonical_url,$deeplink_path,$ios_url,$android_url,$og_title,~campaign,~channel,~tags\nhttps://acme.app.link/summer-sale,https://shop.example.com/sale/summer,,,,Summer Sale,summer_2026,instagram,\"sale,summer\"\nhttps://acme.app.link/p42,https://shop.example.com/products/42,product/42,https://shop.example.com/ios/42,https://shop.example.com/android/42,,,,\n```"
+  },
+  {
+   "page": "Migrate from Branch",
+   "group": "Guides",
+   "section": "2. How each field is mapped",
+   "url": "https://straitlink.in/docs/migrate-from-branch/#2-how-each-field-is-mapped",
+   "markdown": "**Slug.** The link's `alias` if it has one, else the last part of the Branch short link (`https://acme.app.link/summer-sale` becomes `summer-sale`), else the Branch link id (`~id`). Slugs can contain letters, numbers, `-` and `_` (up to 64), so other characters become `-`: `Invite%20Friend` becomes `Invite-Friend`. If that makes two different Branch links land on the same slug, the second gets `-2`. A slug that appears twice in the file, or that a live link in your workspace already uses, is shown as a problem and not imported.\n\n**Destination and deep link path.** Strait routes your app by the destination's path and query: a tap on a link whose `longUrl` is `https://shop.example.com/product/42?ref=x` gives your app `e.path = \"/product/42\"` and `e.params = { ref: \"x\" }`. So:\n\n- **No `$deeplink_path`:** `longUrl` is `$canonical_url`, else `$fallback_url`, else `$desktop_url`.\n- **With a `$deeplink_path`:** `longUrl` is the web URL's origin plus the deep link path. With `$canonical_url = https://shop.example.com/products/42` and `$deeplink_path = product/42`, `longUrl` is `https://shop.example.com/product/42`, and the app gets `/product/42`. A custom-scheme path loses its scheme: `myapp://invite?code=XYZ` becomes `/invite?code=XYZ`. If a link has a deep link path but no web URL at all, enter your website in the import screen and it is used as the origin.\n- **Different `$ios_deeplink_path` and `$android_deeplink_path`:** Strait has one in-app path for both platforms, so the Android path is used and the row shows a warning. Make sure both apps handle it.\n\nBecause the deep link path may not be a real page on your website, the original web page is kept for people without the app: `desktopUrl` becomes the canonical/fallback URL (unless `$desktop_url` is set), and so do `iosFallbackUrl` and `androidFallbackUrl` (unless `$ios_url` / `$android_url` are set).\n\n**Platform fallbacks.** `$ios_url` → `iosFallbackUrl` and `$android_url` → `androidFallbackUrl`: where someone without the app goes on that platform when your workspace sends them to a website rather than the store.\n\n**Social previews.** `$og_title` → `title` (or `$marketing_title` when there's no `$og_title`), `$og_description` → `description`, `$og_image_url` → `imageUrl`.\n\n**Campaigns.** `~campaign` → `campaign`. `~channel` is added to the destination as `utm_source` (unless it already has one), which is how Strait labels a link's channel in [Analytics](https://straitlink.in/docs/analytics/). `~tags` become tags, and `~feature` adds a `feature:<name>` tag.\n\n**Everything must be https.** A destination that isn't `https://` stops the row; an optional URL that isn't (for example an `http://` preview image) is left out and the row shows a warning.\n\n**Other fields are not imported.** The preview lists every field in your file that Strait doesn't use, such as `~stage`, `~creation_source`, `$one_time_use` and your own custom link data keys. If your app reads custom link data, put what it needs into the deep link path or its query string before you import."
+  },
+  {
+   "page": "Migrate from Branch",
+   "group": "Guides",
+   "section": "3. Import",
+   "url": "https://straitlink.in/docs/migrate-from-branch/#3-import",
+   "markdown": "### In the dashboard\n\nOpen **Dashboard → Import → From Branch**, choose the export file and select **Preview**. Each row shows the slug, the destination and the path your app will get, the fallbacks, the social preview, the campaign and tags, and any problems. Select **Import**. You get a summary of what was created and what wasn't (with the reason), and you can download the rows that failed as a CSV, fix them and import them again with **Bulk create**.\n\nImports are safe to run twice: a slug that already exists is reported, never overwritten.\n\n### With the API\n\n`POST /v1/links/batch` creates up to 500 links per call with your secret key. Each item takes the same fields as `POST /v1/links` and gets its own result, so one bad item never fails the batch. A slug that already exists (or repeats earlier in the batch) is a `409` for that item only.\n\n```bash\ncurl https://strait.link/v1/links/batch \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"links\": [\n      {\n        \"slug\": \"p42\",\n        \"longUrl\": \"https://shop.example.com/product/42\",\n        \"desktopUrl\": \"https://shop.example.com/products/42\",\n        \"iosFallbackUrl\": \"https://shop.example.com/ios/42\",\n        \"androidFallbackUrl\": \"https://shop.example.com/android/42\",\n        \"title\": \"Product 42\",\n        \"campaign\": \"summer_2026\",\n        \"tags\": [\"sale\"]\n      },\n      { \"slug\": \"summer-sale\", \"longUrl\": \"https://shop.example.com/sale/summer?utm_source=instagram\" }\n    ]\n  }'\n```\n\n```json\n{\n  \"results\": [\n    { \"index\": 0, \"ok\": true, \"status\": 201, \"link\": { \"slug\": \"p42\", \"shortUrl\": \"https://<handle>.strait.link/p42\", … } },\n    { \"index\": 1, \"ok\": false, \"status\": 409, \"error\": \"slug already exists in this workspace\" }\n  ],\n  \"summary\": { \"total\": 2, \"created\": 1, \"failed\": 1 }\n}\n```\n\nEach item's `status` is what `POST /v1/links` would have answered: `201`, `400` (invalid, or `destination_blocked`), `402` (plan limit reached) or `409`. See the [REST API](https://straitlink.in/docs/api/#batch-create)."
+  },
+  {
+   "page": "Migrate from Branch",
+   "group": "Guides",
+   "section": "4. Swap the SDK",
+   "url": "https://straitlink.in/docs/migrate-from-branch/#4-swap-the-sdk",
+   "markdown": "Remove the Branch SDK and add ours ([React Native](https://straitlink.in/docs/sdks/react-native/), [Flutter](https://straitlink.in/docs/sdks/flutter/), [Android](https://straitlink.in/docs/sdks/android/), [iOS](https://straitlink.in/docs/sdks/ios/), [Unity](https://straitlink.in/docs/sdks/unity/)). Where you read `$deeplink_path` from Branch's link data, route on `e.path` and `e.params` instead; the import put the deep link path there.\n\n```diff\n- branch.subscribe(({ params }) => { if (params['+clicked_branch_link']) route(params.$deeplink_path); });\n+ links.onLink((e) => { if (e.matched && e.path) route(e.path, e.params); });\n```\n\nOn Android and iOS that's the same change: drop `Branch.getAutoInstance()` and the `initSession` callback, start the Strait client at launch, and subscribe to `onLink`. Deferred links (the link someone tapped before installing) arrive through the same callback with `kind` set to `deferred`.\n\nEvents move from Branch events to `trackEvent`:\n\n```diff\n- new BranchEvent(BranchEvent.Purchase, null, { revenue: 49.99, currency: 'USD' }).logEvent();\n+ links.trackEvent('purchase', { value: 49.99, currency: 'USD' });\n```\n\nThen update app verification to your link domain: on Android change the intent filter's `android:host` to `acme.strait.link` and add your SHA-256 fingerprints in Settings; on iPhone change Associated Domains to `applinks:acme.strait.link` and add your Team ID and bundle ID in Settings. See [App Links & Universal Links](https://straitlink.in/docs/app-links/)."
+  },
+  {
+   "page": "Migrate from Branch",
+   "group": "Guides",
+   "section": "5. Cutover plan",
+   "url": "https://straitlink.in/docs/migrate-from-branch/#5-cutover-plan",
+   "markdown": "1. **Import and test.** Import your links, then tap a few on a real phone with the app installed and without it, and on a desktop browser.\n2. **Ship the app update** with the Strait SDK and the new verification domain. You can keep the Branch SDK in the same release so old Branch links still open the app for people on it.\n3. **Create new links on Strait.** Point your backend, marketing tools and share buttons at `POST /v1/links` (or the [Node SDK](https://straitlink.in/docs/sdks/node/)). New links live on `<handle>.strait.link`.\n4. **Keep Branch active while old links circulate.** Links on `app.link` are served by Branch, and only while your Branch account is active. Replace them wherever you still control the text (website, emails, app screens, QR codes you can reprint), then let the rest age out before you close the Branch account.\n5. **Remove the Branch SDK** in a later app release, once taps on old links have dropped off.\n\nIf you used a custom domain with Branch, it can't move to Strait yet: custom domains are coming soon. Until then, new links use `<handle>.strait.link`."
+  },
+  {
+   "page": "Migrate from Branch",
+   "group": "Guides",
+   "section": "What doesn't migrate",
+   "url": "https://straitlink.in/docs/migrate-from-branch/#what-doesnt-migrate",
+   "markdown": "- **Analytics history.** Branch's clicks, installs, opens and attribution data stay in Branch. Export the reports you need before you close the account. Strait counts from the day your links and app switch over.\n- **The `app.link` domain.** It belongs to Branch. Links on it keep working only while your Branch account is active, and nobody else can redirect them.\n- **A Branch custom domain.** Not yet: custom domains are coming soon.\n- **Custom link data** beyond the deep link path and query, and Branch settings such as `$one_time_use`, `$match_duration` or journeys and banners. The import lists every field it leaves out.\n- **Separate iOS and Android deep link paths.** One path is kept for both."
+  },
+  {
+   "page": "Troubleshooting",
+   "group": "Guides",
+   "section": "The link opens the browser instead of the app",
+   "url": "https://straitlink.in/docs/troubleshooting/#the-link-opens-the-browser-instead-of-the-app",
+   "markdown": "This almost always means the phone couldn't verify that your app may open links on your domain.\n\nStart with the free [App Links checker](https://straitlink.in/tools/app-links-checker/): it fetches both files from your domain and explains what's wrong with them (missing file, redirect, wrong content type, malformed fingerprint or app ID).\n\n1. **Check the file.** `curl https://acme.strait.link/.well-known/assetlinks.json` should list your package name and fingerprints. A `404` means the Android fields in Settings are empty.\n2. **Check the SHA-256.** The fingerprint must match the certificate of the build on the phone:\n   - Debug builds: your debug keystore.\n   - Release builds you install yourself: your upload key.\n   - Builds from Google Play: the **App signing key** in Play Console → App integrity. This is Google's key, not yours.\n3. **Check the intent filter**: `android:autoVerify=\"true\"`, `https` scheme, and `android:host=\"acme.strait.link\"` exactly.\n4. **Re-verify.** Android checks at install time. Reinstall the app, then run `adb shell pm get-app-links com.yourco.app`. You want `verified`.\n5. **Tap, don't type.** Pasting a link into the address bar never opens an app. Test from Messages, WhatsApp or Gmail.\n\nOn iPhone (beta): check `apple-app-site-association` lists `<Team ID>.<bundle ID>`, and the app has `applinks:acme.strait.link` in Associated Domains. iOS caches the file through Apple's CDN, so changes can take a while to show."
+  },
+  {
+   "page": "Troubleshooting",
+   "group": "Guides",
+   "section": "Samsung Internet",
+   "url": "https://straitlink.in/docs/troubleshooting/#samsung-internet",
+   "markdown": "Samsung Internet handles our hand-off like Chrome: if the app is installed it opens; if not, it goes to Google Play. If Samsung Internet keeps opening links in the browser, check **Settings → Useful features → Open links in other apps** is on."
+  },
+  {
+   "page": "Troubleshooting",
+   "group": "Guides",
+   "section": "Firefox and Edge ask before opening the app",
+   "url": "https://straitlink.in/docs/troubleshooting/#firefox-and-edge-ask-before-opening-the-app",
+   "markdown": "Firefox (\"Open this link in …?\") and Edge (\"wants to open an external app\") show a confirmation before handing a link to an app. That's the browser's choice and can't be skipped. Once the person confirms, the app opens on the right screen and the tap is counted once."
+  },
+  {
+   "page": "Troubleshooting",
+   "group": "Guides",
+   "section": "In-app browsers (Instagram, TikTok, X, Facebook…)",
+   "url": "https://straitlink.in/docs/troubleshooting/#in-app-browsers-instagram-tiktok-x-facebook",
+   "markdown": "In-app browsers block apps and app stores, so a deep link can't work inside them. We detect them and show a page that helps the person open the link in their real browser, where it works normally. To skip that step, share links where possible as plain links that open outside the in-app browser, for example in WhatsApp, Messages or email."
+  },
+  {
+   "page": "Troubleshooting",
+   "group": "Guides",
+   "section": "The deferred link didn't open the right screen after install",
+   "url": "https://straitlink.in/docs/troubleshooting/#the-deferred-link-didnt-open-the-right-screen-after-install",
+   "markdown": "- **Android**: the app must be installed **from Google Play** (internal testing is fine). Sideloaded builds have no install referrer. In Settings, set \"When someone without the app taps a link\" to **Always Google Play** while your app isn't public, otherwise we send people to your website to avoid Play's \"Item not found\" page.\n- **iPhone (beta)**: the person must tap **Get the app** on our page in Safari, and open the app within an hour, on the same network. A different network (Wi-Fi to cellular) will usually prevent a match.\n- **Both**: the deferred check runs once per install. Uninstall and reinstall to test again."
+  },
+  {
+   "page": "Troubleshooting",
+   "group": "Guides",
+   "section": "The app opened but `matched` is false",
+   "url": "https://straitlink.in/docs/troubleshooting/#the-app-opened-but-matched-is-false",
+   "markdown": "Check `reason` on the link event:\n\n| Reason | What it means |\n|---|---|\n| `not_found` | No such link in this workspace (check the publishable key and the slug) |\n| `expired` | The link's expiry has passed |\n| `password_protected` | Password links can't be opened directly in the app |\n| `no_match` | Deferred: no recent matching tap |\n| `network` | The phone couldn't reach us. The open is saved and reported later |\n| `invalid_url` | The URL couldn't be parsed |"
+  },
+  {
+   "page": "Troubleshooting",
+   "group": "Guides",
+   "section": "Still stuck?",
+   "url": "https://straitlink.in/docs/troubleshooting/#still-stuck",
+   "markdown": "Email [support@straitlink.in](mailto:support@straitlink.in) with the link, the phone model, the browser or app you tapped it in, and what happened."
+  }
+ ]
+}

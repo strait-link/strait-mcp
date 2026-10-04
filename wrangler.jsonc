@@ -1,0 +1,19 @@
+// Remote Strait MCP server (planned at mcp.strait.link). NOT DEPLOYED.
+// To try it locally: set REMOTE_MCP to "on" in .dev.vars, create a KV namespace
+// (`npx wrangler kv namespace create OAUTH_KV`) and put its id below, then `npx wrangler dev`.
+// Deploying needs the founder's approval (council ground rules: agents never deploy).
+{
+  "name": "strait-mcp",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "vars": {
+    "REMOTE_MCP": "off",
+    "STRAIT_API_URL": "https://strait.link",
+    "MCP_ORIGIN": "https://mcp.strait.link"
+  },
+  "kv_namespaces": [
+    { "binding": "OAUTH_KV", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }
+  ]
+}

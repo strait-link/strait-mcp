@@ -24,74 +24,81 @@
    "markdown": "- **[5-minute quickstart](https://straitlink.in/docs/quick-start/)**: see a link open your app on an Android phone.\n- **[Pick your platform](https://straitlink.in/docs/sdks/)**: React Native, Expo, Flutter, Android, iOS, Unity, web.\n- **Leaving Firebase Dynamic Links?** [Migrate step by step](https://straitlink.in/docs/migrate-from-firebase/)."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": null,
    "url": "https://straitlink.in/docs/quick-start/",
    "markdown": "This page uses the shortest path: your app's custom scheme. Verified App Links (no browser in between), deferred links and iPhone come after, in the [go-live checklist](https://straitlink.in/docs/production-checklist/)."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": "1. Create a workspace",
    "url": "https://straitlink.in/docs/quick-start/#1-create-a-workspace",
    "markdown": "[Sign up](https://app.straitlink.in/?signup=1) and name your workspace. The name becomes your link domain, `https://<your-handle>.strait.link`. These docs use `acme.strait.link`.\n\n:::warn Pick your handle before you create a link\nTo change it, go to **Dashboard → Get started** before your first link. After that the handle is fixed, because shared links depend on it.\n:::\n\n**You should see:** your link domain and your publishable key (`st_pub_live_…`) in **Dashboard → Get started**."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": "2. Add your Android app",
    "url": "https://straitlink.in/docs/quick-start/#2-add-your-android-app",
    "markdown": "In **Dashboard → Settings**, fill in two fields:\n\n| Field | Example | Where to find it |\n|---|---|---|\n| Package name | `com.yourcompany.yourapp` | `applicationId` in `android/app/build.gradle` |\n| Custom scheme | `yourapp` | Any short lowercase word your app will answer to |\n\n**You should see:** **Settings saved**. Leave everything else for now."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": "3. Create a link",
    "url": "https://straitlink.in/docs/quick-start/#3-create-a-link",
    "markdown": "In **Dashboard → Links → New link**, set the slug to `summer` and the destination to `https://shop.example.com/product/42`. Or from a terminal:\n\n```bash\nexport SECRET_KEY=st_live_…   # Dashboard → Settings → Secret keys\ncurl https://strait.link/v1/links \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"slug\": \"summer\", \"longUrl\": \"https://shop.example.com/product/42\" }'\n```\n\nThe destination doesn't need to exist yet. Your app only receives its path and query.\n\n**You should see:** `https://acme.strait.link/summer` in your link list (the API answers `201` with that `shortUrl`)."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
+   "group": "Get started",
+   "section": "Shortcut: let `strait init` write steps 4 and 5 (available after publish)",
+   "url": "https://straitlink.in/docs/quick-start/#shortcut-let-strait-init-write-steps-4-and-5-available-after-publish",
+   "markdown": "From your app's folder, run:\n\n```bash\nnpx @straitlink/cli init --key st_pub_live_… --host acme.strait.link\n```\n\nIt recognises a React Native, Expo, Flutter or Android app from its files, writes the `links` file from step 5 with your key and host, and prints the step 4 intent filter and the install command filled in with your scheme. It never changes a file you already have; add `--dry-run` to see everything first. `@straitlink/cli` isn't on npm yet, so this command works once it's published. Until then, follow the manual setup steps."
+  },
+  {
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": "4. Let your app answer to its scheme",
    "url": "https://straitlink.in/docs/quick-start/#4-let-your-app-answer-to-its-scheme",
    "markdown": "Add this intent filter to your main activity, using the scheme from step 2:\n\n```xml title=\"android/app/src/main/AndroidManifest.xml\"\n<activity android:name=\".MainActivity\" android:launchMode=\"singleTask\" android:exported=\"true\">\n  \n  <intent-filter>\n    <action android:name=\"android.intent.action.VIEW\" />\n    <category android:name=\"android.intent.category.DEFAULT\" />\n    <category android:name=\"android.intent.category.BROWSABLE\" />\n    <data android:scheme=\"yourapp\" />\n  </intent-filter>\n</activity>\n```\n\n**You should see:** the app builds and runs as before (`npx react-native run-android`)."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": "5. Install the SDK and log each link",
    "url": "https://straitlink.in/docs/quick-start/#5-install-the-sdk-and-log-each-link",
-   "markdown": "Install it straight from GitHub; no sign-up or access request:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nCreate the client once, in a file of its own:\n\n```ts title=\"links.ts (@strait/sdk-react-native 0.8.0)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@strait/sdk-react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.onLink((e) => console.log('Strait link:', e.matched, e.path, e.params));\nlinks.start();\n```\n\nImport `./links` once from your app's entry file (`index.js` or `App.tsx`), then rebuild, because the SDK adds a native module.\n\n**You should see:** the app starts normally. Nothing is logged yet."
+   "markdown": "Install it directly from GitHub; no sign-up or access request:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nCreate the client once, in a file of its own:\n\n```ts title=\"links.ts (@straitlink/react-native 0.8.0)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.onLink((e) => console.log('Strait link:', e.matched, e.path, e.params));\nlinks.start();\n```\n\nImport `./links` once from your app's entry file (`index.js` or `App.tsx`), then rebuild, because the SDK adds a native module.\n\n**You should see:** the app starts normally. Nothing is logged yet."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": "6. Tap the link",
    "url": "https://straitlink.in/docs/quick-start/#6-tap-the-link",
    "markdown": "Send `https://acme.strait.link/summer` to yourself in Google Messages or Gmail, and tap it on the phone. Don't paste it into the browser's address bar: phones only open apps from links that are tapped.\n\n**You should see:** the browser flashes for a moment, your app opens, and Metro logs a line starting `Strait link: true /product/42`. In **Dashboard → Analytics**, the tap and the app open appear within a minute.\n\nTapping in WhatsApp or Instagram can show an **Open in app** page first. That's expected: in-app browsers can't open apps directly."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": "Common errors",
    "url": "https://straitlink.in/docs/quick-start/#common-errors",
    "markdown": "- **Chrome opens the Play Store or the destination instead of the app.** The scheme in Settings and in the manifest differ, or the app on the phone is an old build without the intent filter.\n- **The app opens but nothing is logged.** `links.ts` isn't imported at startup, or the app wasn't rebuilt after installing the SDK.\n- **`matched` is `false` with `reason: \"not_found\"`.** The publishable key is from another workspace. More in [Troubleshooting](https://straitlink.in/docs/troubleshooting/)."
   },
   {
-   "page": "5-minute quickstart",
+   "page": "5-minute quickstart: open your app from a link (Android)",
    "group": "Get started",
    "section": "Next steps",
    "url": "https://straitlink.in/docs/quick-start/#next-steps",
-   "markdown": "- [Open the right screen](https://straitlink.in/docs/sdks/react-native/receive-links/): route `e.path` with React Navigation, or see [Expo Router](https://straitlink.in/docs/sdks/expo/). Not on React Native? [Flutter](https://straitlink.in/docs/sdks/flutter/) · [Android](https://straitlink.in/docs/sdks/android/).\n- [Go-live checklist](https://straitlink.in/docs/production-checklist/): verified App Links, deferred links after install, and iPhone."
+   "markdown": ":::tip Next: deferred deep links\nThis page covers a link opening an app that's already installed. For a new user who installs first, you add **no extra code**: the same `onLink` callback fires with `kind: 'deferred'`. You need a build installed from Google Play and, while the app isn't public, **Always Google Play** in Settings. [Set up deferred links →](https://straitlink.in/docs/deferred-deep-linking/#what-your-app-sees)\n:::\n\n- [Open the right screen](https://straitlink.in/docs/sdks/react-native/receive-links/): route `e.path` with React Navigation, or see [Expo Router](https://straitlink.in/docs/sdks/expo/). Not on React Native? [Flutter](https://straitlink.in/docs/sdks/flutter/) · [Android](https://straitlink.in/docs/sdks/android/).\n- [Go-live checklist](https://straitlink.in/docs/production-checklist/): verified App Links, deferred links after install, and iPhone."
   },
   {
    "page": "Go-live checklist",
    "group": "Get started",
    "section": "1. Add every SHA-256 fingerprint",
    "url": "https://straitlink.in/docs/production-checklist/#1-add-every-sha-256-fingerprint",
-   "markdown": "Android opens your app straight from a link only if your link domain lists the certificate the installed build was signed with. Add all three in **Dashboard → Settings**:\n\n| Build | Certificate | Where to find it |\n|---|---|---|\n| Local debug builds | Debug key | The commands below |\n| Release builds you install yourself | Upload key | Your keystore, or `eas credentials` |\n| Anything installed from Google Play | **Play App Signing** key (Google's, not yours) | Play Console → Test and release → App integrity |\n\n```bash\n# Native Android project (Android Studio's shared debug key)\nkeytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA256\n\n# React Native, or Expo after `npx expo prebuild`: the project's own debug key\nkeytool -list -v -keystore android/app/debug.keystore -storepass android | grep SHA256\n\n# EAS Build: choose Android and your build profile; the keystore's SHA-256 is listed\neas credentials\n```\n\nPaste them in any form: upper or lower case, with or without colons. We store them as uppercase pairs joined by colons and refuse anything that isn't a SHA-256 fingerprint.\n\n**You should see:** your package name and every fingerprint in the file we host:\n\n```bash\ncurl https://acme.strait.link/.well-known/assetlinks.json\n```"
+   "markdown": "Android opens your app directly from a link only if your link domain lists the certificate the installed build was signed with. Add all three in **Dashboard → Settings**:\n\n| Build | Certificate | Where to find it |\n|---|---|---|\n| Local debug builds | Debug key | The commands below |\n| Release builds you install yourself | Upload key | Your keystore, or `eas credentials` |\n| Anything installed from Google Play | **Play App Signing** key (Google's, not yours) | Play Console → Test and release → App integrity |\n\n```bash\n# Native Android project (Android Studio's shared debug key)\nkeytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA256\n\n# React Native, or Expo after `npx expo prebuild`: the project's own debug key\nkeytool -list -v -keystore android/app/debug.keystore -storepass android | grep SHA256\n\n# EAS Build: choose Android and your build profile; the keystore's SHA-256 is listed\neas credentials\n```\n\nPaste them in any form: upper or lower case, with or without colons. We store them as uppercase pairs joined by colons and refuse anything that isn't a SHA-256 fingerprint.\n\n**You should see:** your package name and every fingerprint in the file we host:\n\n```bash\ncurl https://acme.strait.link/.well-known/assetlinks.json\n```"
   },
   {
    "page": "Go-live checklist",
@@ -353,25 +360,242 @@
    "markdown": "- **Analytics history.** Branch's clicks, installs, opens and attribution data stay in Branch. Export the reports you need before you close the account. Strait counts from the day your links and app switch over.\n- **The `app.link` domain.** It belongs to Branch. Links on it keep working only while your Branch account is active, and nobody else can redirect them.\n- **A Branch custom domain.** Not yet: custom domains are coming soon.\n- **Custom link data** beyond the deep link path and query, and Branch settings such as `$one_time_use`, `$match_duration` or journeys and banners. The import lists every field it leaves out.\n- **Separate iOS and Android deep link paths.** One path is kept for both."
   },
   {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": null,
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/",
+   "markdown": "This page strings the separate React Native pages into one path for the case that matters most to growth teams: a new user. Each step links to the page with more detail. The same path for other stacks: [Expo](https://straitlink.in/docs/recipes/expo-deferred-deep-links/) · [Flutter](https://straitlink.in/docs/recipes/flutter-deferred-deep-links/)."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "1. Make a link for one screen",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#1-make-a-link-for-one-screen",
+   "markdown": "In **Dashboard → Links → New link**, set the slug `summer` and the destination `https://shop.example.com/product/42?ref=SUMMER`. Or from your server:\n\n```bash\ncurl https://strait.link/v1/links \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"slug\": \"summer\", \"longUrl\": \"https://shop.example.com/product/42?ref=SUMMER\", \"campaign\": \"summer_2026\" }'\n```\n\nYour app receives the destination's path and query (`/product/42`, `{ ref: 'SUMMER' }`), so use paths your app already routes on.\n\n**You should see:** the link `https://acme.strait.link/summer` in the Links list."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "2. Install the SDK with the Play Install Referrer",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#2-install-the-sdk-with-the-play-install-referrer",
+   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The SDK reads it for you once you pass the referrer module:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\n```ts title=\"links.ts\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',      // Dashboard → Get started\n  endpoint: 'https://acme.strait.link',   // your link domain\n  storage: AsyncStorage,          // keeps the once-per-install flag\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\nImport `./links` once from `index.js`, then rebuild with `npx react-native run-android` (the SDK adds a native module). Add the intent filters from [Install & set up, step 3](https://straitlink.in/docs/sdks/react-native/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** the app starts as before, and `@straitlink/react-native` is in `package.json`."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "3. Route every link, including the deferred one",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#3-route-every-link-including-the-deferred-one",
+   "markdown": "The deferred link arrives through the same `onLink` callback as any other link, once, on the first launch after the install. `onLink` also replays events from before you subscribed, so subscribing when the navigator is ready never misses it:\n\n```tsx title=\"App.tsx\"\nimport { NavigationContainer } from '@react-navigation/native';\nimport { links } from './links';\nimport { navigationRef, openPath } from './navigation'; // from Receive links, step 1\n\nexport default function App() {\n  return (\n    <NavigationContainer\n      ref={navigationRef}\n      onReady={() => links.onLink((e) => {\n        if (e.kind === 'deferred') console.log('Strait first open:', e.route, e.matched, e.reason);\n        if (e.matched && e.path) openPath(e.path, e.params);\n      })}\n    >\n      {/* your navigator */}\n    </NavigationContainer>\n  );\n}\n```\n\n**You should see:** `adb shell am start -W -a android.intent.action.VIEW -d \"yourapp://shop.example.com/product/42\"` opens the Product screen. This proves the routing; the next steps prove the install."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "4. Decide what a new user sees first",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#4-decide-what-a-new-user-sees-first",
+   "markdown": "On the first launch the SDK always answers once with `kind: 'deferred'`. When `matched` is `false`, `reason` is `no_match` (most installs don't come from a link) or `network` (the check runs again on the next launch). Show your usual onboarding in both cases, and skip it when a link matched:\n\n```ts title=\"firstOpen.ts\"\nimport { links } from './links';\n\n// Resolves with the link's path for a new user who came from a link, or null.\nexport const firstOpenPath = new Promise<string | null>((resolve) => {\n  const off = links.onLink((e) => {\n    if (e.kind !== 'deferred') return;\n    off();\n    resolve(e.matched && e.path ? e.path : null);\n  });\n});\n```\n\nKeep a short loading screen while you wait. [Receive links, step 3](https://straitlink.in/docs/sdks/react-native/receive-links/#3-show-a-loading-state-optional) has one.\n\n**You should see:** a fresh debug install, with no link tapped, logs `Strait first open: fingerprint false no_match` and shows your onboarding."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "5. Ship a Google Play internal-testing build",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#5-ship-a-google-play-internal-testing-build",
+   "markdown": "A build from Android Studio has no install referrer, so this test needs a build installed from Google Play:\n\n1. Upload a release build to **internal testing** in Play Console and add yourself as a tester.\n2. In **Dashboard → Settings → When someone without the app taps a link**, choose **Always Google Play** while the app isn't public. (The default sends people to your website while the Play listing isn't live.)\n\n**You should see:** the build listed as available to testers in Play Console. The first review can take 1 to 2 hours."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "6. Tap, install, open",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#6-tap-install-open",
+   "markdown": "1. Uninstall the app from the phone.\n2. Send yourself `https://acme.strait.link/summer` in WhatsApp or Messages and tap it. Google Play opens on your app.\n3. Install from Play and open the app.\n\n**You should see:** the app opens directly on the Product screen for `42`, with `ref` `SUMMER` in its params, and `adb logcat` shows `Strait first open: install_referrer true`. The check runs once per install; uninstall to repeat it."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "7. See the install in Analytics",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#7-see-the-install-in-analytics",
+   "markdown": "Open **Dashboard → Analytics** and choose `summer_2026` in the **Campaign** filter. To put revenue on the same tap, record a purchase from the app with `links.trackEvent('purchase', { value: 499, currency: 'INR' })` ([Events & revenue](https://straitlink.in/docs/sdks/react-native/events/)).\n\n**You should see:** your tap on `summer`, one install with match method `install_referrer` joined to that exact tap, and one app open from a new user. A test purchase appears under the same campaign."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "Common errors",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#common-errors",
+   "markdown": "- **The first open lands on the home screen.** The app came from Android Studio or a shared APK, not Google Play, or the Settings choice in step 5 still sends people to your website. [Test page](https://straitlink.in/docs/sdks/react-native/test/#4-test-a-deferred-link-first-open-after-install).\n- **Analytics shows the tap but no install.** The phone was offline on the first launch, so the report is saved and sent on a later launch. Open the app again on a network.\n- **The deferred event fires before the navigator exists.** Navigating from it crashes or does nothing. Subscribe in `onReady`, as in step 3."
+  },
+  {
+   "page": "Deferred deep links in React Native, end to end",
+   "group": "Recipes",
+   "section": "Next steps",
+   "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#next-steps",
+   "markdown": "- [Go-live checklist](https://straitlink.in/docs/production-checklist/): verified links, iPhone (beta) and keys before real users tap.\n- [Test mode (coming soon)](https://straitlink.in/docs/test-mode/): check the deferred wiring from a debug build, without a Play upload."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": null,
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/",
+   "markdown": "This page strings the Expo and React Native pages into one path for the case that matters most to growth teams: a new user. Expo uses the same SDK as bare React Native; what changes is `app.json`, a development build instead of Expo Go, and EAS for the Play build. Bare React Native? Use the [React Native recipe](https://straitlink.in/docs/recipes/react-native-deferred-deep-links/)."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "1. Make a link for one screen",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#1-make-a-link-for-one-screen",
+   "markdown": "In **Dashboard → Links → New link**, set the slug `summer` and the destination `https://shop.example.com/product/42?ref=SUMMER`. Or from your server:\n\n```bash\ncurl https://strait.link/v1/links \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"slug\": \"summer\", \"longUrl\": \"https://shop.example.com/product/42?ref=SUMMER\", \"campaign\": \"summer_2026\" }'\n```\n\nYour app receives the destination's path and query (`/product/42`, `{ ref: 'SUMMER' }`), so use paths that match files in `app/`, here `app/product/[id].tsx`.\n\n**You should see:** the link `https://acme.strait.link/summer` in the Links list."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "2. Install the SDK and add app.json settings",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#2-install-the-sdk-and-add-appjson-settings",
+   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The SDK reads it once you pass the referrer module:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0\nnpx expo install @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nCreate `links.ts` exactly as for [bare React Native](https://straitlink.in/docs/sdks/react-native/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add `scheme`, `android.package`, the `intentFilters` and `associatedDomains` to `app.json` as in [Expo, step 2](https://straitlink.in/docs/sdks/expo/#2-add-link-settings-to-appjson).\n\n**You should see:** `npx expo config --type public` prints your `scheme` and `intentFilters`, and the SDK is in `package.json`."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "3. Route every link, including the deferred one",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#3-route-every-link-including-the-deferred-one",
+   "markdown": "The deferred link arrives through the same `onLink` callback as any other link, once, on the first launch after the install. `onLink` replays events from before you subscribed, so subscribing when navigation is ready never misses it:\n\n```tsx title=\"app/_layout.tsx\"\nimport { Stack, router, useRootNavigationState, type Href } from 'expo-router';\nimport { useEffect } from 'react';\nimport { links } from '../links';\n\nexport default function RootLayout() {\n  const ready = useRootNavigationState()?.key;\n  useEffect(() => {\n    if (!ready) return;\n    return links.onLink((e) => {\n      if (e.kind === 'deferred') console.log('Strait first open:', e.route, e.matched, e.reason);\n      if (e.matched && e.path) router.push({ pathname: e.path, params: e.params } as Href);\n    });\n  }, [ready]);\n  return <Stack />;\n}\n```\n\nAdd `app/+native-intent.tsx` from [Expo, step 3](https://straitlink.in/docs/sdks/expo/#3-route-links-with-expo-router) so Expo Router doesn't try to open the raw link URL itself. Then make a development build, because Expo Go can't load the native module: `npx expo run:android`.\n\n**You should see:** `adb shell am start -W -a android.intent.action.VIEW -d \"yourapp://shop.example.com/product/42\"` opens `app/product/[id].tsx` with `id` `42`, and no \"Unmatched route\" screen. This proves the routing; the next steps prove the install."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "4. Decide what a new user sees first",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#4-decide-what-a-new-user-sees-first",
+   "markdown": "On the first launch the SDK always answers once with `kind: 'deferred'`. When `matched` is `false`, `reason` is `no_match` (most installs don't come from a link) or `network` (the check runs again on the next launch). Show your usual onboarding in both cases, and skip it when a link matched:\n\n```ts title=\"firstOpen.ts\"\nimport { links } from './links';\n\n// The link's path for a new user who came from a link, or null.\n// Later launches have no deferred event, so the timer answers null.\nexport const firstOpenPath = new Promise<string | null>((resolve) => {\n  const timer = setTimeout(() => { off(); resolve(null); }, 5000);\n  const off = links.onLink((e) => {\n    if (e.kind !== 'deferred') return;\n    clearTimeout(timer);\n    off();\n    resolve(e.matched && e.path ? e.path : null);\n  });\n});\n```\n\nKeep the splash screen up while you wait (`expo-splash-screen`'s `preventAutoHideAsync`, then `hideAsync`).\n\n**You should see:** a fresh development-build install, with no link tapped, logs `Strait first open: fingerprint false no_match` and shows your onboarding."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "5. Ship a Google Play internal-testing build",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#5-ship-a-google-play-internal-testing-build",
+   "markdown": "A development build has no install referrer, so this test needs a build installed from Google Play:\n\n1. Run `eas build --platform android --profile production` and upload the `.aab` to **internal testing** in Play Console (by hand, or with `eas submit --platform android`). Add yourself as a tester.\n2. In **Dashboard → Settings → When someone without the app taps a link**, choose **Always Google Play** while the app isn't public. (The default sends people to your website while the Play listing isn't live.)\n\n**You should see:** the build listed as available to testers in Play Console. The first review can take 1 to 2 hours."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "6. Tap, install, open",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#6-tap-install-open",
+   "markdown": "1. Uninstall the app from the phone.\n2. Send yourself `https://acme.strait.link/summer` in WhatsApp or Messages and tap it. Google Play opens on your app.\n3. Install from Play and open the app.\n\n**You should see:** the app opens directly on the Product screen for `42`, with `ref` `SUMMER` in its params, and `adb logcat | grep ReactNativeJS` shows `Strait first open: install_referrer true`. The check runs once per install; uninstall to repeat it."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "7. See the install in Analytics",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#7-see-the-install-in-analytics",
+   "markdown": "Open **Dashboard → Analytics** and choose `summer_2026` in the **Campaign** filter. To put revenue on the same tap, record a purchase from the app with `links.trackEvent('purchase', { value: 499, currency: 'INR' })` ([Events & revenue](https://straitlink.in/docs/sdks/react-native/events/)).\n\n**You should see:** your tap on `summer`, one install with match method `install_referrer` joined to that exact tap, and one app open from a new user. A test purchase appears under the same campaign."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "Common errors",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#common-errors",
+   "markdown": "- **The first open lands on the home screen.** The app came from a development build or a shared APK, not Google Play, or the Settings choice in step 5 still sends people to your website.\n- **\"Unmatched route\" after the install.** `app/+native-intent.tsx` is missing, so Expo Router tried to open `/summer` itself (step 3).\n- **Verified links open the browser in the Play build.** The Play App Signing key isn't in Settings. Add it as in [Expo, step 5](https://straitlink.in/docs/sdks/expo/#5-add-your-sha-256-fingerprints)."
+  },
+  {
+   "page": "Deferred deep links in Expo, end to end",
+   "group": "Recipes",
+   "section": "Next steps",
+   "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#next-steps",
+   "markdown": "- [Go-live checklist](https://straitlink.in/docs/production-checklist/): verified links, iPhone (beta) and keys before real users tap.\n- [Test mode (coming soon)](https://straitlink.in/docs/test-mode/): check the deferred wiring from a debug build, without a Play upload."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": null,
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/",
+   "markdown": "This page strings the separate Flutter pages into one path for the case that matters most to growth teams: a new user. Each step links to the page with more detail. The same flow, in React Native: [React Native recipe](https://straitlink.in/docs/recipes/react-native-deferred-deep-links/)."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "1. Make a link for one screen",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#1-make-a-link-for-one-screen",
+   "markdown": "In **Dashboard → Links → New link**, set the slug `summer` and the destination `https://shop.example.com/product/42?ref=SUMMER`. Or from your server:\n\n```bash\ncurl https://strait.link/v1/links \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"slug\": \"summer\", \"longUrl\": \"https://shop.example.com/product/42?ref=SUMMER\", \"campaign\": \"summer_2026\" }'\n```\n\nYour app receives the destination's path and query (`/product/42`, `{ref: SUMMER}`), so use paths your `GoRouter` already has.\n\n**You should see:** the link `https://acme.strait.link/summer` in the Links list."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "2. Add the package and the Play Install Referrer",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#2-add-the-package-and-the-play-install-referrer",
+   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The package reads it once you pass `play_install_referrer` in. Add the git dependency:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk:\n    git:\n      url: https://github.com/bazingga08/strait-sdk-flutter\n      ref: v0.8.0\n```\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\nCreate `lib/links.dart` exactly as in [Install & set up, step 2](https://straitlink.in/docs/sdks/flutter/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add the intent filters and `flutter_deeplinking_enabled` from [step 3](https://straitlink.in/docs/sdks/flutter/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** `flutter pub get` finishes, and the app starts as before after a full `flutter run` (not a hot restart: the plugins are native)."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "3. Route every link, including the deferred one",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#3-route-every-link-including-the-deferred-one",
+   "markdown": "The deferred link arrives on the same `links.onLink` stream as any other link, once, on the first launch after the install. The stream replays events from before you listened, so listening after `startLinks()` never misses it:\n\n```dart title=\"lib/main.dart\"\nimport 'package:flutter/material.dart';\nimport 'package:go_router/go_router.dart';\nimport 'package:strait_sdk/strait_sdk.dart';\nimport 'links.dart';\n\nfinal router = GoRouter(routes: [\n  GoRoute(path: '/', builder: (_, __) => const HomeScreen()),\n  GoRoute(path: '/product/:id', builder: (_, s) => ProductScreen(id: s.pathParameters['id']!)),\n]);\n\nFuture<void> main() async {\n  await startLinks();\n  links.onLink.listen((e) {\n    if (e.kind == LinkKind.deferred) debugPrint('Strait first open: ${e.route.value} ${e.matched} ${e.reason}');\n    if (e.matched && e.path != null) router.go(Uri(path: e.path, queryParameters: e.params).toString());\n  });\n  runApp(MaterialApp.router(routerConfig: router));\n}\n```\n\n**You should see:** `adb shell am start -W -a android.intent.action.VIEW -d \"yourapp://shop.example.com/product/42\"` opens `ProductScreen` with `id` `42`. This proves the routing; the next steps prove the install."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "4. Decide what a new user sees first",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#4-decide-what-a-new-user-sees-first",
+   "markdown": "On the first launch the package always answers once with `LinkKind.deferred`. When `matched` is `false`, `reason` is `no_match` (most installs don't come from a link) or `network` (the check runs again on the next launch). Show your usual onboarding in both cases, and skip it when a link matched:\n\n```dart title=\"lib/first_open.dart\"\nimport 'package:strait_sdk/strait_sdk.dart';\nimport 'links.dart';\n\n/// The link's path for a new user who came from a link, or null.\n/// Later launches have no deferred event, so the timeout answers null.\nFuture<String?> firstOpenPath() => links.onLink\n    .firstWhere((e) => e.kind == LinkKind.deferred)\n    .then<String?>((e) => e.matched ? e.path : null)\n    .timeout(const Duration(seconds: 5), onTimeout: () => null);\n```\n\nShow a short loading screen while you wait, for example with a `FutureBuilder`.\n\n**You should see:** a fresh debug install, with no link tapped, logs `Strait first open: fingerprint false no_match` and shows your onboarding."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "5. Ship a Google Play internal-testing build",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#5-ship-a-google-play-internal-testing-build",
+   "markdown": "A build from `flutter run` has no install referrer, so this test needs a build installed from Google Play:\n\n1. Run `flutter build appbundle`, upload the `.aab` to **internal testing** in Play Console and add yourself as a tester.\n2. In **Dashboard → Settings → When someone without the app taps a link**, choose **Always Google Play** while the app isn't public. (The default sends people to your website while the Play listing isn't live.)\n\n**You should see:** the build listed as available to testers in Play Console. The first review can take 1 to 2 hours."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "6. Tap, install, open",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#6-tap-install-open",
+   "markdown": "1. Uninstall the app from the phone.\n2. Send yourself `https://acme.strait.link/summer` in WhatsApp or Messages and tap it. Google Play opens on your app.\n3. Install from Play and open the app.\n\n**You should see:** the app opens directly on the Product screen for `42`, with `ref` `SUMMER` in its params, and `adb logcat | grep flutter` shows `Strait first open: install_referrer true`. The check runs once per install; uninstall to repeat it."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "7. See the install in Analytics",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#7-see-the-install-in-analytics",
+   "markdown": "Open **Dashboard → Analytics** and choose `summer_2026` in the **Campaign** filter. To put revenue on the same tap, record a purchase from the app with `await links.trackEvent('purchase', value: 499, currency: 'INR');` ([Events & revenue](https://straitlink.in/docs/sdks/flutter/events/)).\n\n**You should see:** your tap on `summer`, one install with match method `install_referrer` joined to that exact tap, and one app open from a new user. A test purchase appears under the same campaign."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "Common errors",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#common-errors",
+   "markdown": "- **The first open lands on the home screen.** The app came from `flutter run` or a shared APK, not Google Play, or the Settings choice in step 5 still sends people to your website. [Test page](https://straitlink.in/docs/sdks/flutter/test/#4-test-a-deferred-link-from-google-play).\n- **The link opens a route like `/summer` that doesn't exist.** Flutter's own deep linking is still on, so it routed the raw URL. Set `flutter_deeplinking_enabled` to `false` (step 2).\n- **`MissingPluginException` on start.** You added the plugins and hot-restarted. Stop the app and run `flutter run` again."
+  },
+  {
+   "page": "Deferred deep links in Flutter, end to end",
+   "group": "Recipes",
+   "section": "Next steps",
+   "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#next-steps",
+   "markdown": "- [Go-live checklist](https://straitlink.in/docs/production-checklist/): verified links, iPhone (beta) and keys before real users tap.\n- [Test mode (coming soon)](https://straitlink.in/docs/test-mode/): check the deferred wiring from a debug build, without a Play upload."
+  },
+  {
    "page": "Platforms and SDKs",
    "group": "Platforms",
    "section": "App SDKs",
    "url": "https://straitlink.in/docs/sdks/#app-sdks",
-   "markdown": "| Platform | Package | What it covers | Start here |\n|---|---|---|---|\n| React Native | `@strait/sdk-react-native` | Links, deferred links (Play Install Referrer on Android), open reporting | [Install & set up](https://straitlink.in/docs/sdks/react-native/) |\n| Expo (Expo Router) | `@strait/sdk-react-native` | The same SDK, set up through `app.json`. Needs a development build | [Expo](https://straitlink.in/docs/sdks/expo/) |\n| Flutter | `strait_sdk` | The same, in pure Dart | [Install & set up](https://straitlink.in/docs/sdks/flutter/) |\n| Android (Kotlin) | `strait-sdk-android` | Native Android apps | [Install & set up](https://straitlink.in/docs/sdks/android/) |\n| iOS (Swift) | `StraitSDK` | Native iOS apps (beta) | [iOS](https://straitlink.in/docs/sdks/ios/) |\n| Unity (C#) | `strait-sdk-unity` | Games on Android and iOS | [Unity](https://straitlink.in/docs/sdks/unity/) |\n\nReact Native, Flutter and Android each have the same pages: **Install & set up**, **Receive links**, **Create links in the app**, **Events & revenue**, **Test** and **Reference**."
+   "markdown": "| Platform | Package | What it covers | Start here |\n|---|---|---|---|\n| React Native | `@straitlink/react-native` | Links, deferred links (Play Install Referrer on Android), open reporting | [Install & set up](https://straitlink.in/docs/sdks/react-native/) |\n| Expo (Expo Router) | `@straitlink/react-native` | The same SDK, set up through `app.json`. Needs a development build | [Expo](https://straitlink.in/docs/sdks/expo/) |\n| Flutter | `strait_sdk` | The same, in pure Dart | [Install & set up](https://straitlink.in/docs/sdks/flutter/) |\n| Android (Kotlin) | `strait-sdk-android` | Native Android apps | [Install & set up](https://straitlink.in/docs/sdks/android/) |\n| iOS (Swift) | `StraitSDK` | Native iOS apps (beta) | [iOS](https://straitlink.in/docs/sdks/ios/) |\n| Unity (C#) | `strait-sdk-unity` | Games on Android and iOS | [Unity](https://straitlink.in/docs/sdks/unity/) |\n\nReact Native, Flutter and Android each have the same pages: **Install & set up**, **Receive links**, **Create links in the app**, **Events & revenue**, **Test** and **Reference**."
+  },
+  {
+   "page": "Platforms and SDKs",
+   "group": "Platforms",
+   "section": "Set up an app with one command (available after publish)",
+   "url": "https://straitlink.in/docs/sdks/#set-up-an-app-with-one-command-available-after-publish",
+   "markdown": "`strait init` (`@straitlink/cli`) recognises a React Native, Expo, Flutter or Android app, writes the integration file with your publishable key and link host, and prints the remaining steps for your app. It refuses a secret key and never edits your existing files.\n\n```bash\nnpx @straitlink/cli init --key st_pub_live_… --host acme.strait.link\n```\n\n`@straitlink/cli` isn't on npm yet, so this command works once it's published. Until then, follow the manual setup steps."
   },
   {
    "page": "Platforms and SDKs",
    "group": "Platforms",
    "section": "Web and server",
    "url": "https://straitlink.in/docs/sdks/#web-and-server",
-   "markdown": "| Platform | Package | What it covers | Guide |\n|---|---|---|---|\n| Web | `@strait/sdk-web` | Deferred link matching for web apps and PWAs | [Web](https://straitlink.in/docs/sdks/web/) |\n| Node | `@strait/sdk-node` | Create and manage links, send events from your backend | [Node](https://straitlink.in/docs/sdks/node/) |"
+   "markdown": "| Platform | Package | What it covers | Guide |\n|---|---|---|---|\n| Web | `@straitlink/web` | Deferred link matching for web apps and PWAs | [Web](https://straitlink.in/docs/sdks/web/) |\n| Node | `@straitlink/node` | Create and manage links, send events from your backend | [Node](https://straitlink.in/docs/sdks/node/) |"
   },
   {
    "page": "Platforms and SDKs",
    "group": "Platforms",
    "section": "What's tested",
    "url": "https://straitlink.in/docs/sdks/#whats-tested",
-   "markdown": "The React Native, iOS (Swift), Flutter and Unity SDKs are at version 0.8.0, the Android SDK at 0.7.2, the Node SDK at 0.6.2 and the web SDK at 0.5.2. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS** is in beta: covered by automated tests, not yet proven on a real iPhone.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nNot using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
+   "markdown": "The React Native, iOS (Swift), Flutter and Unity SDKs are at version 0.8.0, the Android SDK at 0.7.2, the Node SDK at 0.6.2 and the web SDK at 0.6.0. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS** is in beta: covered by automated tests, not yet proven on a real iPhone.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
   },
   {
    "page": "React Native deep linking",
@@ -383,16 +607,23 @@
   {
    "page": "React Native deep linking",
    "group": "Platforms",
+   "section": "Or let `strait init` write the setup (available after publish)",
+   "url": "https://straitlink.in/docs/sdks/react-native/#or-let-strait-init-write-the-setup-available-after-publish",
+   "markdown": "From your app's folder:\n\n```bash\nnpx @straitlink/cli init --key st_pub_live_… --host acme.strait.link\n```\n\nIt writes `links.ts` (step 2) with your key, host and an `onLink` log, and prints the install command, the intent filters for step 3, the iPhone (beta) Associated Domains entry and the Settings fields, each filled in. Steps your project already has are marked `[already done]`. It never edits your existing files. `@straitlink/cli` isn't on npm yet, so this command works once it's published. Until then, follow the manual setup steps."
+  },
+  {
+   "page": "React Native deep linking",
+   "group": "Platforms",
    "section": "1. Install the SDK",
    "url": "https://straitlink.in/docs/sdks/react-native/#1-install-the-sdk",
-   "markdown": "The SDK installs from its public GitHub repo (npm builds it during install), together with the two packages it needs:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nIt installs as `@strait/sdk-react-native`, so your imports stay the same once it's on the npm registry. `AsyncStorage` keeps the once-per-install flag and any open reports that couldn't be sent yet. The Play Install Referrer module gives Android installs an exact match.\n\n**You should see:** `@strait/sdk-react-native` in your `package.json` dependencies."
+   "markdown": "The SDK installs from its public GitHub repo (npm builds it during install), together with the two packages it needs:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nIt installs as `@straitlink/react-native`, so your imports stay the same once it's on the npm registry. `AsyncStorage` keeps the once-per-install flag and any open reports that couldn't be sent yet. The Play Install Referrer module gives Android installs an exact match.\n\n**You should see:** `@straitlink/react-native` in your `package.json` dependencies."
   },
   {
    "page": "React Native deep linking",
    "group": "Platforms",
    "section": "2. Create the client once",
    "url": "https://straitlink.in/docs/sdks/react-native/#2-create-the-client-once",
-   "markdown": "Create it outside your components and start it when the app launches:\n\n```ts title=\"links.ts (@strait/sdk-react-native 0.8.0)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@strait/sdk-react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\nImport `./links` once from `index.js`. `endpoint` is your workspace's link domain: the SDK sends its requests there and treats links on that host as yours. Call `start()` once. `onLink` replays past events to late subscribers, so your navigator can subscribe after `start()` without missing the launch link.\n\n**You should see:** the app starts as before after a rebuild (`npx react-native run-android`), because the SDK adds a native module."
+   "markdown": "Create it outside your components and start it when the app launches:\n\n```ts title=\"links.ts (@straitlink/react-native 0.8.0)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\nImport `./links` once from `index.js`. `endpoint` is your workspace's link domain: the SDK sends its requests there and treats links on that host as yours. Call `start()` once. `onLink` replays past events to late subscribers, so your navigator can subscribe after `start()` without missing the launch link.\n\n**You should see:** the app starts as before after a rebuild (`npx react-native run-android`), because the SDK adds a native module."
   },
   {
    "page": "React Native deep linking",
@@ -483,7 +714,7 @@
    "group": "Platforms",
    "section": "1. Add an endpoint to your server",
    "url": "https://straitlink.in/docs/sdks/react-native/create-links/#1-add-an-endpoint-to-your-server",
-   "markdown": "With the [Node SDK](https://straitlink.in/docs/sdks/node/) (any language can call `POST /v1/links` instead):\n\n```ts title=\"server/share.ts (Express)\"\nimport { randomBytes } from 'node:crypto';\nimport express from 'express';\nimport { StraitClient } from '@strait/sdk-node';\n\nconst strait = new StraitClient({ apiKey: process.env.SECRET_KEY!, baseUrl: 'https://strait.link' });\nconst app = express();\napp.use(express.json());\n\n// POST /share { \"productId\": \"42\" } → { \"url\": \"https://acme.strait.link/…\" }\napp.post('/share', async (req, res) => {\n  const id = String(req.body.productId).replace(/[^\\w-]/g, '');\n  const link = await strait.createLink({\n    slug: `p${id}-${randomBytes(4).toString('hex')}`, // unique in your workspace\n    longUrl: `https://shop.example.com/product/${id}?ref=${encodeURIComponent(req.user?.id ?? 'guest')}`,\n    title: 'Look what I found',              // preview in WhatsApp and other chat apps\n    campaign: 'in_app_share',\n  });\n  res.json({ url: link.shortUrl });\n});\n```\n\nSlugs are unique within your workspace (letters, digits, `-` and `_`, up to 64), so add a random part. Check who's calling before you create links for them, as you would for any write.\n\n**You should see:** `curl -X POST localhost:3000/share -H 'Content-Type: application/json' -d '{\"productId\":\"42\"}'` returns `{\"url\":\"https://acme.strait.link/…\"}`."
+   "markdown": "With the [Node SDK](https://straitlink.in/docs/sdks/node/) (any language can call `POST /v1/links` instead):\n\n```ts title=\"server/share.ts (Express)\"\nimport { randomBytes } from 'node:crypto';\nimport express from 'express';\nimport { StraitClient } from '@straitlink/node';\n\nconst strait = new StraitClient({ apiKey: process.env.SECRET_KEY!, baseUrl: 'https://strait.link' });\nconst app = express();\napp.use(express.json());\n\n// POST /share { \"productId\": \"42\" } → { \"url\": \"https://acme.strait.link/…\" }\napp.post('/share', async (req, res) => {\n  const id = String(req.body.productId).replace(/[^\\w-]/g, '');\n  const link = await strait.createLink({\n    slug: `p${id}-${randomBytes(4).toString('hex')}`, // unique in your workspace\n    longUrl: `https://shop.example.com/product/${id}?ref=${encodeURIComponent(req.user?.id ?? 'guest')}`,\n    title: 'Look what I found',              // preview in WhatsApp and other chat apps\n    campaign: 'in_app_share',\n  });\n  res.json({ url: link.shortUrl });\n});\n```\n\nSlugs are unique within your workspace (letters, digits, `-` and `_`, up to 64), so add a random part. Check who's calling before you create links for them, as you would for any write.\n\n**You should see:** `curl -X POST localhost:3000/share -H 'Content-Type: application/json' -d '{\"productId\":\"42\"}'` returns `{\"url\":\"https://acme.strait.link/…\"}`."
   },
   {
    "page": "Create links from a React Native app",
@@ -623,7 +854,7 @@
    "group": "Platforms",
    "section": "Deferred match only",
    "url": "https://straitlink.in/docs/sdks/react-native/reference/#deferred-match-only",
-   "markdown": "If you only want the first-open-after-install destination, there's a one-call API. It never throws; on any error it returns `{ matched: false, matchMethod: 'none' }`.\n\n```ts\nimport { resolveDeferredLink, splitUrl } from '@strait/sdk-react-native';\nimport { navigationRef, openPath } from './navigation';\n\nconst result = await resolveDeferredLink({\n  publishableKey: 'st_pub_live_…',\n  endpoint: 'https://acme.strait.link',\n});\nconst dest = result.matched && result.longUrl ? splitUrl(result.longUrl) : null;\nif (dest && navigationRef.isReady()) openPath(dest.path, dest.params);\n```"
+   "markdown": "If you only want the first-open-after-install destination, there's a one-call API. It never throws; on any error it returns `{ matched: false, matchMethod: 'none' }`.\n\n```ts\nimport { resolveDeferredLink, splitUrl } from '@straitlink/react-native';\nimport { navigationRef, openPath } from './navigation';\n\nconst result = await resolveDeferredLink({\n  publishableKey: 'st_pub_live_…',\n  endpoint: 'https://acme.strait.link',\n});\nconst dest = result.matched && result.longUrl ? splitUrl(result.longUrl) : null;\nif (dest && navigationRef.isReady()) openPath(dest.path, dest.params);\n```"
   },
   {
    "page": "React Native SDK reference",
@@ -637,14 +868,21 @@
    "group": "Platforms",
    "section": "iPhone clipboard boost (optional)",
    "url": "https://straitlink.in/docs/sdks/react-native/reference/#iphone-clipboard-boost-optional",
-   "markdown": "Off by default. The SDK never touches the clipboard unless you set `clipboardBoost: true` **and** pass a clipboard adapter. Also turn on **Dashboard → Settings → Clipboard boost**.\n\n```ts\nimport * as Clipboard from 'expo-clipboard';\nimport { createStrait, fromExpoClipboard } from '@strait/sdk-react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',\n  endpoint: 'https://acme.strait.link',\n  clipboardBoost: true,\n  clipboard: fromExpoClipboard(Clipboard),\n});\n```\n\nOn the first launch only, the SDK asks whether the clipboard probably holds a web link (iOS answers without a prompt). Only if it does, it reads the text, and iOS shows its **Allow Paste** prompt. Anything that isn't a Strait handoff link never leaves the phone."
+   "markdown": "Off by default. The SDK never touches the clipboard unless you set `clipboardBoost: true` **and** pass a clipboard adapter. Also turn on **Dashboard → Settings → Clipboard boost**.\n\n```ts\nimport * as Clipboard from 'expo-clipboard';\nimport { createStrait, fromExpoClipboard } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',\n  endpoint: 'https://acme.strait.link',\n  clipboardBoost: true,\n  clipboard: fromExpoClipboard(Clipboard),\n});\n```\n\nOn the first launch only, the SDK asks whether the clipboard probably holds a web link (iOS answers without a prompt). Only if it does, it reads the text, and iOS shows its **Allow Paste** prompt. Anything that isn't a Strait handoff link never leaves the phone."
   },
   {
    "page": "Expo deep linking (Expo Router)",
    "group": "Platforms",
    "section": null,
    "url": "https://straitlink.in/docs/sdks/expo/",
-   "markdown": "The SDK is the same one bare React Native uses. Two things differ: link settings go in `app.json`, and you need a development build, not Expo Go."
+   "markdown": "The SDK is the same one bare React Native uses. Two things differ: link settings go in `app.json`, and you need a development build, not Expo Go. For the whole path from tap to Google Play install, follow the [Expo deferred links recipe](https://straitlink.in/docs/recipes/expo-deferred-deep-links/)."
+  },
+  {
+   "page": "Expo deep linking (Expo Router)",
+   "group": "Platforms",
+   "section": "Or let `strait init` write the setup (available after publish)",
+   "url": "https://straitlink.in/docs/sdks/expo/#or-let-strait-init-write-the-setup-available-after-publish",
+   "markdown": "From your app's folder:\n\n```bash\nnpx @straitlink/cli init --key st_pub_live_… --host acme.strait.link\n```\n\nIt reads your `app.json`, writes `links.ts` and, with Expo Router, `app/+native-intent.tsx` (step 3), and prints the install commands, the `app.json` block for step 2 and the root layout code, filled in with your package, scheme and host. It never edits your existing files. `@straitlink/cli` isn't on npm yet, so this command works once it's published. Until then, follow the manual setup steps."
   },
   {
    "page": "Expo deep linking (Expo Router)",
@@ -700,7 +938,14 @@
    "group": "Platforms",
    "section": null,
    "url": "https://straitlink.in/docs/sdks/flutter/",
-   "markdown": "`strait_sdk` is pure Dart. Your app hands it the launch link, a stream of later links and the app lifecycle; it resolves short links, runs the deferred check once per install and emits one event per link."
+   "markdown": "`strait_sdk` is pure Dart. Your app hands it the launch link, a stream of later links and the app lifecycle; it resolves short links, runs the deferred check once per install and emits one event per link. For the whole path from tap to Google Play install, follow the [Flutter deferred links recipe](https://straitlink.in/docs/recipes/flutter-deferred-deep-links/)."
+  },
+  {
+   "page": "Flutter deep linking",
+   "group": "Platforms",
+   "section": "Or let `strait init` write the setup (available after publish)",
+   "url": "https://straitlink.in/docs/sdks/flutter/#or-let-strait-init-write-the-setup-available-after-publish",
+   "markdown": "From your app's folder:\n\n```bash\nnpx @straitlink/cli init --key st_pub_live_… --host acme.strait.link\n```\n\nIt writes `lib/links.dart` (step 2) with your key and host, and prints the `pubspec.yaml` lines, the `main()` change, the manifest lines for step 3 (including `flutter_deeplinking_enabled`) and the iPhone (beta) settings. Steps your project already has are marked `[already done]`. It never edits your existing files. `@straitlink/cli` isn't on npm yet, so this command works once it's published. Until then, follow the manual setup steps."
   },
   {
    "page": "Flutter deep linking",
@@ -953,6 +1198,13 @@
    "section": null,
    "url": "https://straitlink.in/docs/sdks/android/",
    "markdown": "The SDK is plain Kotlin and depends only on the Kotlin standard library and Android's built-in `org.json`. Everything is in the `dev.strait.sdk` package."
+  },
+  {
+   "page": "Android deep linking (Kotlin)",
+   "group": "Platforms",
+   "section": "Or let `strait init` write the setup (available after publish)",
+   "url": "https://straitlink.in/docs/sdks/android/#or-let-strait-init-write-the-setup-available-after-publish",
+   "markdown": "From your project's folder:\n\n```bash\nnpx @straitlink/cli init --key st_pub_live_… --host acme.strait.link\n```\n\nIt finds your package name in Gradle, writes `StraitLinks.kt` next to your code with your key and host and the Play Install Referrer wired in, and prints the Gradle lines and intent filters, filled in. It never edits your existing files. `@straitlink/cli` isn't on npm yet, so this command works once it's published. Until then, follow the manual setup steps."
   },
   {
    "page": "Android deep linking (Kotlin)",
@@ -1302,14 +1554,14 @@
    "group": "Platforms",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/web/#install",
-   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@strait/sdk-web`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-web#v0.5.2\n```"
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@straitlink/web`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-web#v0.6.0\n```"
   },
   {
    "page": "Web",
    "group": "Platforms",
    "section": "Use",
    "url": "https://straitlink.in/docs/sdks/web/#use",
-   "markdown": "```ts\nimport { resolveDeferredLink } from '@strait/sdk-web';\n\nconst result = await resolveDeferredLink({\n  publishableKey: 'st_pub_live_…',      // Dashboard → Get started (never the secret key)\n  endpoint: 'https://acme.strait.link',   // your workspace's link domain\n});\n\nif (result.matched && result.longUrl) {\n  const url = new URL(result.longUrl);\n  window.location.assign(url.pathname + url.search); // or your router's navigate()\n}\n```\n\n`resolveDeferredLink` runs **at most once per browser** (it records one install on our side). It never throws: on any error it resolves to `{ matched: false, matchMethod: 'none' }`, so it's safe to await on startup."
+   "markdown": "```ts\nimport { resolveDeferredLink } from '@straitlink/web';\n\nconst result = await resolveDeferredLink({\n  publishableKey: 'st_pub_live_…',      // Dashboard → Get started (never the secret key)\n  endpoint: 'https://acme.strait.link',   // your workspace's link domain\n});\n\nif (result.matched && result.longUrl) {\n  const url = new URL(result.longUrl);\n  window.location.assign(url.pathname + url.search); // or your router's navigate()\n}\n```\n\n`resolveDeferredLink` runs **at most once per browser** (it records one install on our side). It never throws: on any error it resolves to `{ matched: false, matchMethod: 'none' }`, so it's safe to await on startup."
   },
   {
    "page": "Web",
@@ -1328,9 +1580,86 @@
   {
    "page": "Web",
    "group": "Platforms",
+   "section": "Smart app banner",
+   "url": "https://straitlink.in/docs/sdks/web/#smart-app-banner",
+   "markdown": "To send visitors on phones from your website to your app, add the \"Open in app\" bar from the same package: `Strait.banner({ link, title })`. See [Smart app banner](https://straitlink.in/docs/smart-banner/)."
+  },
+  {
+   "page": "Web",
+   "group": "Platforms",
    "section": "API",
    "url": "https://straitlink.in/docs/sdks/web/#api",
-   "markdown": "| Export | Purpose |\n|---|---|\n| `resolveDeferredLink(config, opts?)` | The one call you need on launch |\n| `computeSignature(inputs)` | The shared match signature (advanced / testing) |\n| `h32(s)` | The shared hash (advanced / testing) |"
+   "markdown": "| Export | Purpose |\n|---|---|\n| `resolveDeferredLink(config, opts?)` | The one call you need on launch |\n| `banner(options)` / `Strait.banner(options)` | The [smart app banner](https://straitlink.in/docs/smart-banner/) for mobile web |\n| `computeSignature(inputs)` | The shared match signature (advanced / testing) |\n| `h32(s)` | The shared hash (advanced / testing) |"
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": null,
+   "url": "https://straitlink.in/docs/smart-banner/",
+   "markdown": "The banner is part of the web SDK. It's a plain link to your Strait link, so a tap on it is handled like any other tap: the app opens if it's installed, otherwise the store opens and your app gets the destination on its first open (on iPhone, install matching is in beta)."
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "1. Create a link for the banner",
+   "url": "https://straitlink.in/docs/smart-banner/#1-create-a-link-for-the-banner",
+   "markdown": "In Dashboard → Links, create a link whose destination is the screen the banner should open, for example `https://yourshop.example/app`. A link used only by the banner keeps its taps separate in Analytics.\n\nTo open the page the visitor is on (a product, an article), create one link per page through the [REST API](https://straitlink.in/docs/api/) and pass that page's link to the banner.\n\n**You should see:** your link in the list, for example `https://acme.strait.link/app`."
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "2. Install the web SDK",
+   "url": "https://straitlink.in/docs/smart-banner/#2-install-the-web-sdk",
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub. The banner arrived in version 0.6.0.\n\n```bash\nnpm install github:bazingga08/strait-sdk-web#v0.6.0\n```\n\n**You should see:** `@straitlink/web` in your `package.json`."
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "3. Add the banner",
+   "url": "https://straitlink.in/docs/smart-banner/#3-add-the-banner",
+   "markdown": "Call it once when the page loads. Copy, then change the link, title and icon:\n\n```ts title=\"main.ts\"\nimport { Strait } from '@straitlink/web';\n\nStrait.banner({\n  link: 'https://acme.strait.link/app',         // your banner link from step 1\n  title: 'Acme',                          // usually your app's name\n  subtitle: 'Track your order in the app',\n  icon: '/icons/app-192.png',             // shown at 40×40\n  theme: 'auto',                          // 'light' | 'dark' | 'auto'\n});\n```\n\nNo build step? `dist/banner.js` in the package has no imports, so you can copy it next to your pages and load it directly:\n\n```html title=\"index.html\"\n<script type=\"module\">\n  import { banner } from '/js/banner.js';\n  banner({ link: 'https://acme.strait.link/app', title: 'Acme', subtitle: 'Track your order in the app' });\n</script>\n```\n\n**You should see:** on a phone, a bar at the top of the page with your icon, title and an **Open in app** button. On a computer, nothing: the banner shows on phones and tablets only. To check the styling on a computer, add `force: true` for a moment."
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "4. Hide it inside your own app",
+   "url": "https://straitlink.in/docs/smart-banner/#4-hide-it-inside-your-own-app",
+   "markdown": "If your app shows your website in a WebView, tell the banner, so people already in the app don't see it. Add a token to your WebView's user agent and pass it, or pass your own check:\n\n```ts\nStrait.banner({\n  link: 'https://acme.strait.link/app',\n  title: 'Acme',\n  appUserAgent: 'AcmeApp/',               // a token your WebView adds to its user agent\n  // or: inApp: () => document.cookie.includes('in_app=1'),\n});\n```\n\nThe banner also hides on its own in WebViews that have a React Native WebView or `flutter_inappwebview` bridge. It still shows in in-app browsers such as Instagram's or WhatsApp's, which aren't your app.\n\n**You should see:** the bar on your site in a phone browser, and no bar on the same page inside your app."
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "5. Tap it and close it",
+   "url": "https://straitlink.in/docs/smart-banner/#5-tap-it-and-close-it",
+   "markdown": "On a phone with your app installed, tap **Open in app**. Then open the site again and tap the close button.\n\n**You should see:** your app opens on the link's screen, and the tap appears in Dashboard → Analytics. After you close the bar, it stays hidden on that browser for 30 days."
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "Options",
+   "url": "https://straitlink.in/docs/smart-banner/#options",
+   "markdown": "| Option | Default | What it does |\n|---|---|---|\n| `link` | (required) | Your Strait link. Opened as is. |\n| `title`, `subtitle` | (title required) | Text on the bar, shown as plain text. |\n| `icon` | none | Icon URL, shown at 40×40. |\n| `button` | `Open in app` | Button text. |\n| `theme` | `auto` | `light`, `dark`, or `auto` to follow the visitor's setting. |\n| `position` | `top` | `top` pushes the page down; `bottom` floats over it. |\n| `accent`, `accentText` | dark button | Button colour and its text colour, any CSS colour. |\n| `dismissDays` | `30` | Days it stays hidden after the visitor closes it. |\n| `inApp`, `appUserAgent` | none | Hide it inside your own app (step 4). |\n| `force` | `false` | Show it everywhere, even after a close. For previews only. |\n\n`banner()` returns `{ element, dismiss, remove }`, or `null` when it isn't shown."
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "What it sends",
+   "url": "https://straitlink.in/docs/smart-banner/#what-it-sends",
+   "markdown": "Nothing. The banner makes no requests and sets no cookies. It stores one value in the visitor's browser, `strait.banner.dismissed`, the time they closed it. The only thing recorded is the tap on your link, by Strait, the same as for any link. If the browser blocks storage, the banner still works and simply shows again on the next visit.\n\n:::note Safari's own banner\nSafari has a built-in banner (the `apple-itunes-app` meta tag). Use one or the other on iPhone, or visitors see two bars. Safari's banner appears only in Safari and doesn't go through your Strait link.\n:::"
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "Common errors",
+   "url": "https://straitlink.in/docs/smart-banner/#common-errors",
+   "markdown": "- **Nothing shows on your computer.** That's by design. Use a phone, or add `force: true` while you check the styling.\n- **Nothing shows on a phone either.** You closed it in the last 30 days on that browser. Clear the site's data, or use `force: true` once. A link that isn't `https://` or `http://` also stops it.\n- **The app opens on its home screen.** The link's destination is your home page, or the app doesn't route links yet. Check the destination in Dashboard → Links and set up [receiving links](https://straitlink.in/docs/sdks/react-native/receive-links/) in the app."
+  },
+  {
+   "page": "Smart app banner for mobile web",
+   "group": "Platforms",
+   "section": "Next steps",
+   "url": "https://straitlink.in/docs/smart-banner/#next-steps",
+   "markdown": "- [Web SDK](https://straitlink.in/docs/sdks/web/): resolve a deferred link on a first visit to your web app.\n- [Analytics: how we count](https://straitlink.in/docs/analytics/): where banner taps show up."
   },
   {
    "page": "Short links",
@@ -1351,14 +1680,14 @@
    "group": "Links",
    "section": "How a tap is handled",
    "url": "https://straitlink.in/docs/short-links/#how-a-tap-is-handled",
-   "markdown": "Every tap reaches Cloudflare first. What happens next depends on what the tap needs:\n\n- **Plain redirects** are decided at the Cloudflare location nearest the person, without a round trip to our servers. This covers desktop taps, Android browser taps (to your app, Google Play or your website) and iPhone taps that go straight to the website or the App Store. The decision is made by the same code our server runs, so the person lands in the same place either way.\n- **Everything else is served by our server**: pages (the iPhone **Get the app** page, in-app browser pages, password and expired pages), link-preview robots, and links with A/B destinations. A link close to its expiry time also goes to our server, so expiry is exact.\n\nBoth paths record the tap the same way: the same Analytics row, the same billing rules and the same `link.clicked` webhook. For a tap decided at the edge, the webhook is sent when our server receives the tap's record, a moment after the redirect. If that record can't be delivered straight away, it's kept and sent again later."
+   "markdown": "Every tap reaches Cloudflare first. What happens next depends on what the tap needs:\n\n- **Plain redirects** are decided at the Cloudflare location nearest the person, without a round trip to our servers. This covers desktop taps, Android browser taps (to your app, Google Play or your website) and iPhone taps that go directly to the website or the App Store. The decision is made by the same code our server runs, so the person lands in the same place either way.\n- **Everything else is served by our server**: pages (the iPhone **Get the app** page, in-app browser pages, password and expired pages), link-preview robots, and links with A/B destinations. A link close to its expiry time also goes to our server, so expiry is exact.\n\nBoth paths record the tap the same way: the same Analytics row, the same billing rules and the same `link.clicked` webhook. For a tap decided at the edge, the webhook is sent when our server receives the tap's record, a moment after the redirect. If that record can't be delivered right away, it's kept and sent again later."
   },
   {
    "page": "Short links",
    "group": "Links",
    "section": "When changes take effect",
    "url": "https://straitlink.in/docs/short-links/#when-changes-take-effect",
-   "markdown": "When you change or deactivate a link, or change your workspace settings, taps follow the new version within 30 seconds. Changes made through the API take effect straight away on our server and at the Cloudflare location that carried the request; other locations, and changes made in the dashboard, can take up to 30 seconds."
+   "markdown": "When you change or deactivate a link, or change your workspace settings, taps follow the new version within 30 seconds. Changes made through the API take effect right away on our server and at the Cloudflare location that carried the request; other locations, and changes made in the dashboard, can take up to 30 seconds."
   },
   {
    "page": "Short links",
@@ -1419,6 +1748,13 @@
   {
    "page": "Deferred deep linking",
    "group": "Concepts",
+   "section": "What your app sees",
+   "url": "https://straitlink.in/docs/deferred-deep-linking/#what-your-app-sees",
+   "markdown": "No extra code. The same callback that handles a link opening an installed app also gets the deferred one, once, on the first open after the install. The path and every query parameter on the link survive the install, so a `?ref=CODE` reaches your app too.\n\n```ts\nlinks.onLink((e) => {\n  // e.kind: 'direct' (the app was installed) or 'deferred' (tapped before install)\n  // e.route: 'install_referrer' on Android; 'fingerprint' or 'clipboard' on iPhone (beta)\n  if (e.matched && e.path) openScreen(e.path, e.params); // e.g. '/product/42', { ref: 'CODE' }\n});\n```\n\nTo try it on Android you need three things: the SDK started at launch (it reads the Play Install Referrer for you), a build installed **from Google Play** (an internal testing track works), and, while the app isn't public, **Dashboard → Settings → When someone without the app taps a link → Always Google Play**. Step-by-step: [go-live checklist, step 3](https://straitlink.in/docs/production-checklist/#3-test-a-deferred-link-from-google-play) and the [React Native test page](https://straitlink.in/docs/sdks/react-native/test/)."
+  },
+  {
+   "page": "Deferred deep linking",
+   "group": "Concepts",
    "section": "Android: the Play Install Referrer (exact)",
    "url": "https://straitlink.in/docs/deferred-deep-linking/#android-the-play-install-referrer-exact",
    "markdown": "When someone without your app taps a link on Android, we send them to Google Play with the link attached to the install:\n\n```txt\nhttps://play.google.com/store/apps/details?id=com.yourco.app&referrer=strait_link%3D<link id>%26strait_click%3D<tap id>\n```\n\nGoogle Play keeps that referrer through the install. On first open, the SDK reads it, asks our server for the link (`/v1/referrer`), and routes your app there. It's **deterministic**: no guessing, and the install is joined to the exact tap.\n\nTo test it you need a build installed **from Google Play**. An internal testing track works. Sideloaded builds have no referrer.\n\nIf there's no referrer link (the app was found in a store search, for example), the SDK still checks in once so the install is counted in your match rate. Don't expect a match in that case on Android."
@@ -1470,7 +1806,7 @@
    "group": "Concepts",
    "section": "How your link pages look",
    "url": "https://straitlink.in/docs/app-links/#how-your-link-pages-look",
-   "markdown": "When a tap can't open your app straight away, the person sees one of our pages: the iPhone \"Get the app\" page, the page inside an in-app browser (Instagram, Facebook, WhatsApp…) with **Open in app**, the password page, and the \"not found\" and \"This link has expired\" pages. They lead with your app, not with Strait. Set these optional fields in **Dashboard → Settings → How your link pages look**:\n\n| Field | Rules | Used for |\n|---|---|---|\n| App name | 1 to 60 characters, no line breaks | \"Opens Acme Shop…\", \"Go to Acme Shop's website\" |\n| Icon URL | `https://` only (people's phones load it). Use a square image | The icon at the top of each page |\n| Brand colour | A hex colour such as `#7c3aed` (`#abc` is fine too) | The main button. We pick black or white text on it so it stays readable (contrast at least 4.5:1) |\n\nInvalid values are refused when you save, with a message saying why. Leave them empty and the pages use neutral defaults. Every page works in light and dark mode. The page we show for a link we've disabled for safety stays unbranded on purpose."
+   "markdown": "When a tap can't open your app right away, the person sees one of our pages: the iPhone \"Get the app\" page, the page inside an in-app browser (Instagram, Facebook, WhatsApp…) with **Open in app**, the password page, and the \"not found\" and \"This link has expired\" pages. They lead with your app, not with Strait. Set these optional fields in **Dashboard → Settings → How your link pages look**:\n\n| Field | Rules | Used for |\n|---|---|---|\n| App name | 1 to 60 characters, no line breaks | \"Opens Acme Shop…\", \"Go to Acme Shop's website\" |\n| Icon URL | `https://` only (people's phones load it). Use a square image | The icon at the top of each page |\n| Brand colour | A hex colour such as `#7c3aed` (`#abc` is fine too) | The main button. We pick black or white text on it so it stays readable (contrast at least 4.5:1) |\n\nInvalid values are refused when you save, with a message saying why. Leave them empty and the pages use neutral defaults. Every page works in light and dark mode. The page we show for a link we've disabled for safety stays unbranded on purpose."
   },
   {
    "page": "App Links & Universal Links",
@@ -1596,7 +1932,7 @@
    "group": "Concepts",
    "section": "Rotating keys",
    "url": "https://straitlink.in/docs/keys/#rotating-keys",
-   "markdown": "**Publishable key.** Rotate it in **Dashboard → Get started**. You get a new key straight away, and the old one keeps working for **7 days**, so apps already on people's phones keep working while you ship an update with the new key. During those 7 days, responses to the old key carry a `Strait-Key-Deprecated` header with the time it stops working (ISO 8601, for example `2026-01-08T12:00:00.000Z`). After that, the old key gets `401`. If you rotate again within the 7 days, the key from the earlier rotation stops at once: only one old key is honoured.\n\n**Secret keys.** You can have several. Each one in **Dashboard → Settings → Secret keys** shows when it was last used (\"never used\" if it hasn't been), so you can spot a key nothing uses any more before you revoke it. We store only a hash, so a new key is shown once. Revoking a secret key stops it immediately. To replace one without downtime, create the new key, deploy it, check the old key's last-used date has stopped moving, then revoke the old one."
+   "markdown": "**Publishable key.** Rotate it in **Dashboard → Get started**. You get a new key right away, and the old one keeps working for **7 days**, so apps already on people's phones keep working while you ship an update with the new key. During those 7 days, responses to the old key carry a `Strait-Key-Deprecated` header with the time it stops working (ISO 8601, for example `2026-01-08T12:00:00.000Z`). After that, the old key gets `401`. If you rotate again within the 7 days, the key from the earlier rotation stops at once: only one old key is honoured.\n\n**Secret keys.** You can have several. Each one in **Dashboard → Settings → Secret keys** shows when it was last used (\"never used\" if it hasn't been), so you can spot a key nothing uses any more before you revoke it. We store only a hash, so a new key is shown once. Revoking a secret key stops it immediately. To replace one without downtime, create the new key, deploy it, check the old key's last-used date has stopped moving, then revoke the old one."
   },
   {
    "page": "Keys",
@@ -1610,14 +1946,14 @@
    "group": "Server & API",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/node/#install",
-   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@strait/sdk-node`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-node#v0.6.2\n```"
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@straitlink/node`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-node#v0.6.2\n```"
   },
   {
    "page": "Node (server)",
    "group": "Server & API",
    "section": "Use",
    "url": "https://straitlink.in/docs/sdks/node/#use",
-   "markdown": "```ts\nimport { StraitClient } from '@strait/sdk-node';\n\nconst links = new StraitClient({\n  apiKey: process.env.SECRET_KEY!,   // st_live_… from Dashboard → Settings → Secret keys\n  baseUrl: 'https://strait.link',\n});\n\n// Create a link\nconst link = await links.createLink({\n  slug: 'launch',\n  longUrl: 'https://yourapp.com/launch',\n  tags: ['campaign'],\n});\n\n// List / update / deactivate\nawait links.listLinks();\nawait links.updateLink('launch', { longUrl: 'https://yourapp.com/launch-v2' });\nawait links.deleteLink('launch');\n\n// Send a conversion / revenue event (no publishable key needed server-side)\nawait links.sendEvent({ event: 'purchase', value: 49.99, currency: 'USD' });\n\n// Name the tap it came from, when you know it (for example from a webhook)\nawait links.sendEvent({ event: 'purchase', value: 49.99, currency: 'USD', clickId });\n```\n\nOn a server nothing is remembered for you: `sendEvent` passes `clickId` through only when you give it. Use a tap id you received, such as `clickId` from an `app.opened` or `install.matched` [webhook](https://straitlink.in/docs/webhooks/). The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\nFailures throw a `StraitError` with `.status` and the parsed `.body`.\n\n:::warn Keep the secret key on the server\nThe secret key can create and change links. Store it in an environment variable and never ship it in an app, a web page or a public repository. If it leaks, revoke it in the dashboard and create a new one.\n:::"
+   "markdown": "```ts\nimport { StraitClient } from '@straitlink/node';\n\nconst links = new StraitClient({\n  apiKey: process.env.SECRET_KEY!,   // st_live_… from Dashboard → Settings → Secret keys\n  baseUrl: 'https://strait.link',\n});\n\n// Create a link\nconst link = await links.createLink({\n  slug: 'launch',\n  longUrl: 'https://yourapp.com/launch',\n  tags: ['campaign'],\n});\n\n// List / update / deactivate\nawait links.listLinks();\nawait links.updateLink('launch', { longUrl: 'https://yourapp.com/launch-v2' });\nawait links.deleteLink('launch');\n\n// Send a conversion / revenue event (no publishable key needed server-side)\nawait links.sendEvent({ event: 'purchase', value: 49.99, currency: 'USD' });\n\n// Name the tap it came from, when you know it (for example from a webhook)\nawait links.sendEvent({ event: 'purchase', value: 49.99, currency: 'USD', clickId });\n```\n\nOn a server nothing is remembered for you: `sendEvent` passes `clickId` through only when you give it. Use a tap id you received, such as `clickId` from an `app.opened` or `install.matched` [webhook](https://straitlink.in/docs/webhooks/). The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\nFailures throw a `StraitError` with `.status` and the parsed `.body`.\n\n:::warn Keep the secret key on the server\nThe secret key can create and change links. Store it in an environment variable and never ship it in an app, a web page or a public repository. If it leaks, revoke it in the dashboard and create a new one.\n:::"
   },
   {
    "page": "Node (server)",
@@ -1659,7 +1995,7 @@
    "group": "Server & API",
    "section": "When changes take effect",
    "url": "https://straitlink.in/docs/api/#when-changes-take-effect",
-   "markdown": "Link edits (`PATCH /v1/links/{slug}`) and deactivations (`DELETE /v1/links/{slug}`) apply to taps within 30 seconds. They apply straight away on our server and at the Cloudflare location that carried your request; plain redirects decided at other Cloudflare locations can follow the old version for up to 30 seconds. See [How a tap is handled](https://straitlink.in/docs/short-links/#how-a-tap-is-handled)."
+   "markdown": "Link edits (`PATCH /v1/links/{slug}`) and deactivations (`DELETE /v1/links/{slug}`) apply to taps within 30 seconds. They apply right away on our server and at the Cloudflare location that carried your request; plain redirects decided at other Cloudflare locations can follow the old version for up to 30 seconds. See [How a tap is handled](https://straitlink.in/docs/short-links/#how-a-tap-is-handled)."
   },
   {
    "page": "REST API",
@@ -1701,7 +2037,7 @@
    "group": "Server & API",
    "section": "Export",
    "url": "https://straitlink.in/docs/api/#export",
-   "markdown": "Export everything in your workspace at any time, on every plan. It gives you what you need to leave, or to keep your links running if Strait ever shuts down. Send your secret key; a publishable key gets `401`.\n\n```txt\nGET https://strait.link/v1/export?part=links|taps|events|webhooks|worker\nAuthorization: Bearer st_live_…\n```\n\n| `part` | What you get |\n|---|---|\n| `links` | NDJSON, one link per line: slug, destination, platform fallbacks and whether it is active |\n| `taps` | CSV of every tap, joined to the app opens and installs that came from it. No date cap; add optional `from` and `to` (ISO dates) to narrow it |\n| `events` | CSV of every conversion event (signups, purchases, revenue): `created_at, name, value, currency, platform, link_id, slug, click_id, channel, campaign, variant`. `channel`, `campaign` and `variant` come from the tap the event is attributed to, when it has a `click_id`. Oldest first, no date cap; optional `from` and `to` |\n| `webhooks` | JSON of your webhook settings: `url`, `events`, `active` and `createdAt` for each one. Signing secrets are never exported; make new ones when you recreate a webhook |\n| `worker` | A single-file Cloudflare Worker that keeps your links redirecting, with the Android, iPhone and desktop fallbacks built in. Deploy it on your own account |\n\n```bash\ncurl \"https://strait.link/v1/export?part=events&from=2026-01-01\" \\\n  -H \"Authorization: Bearer $SECRET_KEY\" -o events.csv\n```\n\nTaps and events are streamed page by page, so an export of millions of rows starts straight away and never times out on our side.\n\n### Download from the dashboard\n\nOwners and admins can download every part from **Dashboard → Settings → Download everything**: one button per file, no secret key needed. Members and viewers can't, because an export contains all of the workspace's data. The same section keeps the commands above under **Or from your server**.\n\nEach button asks for a one-time download link, then your browser saves the file directly, however large:\n\n```txt\nPOST https://strait.link/v1/export/token      {\"part\": \"events\"}\n→ 201 {\"token\": \"stx_…\", \"expiresAt\": \"…\", \"path\": \"/v1/export?part=events&token=stx_…\"}\nGET  https://strait.link/v1/export?part=events&token=stx_…\n```\n\nThe token works once, for 60 seconds, for that part (and its `from` / `to`) only. Only a hash of it is stored. A used or expired token gets `401`.\n\nThe SDKs call the publishable-key endpoints for you; you only need those if you're writing your own client."
+   "markdown": "Export everything in your workspace at any time, on every plan. It gives you what you need to leave, or to keep your links running if Strait ever shuts down. Send your secret key; a publishable key gets `401`.\n\n```txt\nGET https://strait.link/v1/export?part=links|taps|events|webhooks|worker\nAuthorization: Bearer st_live_…\n```\n\n| `part` | What you get |\n|---|---|\n| `links` | NDJSON, one link per line: slug, destination, platform fallbacks and whether it is active |\n| `taps` | CSV of every tap, joined to the app opens and installs that came from it. No date cap; add optional `from` and `to` (ISO dates) to narrow it |\n| `events` | CSV of every conversion event (signups, purchases, revenue): `created_at, name, value, currency, platform, link_id, slug, click_id, channel, campaign, variant`. `channel`, `campaign` and `variant` come from the tap the event is attributed to, when it has a `click_id`. Oldest first, no date cap; optional `from` and `to` |\n| `webhooks` | JSON of your webhook settings: `url`, `events`, `active` and `createdAt` for each one. Signing secrets are never exported; make new ones when you recreate a webhook |\n| `worker` | A single-file Cloudflare Worker that keeps your links redirecting, with the Android, iPhone and desktop fallbacks built in. Deploy it on your own account |\n\n```bash\ncurl \"https://strait.link/v1/export?part=events&from=2026-01-01\" \\\n  -H \"Authorization: Bearer $SECRET_KEY\" -o events.csv\n```\n\nTaps and events are streamed page by page, so an export of millions of rows starts right away and never times out on our side.\n\n### Download from the dashboard\n\nOwners and admins can download every part from **Dashboard → Settings → Download everything**: one button per file, no secret key needed. Members and viewers can't, because an export contains all of the workspace's data. The same section keeps the commands above under **Or from your server**.\n\nEach button asks for a one-time download link, then your browser saves the file directly, however large:\n\n```txt\nPOST https://strait.link/v1/export/token      {\"part\": \"events\"}\n→ 201 {\"token\": \"stx_…\", \"expiresAt\": \"…\", \"path\": \"/v1/export?part=events&token=stx_…\"}\nGET  https://strait.link/v1/export?part=events&token=stx_…\n```\n\nThe token works once, for 60 seconds, for that part (and its `from` / `to`) only. Only a hash of it is stored. A used or expired token gets `401`.\n\nThe SDKs call the publishable-key endpoints for you; you only need those if you're writing your own client."
   },
   {
    "page": "Webhooks",
@@ -1715,14 +2051,14 @@
    "group": "Server & API",
    "section": "Send a test event",
    "url": "https://straitlink.in/docs/webhooks/#send-a-test-event",
-   "markdown": "Press **Send test event** next to a webhook in **Dashboard → Settings → Webhooks**. We send one `ping` event to it straight away, signed like every other delivery, and show what your server answered: the status code, the first 500 characters of the response body and how long it took. It works on a paused webhook too. Test events aren't stored or retried.\n\nFrom your server, call the same thing with your secret key:\n\n```bash\ncurl -X POST https://strait.link/v1/webhooks/<webhook id>/test \\\n  -H \"Authorization: Bearer $SECRET_KEY\"\n```\n\n```json title=\"Response\"\n{\n  \"delivered\": true,\n  \"status\": 204,\n  \"error\": null,\n  \"body\": \"\",\n  \"durationMs\": 182,\n  \"deliveryId\": \"0b9c3f0e-5a7d-4a51-9a2e-3f1c8d2b6e47\",\n  \"event\": \"ping\"\n}\n```\n\nWhen the delivery fails, `delivered` is `false` and `error` says why: `HTTP 500` (your server's status), `timeout` (no answer within 5 seconds) or `unsafe_target` (the URL resolves to a private address). An unknown webhook id, or one from another workspace, gets `404`."
+   "markdown": "Press **Send test event** next to a webhook in **Dashboard → Settings → Webhooks**. We send one `ping` event to it right away, signed like every other delivery, and show what your server answered: the status code, the first 500 characters of the response body and how long it took. It works on a paused webhook too. Test events aren't stored or retried.\n\nFrom your server, call the same thing with your secret key:\n\n```bash\ncurl -X POST https://strait.link/v1/webhooks/<webhook id>/test \\\n  -H \"Authorization: Bearer $SECRET_KEY\"\n```\n\n```json title=\"Response\"\n{\n  \"delivered\": true,\n  \"status\": 204,\n  \"error\": null,\n  \"body\": \"\",\n  \"durationMs\": 182,\n  \"deliveryId\": \"0b9c3f0e-5a7d-4a51-9a2e-3f1c8d2b6e47\",\n  \"event\": \"ping\"\n}\n```\n\nWhen the delivery fails, `delivered` is `false` and `error` says why: `HTTP 500` (your server's status), `timeout` (no answer within 5 seconds) or `unsafe_target` (the URL resolves to a private address). An unknown webhook id, or one from another workspace, gets `404`."
   },
   {
    "page": "Webhooks",
    "group": "Server & API",
    "section": "Events",
    "url": "https://straitlink.in/docs/webhooks/#events",
-   "markdown": "| Event | Sent when | `data` fields |\n|---|---|---|\n| `link.clicked` | Someone taps a link (browser taps, and verified-link opens your app reports) | `linkId`, `slug`, `platform`, `clickId`, `sentTo`, `deviceClass`, `variant`, `source` |\n| `install.matched` | A first launch after install is matched to a link | `linkId`, `clickId`, `matchMethod`, `platform` |\n| `app.opened` | A link opens your app | `linkId`, `clickId`, `kind`, `route`, `appState`, `isInstall`, `matched`, `platform` |\n| `ping` | You send a test event | `webhookId`, `message` |\n\nFields that don't apply to an event are left out. Taps on an expired link are recorded in Analytics but don't send `link.clicked`."
+   "markdown": "| Event | Sent when | `data` fields |\n|---|---|---|\n| `link.clicked` | Someone taps a link (browser taps, and verified-link opens your app reports) | `linkId`, `slug`, `platform`, `clickId`, `sentTo`, `deviceClass`, `variant`, `source` |\n| `install.matched` | A first launch after install is matched to a link | `linkId`, `clickId`, `matchMethod`, `platform` |\n| `app.opened` | A link opens your app | `linkId`, `clickId`, `kind`, `route`, `appState`, `isInstall`, `matched`, `platform` |\n| `ping` | You send a test event | `webhookId`, `message` |\n| `referral.converted` | Preview, not switched on yet: a referred install opens and matches its tap ([Referrals](https://straitlink.in/docs/referrals/)) | `referralCode`, `linkId`, `clickId`, `platform`, `matchMethod` |\n\nFields that don't apply to an event are left out. Taps on an expired link are recorded in Analytics but don't send `link.clicked`."
   },
   {
    "page": "Webhooks",
@@ -1751,6 +2087,62 @@
    "section": "Delivery history and redelivery",
    "url": "https://straitlink.in/docs/webhooks/#delivery-history-and-redelivery",
    "markdown": "Open **Deliveries** under a webhook in **Dashboard → Settings → Webhooks** to see its last 20 deliveries: the event, when it was created, its status (**Delivered**, **Retrying** or **Failed** after all six attempts), how many attempts it took and your server's last answer. A failed delivery, or one waiting for its next retry, has a **Redeliver** button: fix your endpoint (or change the webhook URL), press it, and we send the same event again right away. Owners, admins and members can redeliver; viewers can only look.\n\nThe same from your server, with a secret key:\n\n```txt\nGET https://strait.link/v1/webhooks/{id}/deliveries?limit=20&cursor=…\nAuthorization: Bearer st_live_…\n```\n\n```json\n{\n  \"deliveries\": [\n    {\n      \"id\": \"7f3e2c1a-9b4d-4e8f-a6c5-2d1b0e9f8a73\",\n      \"webhookId\": \"5d0c…\",\n      \"event\": \"link.clicked\",\n      \"status\": \"failed\",\n      \"attempts\": 6,\n      \"lastStatus\": 500,\n      \"lastError\": \"HTTP 500\",\n      \"nextAttemptAt\": null,\n      \"createdAt\": \"2026-10-04T09:12:03.512Z\",\n      \"deliveredAt\": null\n    }\n  ],\n  \"nextCursor\": null\n}\n```\n\nNewest first, `limit` 1 to 100 (default 20); pass `nextCursor` back as `cursor` for the next page. Payloads aren't returned. `nextAttemptAt` is set while a delivery is waiting for a retry.\n\n```txt\nPOST https://strait.link/v1/webhook-deliveries/{id}/redeliver\nAuthorization: Bearer st_live_…\n```\n\nThis queues the delivery again with its attempt count reset, sends it at once to the webhook's **current** URL with the same `X-Strait-Delivery` id, and answers with the delivery after that attempt (same shape as above). If it fails again it gets the full retry schedule. You get `409` when it was already delivered, or while it's being sent (in its first 2 minutes, or claimed by a delivery worker right now): try again shortly. A delivery from another workspace is `404`.\n\nDelivery history is kept for 30 days, then deleted by a nightly job."
+  },
+  {
+   "page": "Referrals (preview)",
+   "group": "Server & API",
+   "section": null,
+   "url": "https://straitlink.in/docs/referrals/",
+   "markdown": ":::warn Preview, not switched on yet\nReferrals are built and tested, but they are not switched on in production yet, and the details below may change before they are. Until then, use the [invite-link flow that works today](https://straitlink.in/solutions/referrals/): put the code in the link's destination and read it in `onLink`. Want to try the preview? [Talk to us](https://straitlink.in/contact/).\n:::"
+  },
+  {
+   "page": "Referrals (preview)",
+   "group": "Server & API",
+   "section": "What it does",
+   "url": "https://straitlink.in/docs/referrals/#what-it-does",
+   "markdown": "1. **A code on the tap.** Each tap can carry a referral code: either the link's own code, or a code added to the link's address for that one tap.\n2. **The code survives the install.** When the person installs your app and opens it, the deferred answer your app gets on first open includes `referralCode`. On Android this comes through the Google Play install, so it's exact. On iPhone it comes through install matching, which is in [beta](https://straitlink.in/docs/iphone-install-matching/).\n3. **Your server hears about it.** A `referral.converted` webhook fires once for each referred install that opens and matches. It carries the code, the link and the tap it came from.\n4. **You see it per code.** The dashboard's Referrals page (preview) shows, for each code, the taps that carried it and the referred installs.\n\nStrait doesn't grant rewards, hold credits or pay anyone out. That stays with your server, which decides from the webhook what each person gets."
+  },
+  {
+   "page": "Referrals (preview)",
+   "group": "Server & API",
+   "section": "Two ways to attach a code",
+   "url": "https://straitlink.in/docs/referrals/#two-ways-to-attach-a-code",
+   "markdown": "**One link per referrer.** Your server creates a link for each user and sets `referralCode`:\n\n```bash\ncurl https://strait.link/v1/links \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"slug\": \"invite-asha\", \"longUrl\": \"https://shop.example.com/invite\", \"referralCode\": \"ASHA42\" }'\n```\n\nThe answer echoes `\"referralCode\": \"ASHA42\"`. If it doesn't, the code wasn't saved: referrals aren't switched on yet, or the save failed.\n\n**One shared link, a code per tap.** Add `strait_ref` to any of your links:\n\n```text\nhttps://acme.strait.link/invite?strait_ref=ASHA42\n```\n\nA tap's own `strait_ref` wins over the link's code. A tap with two different `strait_ref` values counts as having no code.\n\nA code is 1 to 64 letters, digits, `-` or `_`. Use your own user id or an invite code. Don't use an email address or a phone number: codes appear in links that people share."
+  },
+  {
+   "page": "Referrals (preview)",
+   "group": "Server & API",
+   "section": "What your app gets",
+   "url": "https://straitlink.in/docs/referrals/#what-your-app-gets",
+   "markdown": "The first-open answer (from `/v1/referrer` on Android, `/v1/match` or `/v1/handoff/claim` on iPhone) gains one field when the matched tap carried a code:\n\n```json\n{\n  \"matched\": true,\n  \"longUrl\": \"https://shop.example.com/invite\",\n  \"linkId\": \"lnk_…\",\n  \"clickId\": \"6f1c…\",\n  \"matchMethod\": \"install_referrer\",\n  \"referralCode\": \"ASHA42\"\n}\n```\n\nIf the tap had no code, or the install didn't match a tap, the answer has no `referralCode`, exactly as today. The SDK update that ships with the switch-on passes it to your app as `referralCode` on the deferred link event (React Native, Flutter, Android, iOS) or on the `resolveDeferredLink` result (web). Grant rewards from your server, using the webhook below, not in the app."
+  },
+  {
+   "page": "Referrals (preview)",
+   "group": "Server & API",
+   "section": "The referral.converted webhook",
+   "url": "https://straitlink.in/docs/referrals/#the-referralconverted-webhook",
+   "markdown": "Subscribe to `referral.converted` in Dashboard → Settings → Webhooks (it shows there with a Preview badge once referrals are switched on). Deliveries are signed like every other [webhook](https://straitlink.in/docs/webhooks/):\n\n```json\n{\n  \"id\": \"…\",\n  \"event\": \"referral.converted\",\n  \"createdAt\": \"2026-10-05T10:40:00.000Z\",\n  \"data\": {\n    \"referralCode\": \"ASHA42\",\n    \"linkId\": \"lnk_…\",\n    \"clickId\": \"6f1c…\",\n    \"platform\": \"android\",\n    \"matchMethod\": \"install_referrer\"\n  }\n}\n```\n\nIt fires **once per tap**. If the app retries its first-open call, or the same tap leads to a reinstall, no second event is sent. A friend who already had your app opens it directly, so there is no install and no `referral.converted` event. Tell new users from existing ones with the `app.opened` event's `isInstall` field."
+  },
+  {
+   "page": "Referrals (preview)",
+   "group": "Server & API",
+   "section": "The report",
+   "url": "https://straitlink.in/docs/referrals/#the-report",
+   "markdown": "`GET /v1/referrals?from=2026-10-01&to=2026-10-31` (secret key) returns each code's taps and referred installs in that range, plus totals, with `\"preview\": true`. The dashboard's Referrals page shows the same numbers. A tap counts at the time of the tap, and a referred install at the time of the first open."
+  },
+  {
+   "page": "Referrals (preview)",
+   "group": "Server & API",
+   "section": "Limits of the preview",
+   "url": "https://straitlink.in/docs/referrals/#limits-of-the-preview",
+   "markdown": "- No rewards, credits, payouts, fraud scoring or per-referrer caps. These belong in your server.\n- The code is set when a link is created. It doesn't appear on the link list or edit endpoints yet, and the batch endpoint doesn't take it.\n- Direct opens (the app was already installed) don't carry the code.\n- The endpoint and fields above are in the [REST API reference](https://straitlink.in/docs/api/), marked preview. They may change before referrals are switched on."
+  },
+  {
+   "page": "Referrals (preview)",
+   "group": "Server & API",
+   "section": "Related",
+   "url": "https://straitlink.in/docs/referrals/#related",
+   "markdown": "- [Deferred deep linking](https://straitlink.in/docs/deferred-deep-linking/): how the destination survives the install\n- [Webhooks](https://straitlink.in/docs/webhooks/): signatures, retries and test events\n- [Referral and invite links](https://straitlink.in/solutions/referrals/): the flow that works today"
   },
   {
    "page": "Troubleshooting",
@@ -1800,6 +2192,41 @@
    "section": "Still stuck?",
    "url": "https://straitlink.in/docs/troubleshooting/#still-stuck",
    "markdown": "Email [support@straitlink.in](mailto:support@straitlink.in) with the link, the phone model, the browser or app you tapped it in, and what happened."
+  },
+  {
+   "page": "Test mode for deferred deep links (coming soon)",
+   "group": "Help",
+   "section": null,
+   "url": "https://straitlink.in/docs/test-mode/",
+   "markdown": ":::warn Not available yet\nTest mode is built on our side but switched off. The SDK option it needs (`testMode`) is not in any released SDK, so nothing on this page works today. The details below may still change before it ships. Today, test deferred links with a Google Play internal-testing build: [the end-to-end recipe](https://straitlink.in/docs/recipes/react-native-deferred-deep-links/) walks through it.\n:::"
+  },
+  {
+   "page": "Test mode for deferred deep links (coming soon)",
+   "group": "Help",
+   "section": "Why it exists",
+   "url": "https://straitlink.in/docs/test-mode/#why-it-exists",
+   "markdown": "Seeing a deferred deep link work today takes a build installed from Google Play (the link travels in the Play Install Referrer) or, on iPhone (beta), a device match. Both are slow to set up for a first check. Test mode is a shortcut for one question only: *is my app wired up so that the first open lands on the link's screen?*"
+  },
+  {
+   "page": "Test mode for deferred deep links (coming soon)",
+   "group": "Help",
+   "section": "How it will work",
+   "url": "https://straitlink.in/docs/test-mode/#how-it-will-work",
+   "markdown": "1. In **Dashboard → Get started**, a writer turns on test mode. That opens a 15-minute window for the workspace.\n2. On your phone, tap any of your links. WhatsApp works.\n3. Install and open your **debug** build with test mode on in the SDK.\n4. The first device that checks in during the window becomes the workspace's test device. It gets your most recent tap since the window opened, once, and the SDK hands it to your app exactly like a real deferred link: `kind: 'deferred'` in the same `onLink` callback.\n\nThe dashboard shows the result and, when nothing matched, why: no window open, a different device already used it, or no tap since you turned it on (tap your link and reopen the app)."
+  },
+  {
+   "page": "Test mode for deferred deep links (coming soon)",
+   "group": "Help",
+   "section": "What it will never do",
+   "url": "https://straitlink.in/docs/test-mode/#what-it-will-never-do",
+   "markdown": "- **Run in release builds.** The SDK sends the test request only from debug builds; your production app never does.\n- **Change your numbers.** A test match records no install and no app open, and the tap isn't marked as matched. Analytics and billing are unchanged.\n- **Touch real matching.** Real users are matched exactly as they are today, with or without test mode.\n- **Use a hardware or advertising ID.** The test device is a random id the SDK creates once in the debug build."
+  },
+  {
+   "page": "Test mode for deferred deep links (coming soon)",
+   "group": "Help",
+   "section": "When it ships",
+   "url": "https://straitlink.in/docs/test-mode/#when-it-ships",
+   "markdown": "When the SDKs gain the `testMode` option, this page becomes a step-by-step guide and the [changelog](https://straitlink.in/changelog/) will say so. Until then, deferred links are tested the long way: [React Native](https://straitlink.in/docs/sdks/react-native/test/#4-test-a-deferred-link-first-open-after-install), or [go-live checklist, step 3](https://straitlink.in/docs/production-checklist/#3-test-a-deferred-link-from-google-play) for any platform."
   }
  ]
 }

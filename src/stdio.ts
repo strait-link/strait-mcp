@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Local MCP server over stdio:  npx @strait/mcp   (or node dist/stdio.js)
+ * Local MCP server over stdio:  npx @straitlink/mcp   (or node dist/stdio.js)
  * Env:
  *   STRAIT_SECRET_KEY  a secret key (st_live_…) from Dashboard → Settings → Secret keys. Without it only
  *                      check_app_links, search_docs and demo trace_tap work.

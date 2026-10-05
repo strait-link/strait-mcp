@@ -3,7 +3,7 @@
 Use Strait from AI tools such as Claude Code, Cursor and Claude Desktop: create deep links, change them, read
 analytics, check App Links / Universal Links files, see where taps on a link go, and search the Strait docs.
 
-> **Preview.** The package is not on npm yet, so `npx @strait/mcp` does not work today. Until it is published,
+> **Preview.** The package is not on npm yet, so `npx @straitlink/mcp` does not work today. Until it is published,
 > run it from a checkout (see "From a checkout" below). The remote server (`mcp.strait.link`) is built and
 > deploy-ready but not deployed (see "Deploy the remote server").
 
@@ -45,7 +45,7 @@ Without a key, `check_app_links`, `search_docs` and demo `trace_tap` still work.
 ### Claude Code
 
 ```sh
-claude mcp add strait --env STRAIT_SECRET_KEY=st_live_your_key -- npx -y @strait/mcp
+claude mcp add strait --env STRAIT_SECRET_KEY=st_live_your_key -- npx -y @straitlink/mcp
 ```
 
 ### Cursor
@@ -57,7 +57,7 @@ claude mcp add strait --env STRAIT_SECRET_KEY=st_live_your_key -- npx -y @strait
   "mcpServers": {
     "strait": {
       "command": "npx",
-      "args": ["-y", "@strait/mcp"],
+      "args": ["-y", "@straitlink/mcp"],
       "env": { "STRAIT_SECRET_KEY": "st_live_your_key" }
     }
   }

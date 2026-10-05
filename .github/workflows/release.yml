@@ -1,0 +1,40 @@
+name: Release
+# Push a tag vX.Y.Z (matching package.json "version") to publish @straitlink/mcp to npm.
+# Inert until the NPM_TOKEN repo secret exists: tests still run, publish is skipped.
+# Setup: docs/REGISTRY-SETUP.md in the workspace (npm org "straitlink", automation token).
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+  id-token: write # npm provenance (signed build attestation)
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - name: Tag matches package.json version
+        run: |
+          v="$(node -p "require('./package.json').version")"
+          [ "$GITHUB_REF_NAME" = "v$v" ] || { echo "::error::tag $GITHUB_REF_NAME does not match package.json version $v"; exit 1; }
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Point package.json at this repo (provenance checks repository.url)
+        run: npm pkg set repository.type=git "repository.url=git+https://github.com/${GITHUB_REPOSITORY}.git" "bugs.url=https://github.com/${GITHUB_REPOSITORY}/issues"
+      - run: npm pack --dry-run
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::notice::NPM_TOKEN secret not set, so nothing was published (see REGISTRY-SETUP.md)."
+            exit 0
+          fi
+          npm publish --provenance --access public

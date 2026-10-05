@@ -47,7 +47,7 @@ store or website when it is not, and keep the destination through the install (d
    - Expo: `scheme`, `android.intentFilters` (with `autoVerify`) and `ios.associatedDomains` in `app.json`, then a
      **development build** (`npx expo run:android` or EAS). Expo Go cannot test this.
 4. **Install the SDK** (versions are pinned here and on each docs page):
-   - React Native / Expo: `npm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer`
+   - React Native / Expo: `npm install github:bazingga08/strait-sdk-react-native#v0.8.1 @react-native-async-storage/async-storage react-native-play-install-referrer`
      → https://straitlink.in/docs/sdks/react-native/ (Expo: https://straitlink.in/docs/sdks/expo/)
    - Flutter: in `pubspec.yaml`, `strait_sdk` as a git dependency (url `https://github.com/bazingga08/strait-sdk-flutter`, ref `v0.8.0`),
      then `flutter pub add app_links shared_preferences play_install_referrer flutter_timezone`
@@ -56,11 +56,11 @@ store or website when it is not, and keep the destination through the install (d
      `com.android.installreferrer:installreferrer:2.2` → https://straitlink.in/docs/sdks/android/
    - iOS: Swift Package `https://github.com/bazingga08/strait-sdk-swift` from `0.8.0` → https://straitlink.in/docs/sdks/ios/
    - Unity: Package Manager → Add package from git URL → `https://github.com/bazingga08/strait-sdk-unity.git?path=src#v0.8.0` → https://straitlink.in/docs/sdks/unity/
-   - Web (deferred links on a website): `npm install github:bazingga08/strait-sdk-web#v0.6.0` → https://straitlink.in/docs/sdks/web/
+   - Web (deferred links on a website): `npm install github:bazingga08/strait-sdk-web#v0.6.1` → https://straitlink.in/docs/sdks/web/
    - Capacitor / Ionic: there is no plugin yet. Use `@capacitor/app` (`getLaunchUrl`, `appUrlOpen`) and the REST
      calls the SDKs make (`POST /v1/resolve`, `/v1/referrer`, `/v1/match`, `/v1/open`) with the publishable key
      → https://straitlink.in/guides/capacitor-deep-linking/
-   - Server (creates links, sends events; secret key from an environment variable): `npm install github:bazingga08/strait-sdk-node#v0.6.2`
+   - Server (creates links, sends events; secret key from an environment variable): `npm install github:bazingga08/strait-sdk-node#v0.6.3`
      → https://straitlink.in/docs/sdks/node/
 5. **Wire it** exactly as the platform's docs page shows: create the client once with `publishableKey` and
    `endpoint: 'https://<handle>.strait.link'` (plus storage and the install referrer where the page says so), call

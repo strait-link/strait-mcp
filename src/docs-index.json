@@ -70,7 +70,7 @@
    "group": "Get started",
    "section": "5. Install the SDK and log each link",
    "url": "https://straitlink.in/docs/quick-start/#5-install-the-sdk-and-log-each-link",
-   "markdown": "Install it directly from GitHub; no sign-up or access request:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nCreate the client once, in a file of its own:\n\n```ts title=\"links.ts (@straitlink/react-native 0.8.0)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.onLink((e) => console.log('Strait link:', e.matched, e.path, e.params));\nlinks.start();\n```\n\nImport `./links` once from your app's entry file (`index.js` or `App.tsx`), then rebuild, because the SDK adds a native module.\n\n**You should see:** the app starts normally. Nothing is logged yet."
+   "markdown": "Install it directly from GitHub; no sign-up or access request:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.1 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nCreate the client once, in a file of its own:\n\n```ts title=\"links.ts (@straitlink/react-native 0.8.1)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.onLink((e) => console.log('Strait link:', e.matched, e.path, e.params));\nlinks.start();\n```\n\nImport `./links` once from your app's entry file (`index.js` or `App.tsx`), then rebuild, because the SDK adds a native module.\n\n**You should see:** the app starts normally. Nothing is logged yet."
   },
   {
    "page": "5-minute quickstart: open your app from a link (Android)",
@@ -210,7 +210,7 @@
    "group": "Get started",
    "section": "2. React Native",
    "url": "https://straitlink.in/docs/migrate-from-firebase/sdk/#2-react-native",
-   "markdown": "```bash\nnpm uninstall @react-native-firebase/dynamic-links\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\n```diff title=\"App.tsx\"\n- import dynamicLinks from '@react-native-firebase/dynamic-links';\n- dynamicLinks().getInitialLink().then((link) => link && handle(link.url));\n- const unsubscribe = dynamicLinks().onLink((link) => handle(link.url));\n+ import { links } from './links';   // createStrait({ publishableKey, endpoint, storage, installReferrer }); links.start();\n+ const unsubscribe = links.onLink((e) => e.matched && e.path && openPath(e.path, e.params));\n```\n\n`links.ts` is on [Install & set up](https://straitlink.in/docs/sdks/react-native/#2-create-the-client-once). `openPath` maps a path to a screen ([Receive links](https://straitlink.in/docs/sdks/react-native/receive-links/)). Expo apps: [Expo (Expo Router)](https://straitlink.in/docs/sdks/expo/).\n\n**You should see:** a tap on `https://acme.strait.link/summer` opens the screen, and so does the first open after installing from Google Play."
+   "markdown": "```bash\nnpm uninstall @react-native-firebase/dynamic-links\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.1 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\n```diff title=\"App.tsx\"\n- import dynamicLinks from '@react-native-firebase/dynamic-links';\n- dynamicLinks().getInitialLink().then((link) => link && handle(link.url));\n- const unsubscribe = dynamicLinks().onLink((link) => handle(link.url));\n+ import { links } from './links';   // createStrait({ publishableKey, endpoint, storage, installReferrer }); links.start();\n+ const unsubscribe = links.onLink((e) => e.matched && e.path && openPath(e.path, e.params));\n```\n\n`links.ts` is on [Install & set up](https://straitlink.in/docs/sdks/react-native/#2-create-the-client-once). `openPath` maps a path to a screen ([Receive links](https://straitlink.in/docs/sdks/react-native/receive-links/)). Expo apps: [Expo (Expo Router)](https://straitlink.in/docs/sdks/expo/).\n\n**You should see:** a tap on `https://acme.strait.link/summer` opens the screen, and so does the first open after installing from Google Play."
   },
   {
    "page": "Migrate from Firebase: swap the SDK",
@@ -378,7 +378,7 @@
    "group": "Recipes",
    "section": "2. Install the SDK with the Play Install Referrer",
    "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#2-install-the-sdk-with-the-play-install-referrer",
-   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The SDK reads it for you once you pass the referrer module:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\n```ts title=\"links.ts\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',      // Dashboard → Get started\n  endpoint: 'https://acme.strait.link',   // your link domain\n  storage: AsyncStorage,          // keeps the once-per-install flag\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\nImport `./links` once from `index.js`, then rebuild with `npx react-native run-android` (the SDK adds a native module). Add the intent filters from [Install & set up, step 3](https://straitlink.in/docs/sdks/react-native/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** the app starts as before, and `@straitlink/react-native` is in `package.json`."
+   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The SDK reads it for you once you pass the referrer module:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.1 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\n```ts title=\"links.ts\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',      // Dashboard → Get started\n  endpoint: 'https://acme.strait.link',   // your link domain\n  storage: AsyncStorage,          // keeps the once-per-install flag\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\nImport `./links` once from `index.js`, then rebuild with `npx react-native run-android` (the SDK adds a native module). Add the intent filters from [Install & set up, step 3](https://straitlink.in/docs/sdks/react-native/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** the app starts as before, and `@straitlink/react-native` is in `package.json`."
   },
   {
    "page": "Deferred deep links in React Native, end to end",
@@ -448,7 +448,7 @@
    "group": "Recipes",
    "section": "2. Install the SDK and add app.json settings",
    "url": "https://straitlink.in/docs/recipes/expo-deferred-deep-links/#2-install-the-sdk-and-add-appjson-settings",
-   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The SDK reads it once you pass the referrer module:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0\nnpx expo install @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nCreate `links.ts` exactly as for [bare React Native](https://straitlink.in/docs/sdks/react-native/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add `scheme`, `android.package`, the `intentFilters` and `associatedDomains` to `app.json` as in [Expo, step 2](https://straitlink.in/docs/sdks/expo/#2-add-link-settings-to-appjson).\n\n**You should see:** `npx expo config --type public` prints your `scheme` and `intentFilters`, and the SDK is in `package.json`."
+   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The SDK reads it once you pass the referrer module:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.1\nnpx expo install @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nCreate `links.ts` exactly as for [bare React Native](https://straitlink.in/docs/sdks/react-native/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add `scheme`, `android.package`, the `intentFilters` and `associatedDomains` to `app.json` as in [Expo, step 2](https://straitlink.in/docs/sdks/expo/#2-add-link-settings-to-appjson).\n\n**You should see:** `npx expo config --type public` prints your `scheme` and `intentFilters`, and the SDK is in `package.json`."
   },
   {
    "page": "Deferred deep links in Expo, end to end",
@@ -595,7 +595,7 @@
    "group": "Platforms",
    "section": "What's tested",
    "url": "https://straitlink.in/docs/sdks/#whats-tested",
-   "markdown": "The React Native, iOS (Swift), Flutter and Unity SDKs are at version 0.8.0, the Android SDK at 0.7.2, the Node SDK at 0.6.2 and the web SDK at 0.6.0. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS** is in beta: covered by automated tests, not yet proven on a real iPhone.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
+   "markdown": "The iOS (Swift), Flutter and Unity SDKs are at version 0.8.0, the React Native SDK at 0.8.1, the Android SDK at 0.7.2, the Node SDK at 0.6.3 and the web SDK at 0.6.1. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS** is in beta: covered by automated tests, not yet proven on a real iPhone.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
   },
   {
    "page": "React Native deep linking",
@@ -616,14 +616,14 @@
    "group": "Platforms",
    "section": "1. Install the SDK",
    "url": "https://straitlink.in/docs/sdks/react-native/#1-install-the-sdk",
-   "markdown": "The SDK installs from its public GitHub repo (npm builds it during install), together with the two packages it needs:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nIt installs as `@straitlink/react-native`, so your imports stay the same once it's on the npm registry. `AsyncStorage` keeps the once-per-install flag and any open reports that couldn't be sent yet. The Play Install Referrer module gives Android installs an exact match.\n\n**You should see:** `@straitlink/react-native` in your `package.json` dependencies."
+   "markdown": "The SDK installs from its public GitHub repo (npm builds it during install), together with the two packages it needs:\n\n```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.1 @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\nIt installs as `@straitlink/react-native`, so your imports stay the same once it's on the npm registry. `AsyncStorage` keeps the once-per-install flag and any open reports that couldn't be sent yet. The Play Install Referrer module gives Android installs an exact match.\n\n**You should see:** `@straitlink/react-native` in your `package.json` dependencies."
   },
   {
    "page": "React Native deep linking",
    "group": "Platforms",
    "section": "2. Create the client once",
    "url": "https://straitlink.in/docs/sdks/react-native/#2-create-the-client-once",
-   "markdown": "Create it outside your components and start it when the app launches:\n\n```ts title=\"links.ts (@straitlink/react-native 0.8.0)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\nImport `./links` once from `index.js`. `endpoint` is your workspace's link domain: the SDK sends its requests there and treats links on that host as yours. Call `start()` once. `onLink` replays past events to late subscribers, so your navigator can subscribe after `start()` without missing the launch link.\n\n**You should see:** the app starts as before after a rebuild (`npx react-native run-android`), because the SDK adds a native module."
+   "markdown": "Create it outside your components and start it when the app launches:\n\n```ts title=\"links.ts (@straitlink/react-native 0.8.1)\"\nimport AsyncStorage from '@react-native-async-storage/async-storage';\nimport { PlayInstallReferrer } from 'react-native-play-install-referrer';\nimport { createStrait, fromPlayInstallReferrer } from '@straitlink/react-native';\n\nexport const links = createStrait({\n  publishableKey: 'st_pub_live_…',        // Dashboard → Get started (safe in apps; never the secret key)\n  endpoint: 'https://acme.strait.link',     // your Strait link host\n  storage: AsyncStorage,            // required for reliable analytics\n  installReferrer: fromPlayInstallReferrer(PlayInstallReferrer),\n});\n\nlinks.start();\n```\n\nImport `./links` once from `index.js`. `endpoint` is your workspace's link domain: the SDK sends its requests there and treats links on that host as yours. Call `start()` once. `onLink` replays past events to late subscribers, so your navigator can subscribe after `start()` without missing the launch link.\n\n**You should see:** the app starts as before after a rebuild (`npx react-native run-android`), because the SDK adds a native module."
   },
   {
    "page": "React Native deep linking",
@@ -889,7 +889,7 @@
    "group": "Platforms",
    "section": "1. Install the SDK",
    "url": "https://straitlink.in/docs/sdks/expo/#1-install-the-sdk",
-   "markdown": "```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.0\nnpx expo install @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\n`npx expo install` picks helper versions that match your Expo SDK.\n\n**You should see:** all three packages in `package.json`."
+   "markdown": "```bash\nnpm install github:bazingga08/strait-sdk-react-native#v0.8.1\nnpx expo install @react-native-async-storage/async-storage react-native-play-install-referrer\n```\n\n`npx expo install` picks helper versions that match your Expo SDK.\n\n**You should see:** all three packages in `package.json`."
   },
   {
    "page": "Expo deep linking (Expo Router)",
@@ -1554,7 +1554,7 @@
    "group": "Platforms",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/web/#install",
-   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@straitlink/web`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-web#v0.6.0\n```"
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@straitlink/web`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-web#v0.6.1\n```"
   },
   {
    "page": "Web",
@@ -1610,7 +1610,7 @@
    "group": "Platforms",
    "section": "2. Install the web SDK",
    "url": "https://straitlink.in/docs/smart-banner/#2-install-the-web-sdk",
-   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub. The banner arrived in version 0.6.0.\n\n```bash\nnpm install github:bazingga08/strait-sdk-web#v0.6.0\n```\n\n**You should see:** `@straitlink/web` in your `package.json`."
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub. The banner arrived in version 0.6.1.\n\n```bash\nnpm install github:bazingga08/strait-sdk-web#v0.6.1\n```\n\n**You should see:** `@straitlink/web` in your `package.json`."
   },
   {
    "page": "Smart app banner for mobile web",
@@ -1946,7 +1946,7 @@
    "group": "Server & API",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/node/#install",
-   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@straitlink/node`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-node#v0.6.2\n```"
+   "markdown": "The SDK isn't on the npm registry yet, so install it from GitHub (npm builds it during install). It installs as `@straitlink/node`, so imports stay the same once it's on npm.\n\n```bash\nnpm install github:bazingga08/strait-sdk-node#v0.6.3\n```"
   },
   {
    "page": "Node (server)",

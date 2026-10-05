@@ -49,14 +49,7 @@
    "group": "Get started",
    "section": "3. Create a link",
    "url": "https://straitlink.in/docs/quick-start/#3-create-a-link",
-   "markdown": "In **Dashboard → Links → New link**, set the slug to `summer` and the destination to `https://shop.example.com/product/42`. Or from a terminal:\n\n```bash\nexport SECRET_KEY=st_live_…   # Dashboard → Settings → Secret keys\ncurl https://strait.link/v1/links \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"slug\": \"summer\", \"longUrl\": \"https://shop.example.com/product/42\" }'\n```\n\nThe destination doesn't need to exist yet. Your app only receives its path and query.\n\n**You should see:** `https://acme.strait.link/summer` in your link list (the API answers `201` with that `shortUrl`)."
-  },
-  {
-   "page": "5-minute quickstart: open your app from a link (Android)",
-   "group": "Get started",
-   "section": "Shortcut: let `strait init` write steps 4 and 5 (available after publish)",
-   "url": "https://straitlink.in/docs/quick-start/#shortcut-let-strait-init-write-steps-4-and-5-available-after-publish",
-   "markdown": "From your app's folder, run:\n\n```bash\nnpx @straitlink/cli init --key st_pub_live_… --host acme.strait.link\n```\n\nIt recognises a React Native, Expo, Flutter or Android app from its files, writes the `links` file from step 5 with your key and host, and prints the step 4 intent filter and the install command filled in with your scheme. It never changes a file you already have; add `--dry-run` to see everything first. `@straitlink/cli` isn't on npm yet, so this command works once it's published. Until then, follow the manual setup steps."
+   "markdown": "In **Dashboard → Links → New link**, set the slug to `summer` and the destination to `https://shop.example.com/product/42`. Or from a terminal:\n\n```bash\nexport SECRET_KEY=st_live_…   # Dashboard → Settings → Secret keys\ncurl https://strait.link/v1/links \\\n  -H \"Authorization: Bearer $SECRET_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"slug\": \"summer\", \"longUrl\": \"https://shop.example.com/product/42\" }'\n```\n\nThe destination doesn't need to exist yet. Your app only receives its path and query.\n\n**You should see:** `https://acme.strait.link/summer` in your link list (the API answers `201` with that `shortUrl`).\n\n*Coming with npm publish:* `npx @straitlink/cli init` will write steps 4 and 5 for you. Until then, follow them below."
   },
   {
    "page": "5-minute quickstart: open your app from a link (Android)",
@@ -385,7 +378,7 @@
    "group": "Recipes",
    "section": "3. Route every link, including the deferred one",
    "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#3-route-every-link-including-the-deferred-one",
-   "markdown": "The deferred link arrives through the same `onLink` callback as any other link, once, on the first launch after the install. `onLink` also replays events from before you subscribed, so subscribing when the navigator is ready never misses it:\n\n```tsx title=\"App.tsx\"\nimport { NavigationContainer } from '@react-navigation/native';\nimport { links } from './links';\nimport { navigationRef, openPath } from './navigation'; // from Receive links, step 1\n\nexport default function App() {\n  return (\n    <NavigationContainer\n      ref={navigationRef}\n      onReady={() => links.onLink((e) => {\n        if (e.kind === 'deferred') console.log('Strait first open:', e.route, e.matched, e.reason);\n        if (e.matched && e.path) openPath(e.path, e.params);\n      })}\n    >\n      {/* your navigator */}\n    </NavigationContainer>\n  );\n}\n```\n\n**You should see:** `adb shell am start -W -a android.intent.action.VIEW -d \"yourapp://shop.example.com/product/42\"` opens the Product screen. This proves the routing; the next steps prove the install."
+   "markdown": "The deferred link arrives through the same `onLink` callback as any other link, once, on the first launch after the install. `onLink` also replays events from before you subscribed, so subscribing when the navigator is ready never misses it.\n\nFirst, one file that maps a link's path to a screen (the same helper as [Receive links](https://straitlink.in/docs/sdks/react-native/receive-links/); skip it if you already have it):\n\n```tsx title=\"navigation.ts\"\nimport { createNavigationContainerRef } from '@react-navigation/native';\n\nexport const navigationRef = createNavigationContainerRef<any>();\n\n// Map a link's path to one of your screens.\nexport function openPath(path: string, params: Record<string, string> = {}) {\n  const product = /^\\/product\\/([^/]+)$/.exec(path);\n  if (product) navigationRef.navigate('Product', { id: product[1], ...params });\n  else navigationRef.navigate('Home');\n}\n```\n\nThen subscribe when the navigator is ready:\n\n```tsx title=\"App.tsx\"\nimport { NavigationContainer } from '@react-navigation/native';\nimport { links } from './links';\nimport { navigationRef, openPath } from './navigation';\n\nexport default function App() {\n  return (\n    <NavigationContainer\n      ref={navigationRef}\n      onReady={() => links.onLink((e) => {\n        if (e.kind === 'deferred') console.log('Strait first open:', e.route, e.matched, e.reason);\n        if (e.matched && e.path) openPath(e.path, e.params);\n      })}\n    >\n      {/* your navigator */}\n    </NavigationContainer>\n  );\n}\n```\n\n**You should see:** `adb shell am start -W -a android.intent.action.VIEW -d \"yourapp://shop.example.com/product/42\"` opens the Product screen. This proves the routing; the next steps prove the install."
   },
   {
    "page": "Deferred deep links in React Native, end to end",
@@ -427,7 +420,7 @@
    "group": "Recipes",
    "section": "Next steps",
    "url": "https://straitlink.in/docs/recipes/react-native-deferred-deep-links/#next-steps",
-   "markdown": "- [Go-live checklist](https://straitlink.in/docs/production-checklist/): verified links, iPhone (beta) and keys before real users tap.\n- [Test mode (coming soon)](https://straitlink.in/docs/test-mode/): check the deferred wiring from a debug build, without a Play upload."
+   "markdown": "- [Go-live checklist](https://straitlink.in/docs/production-checklist/): verified links, iPhone (beta) and keys before real users tap.\n- [Test on a real phone](https://straitlink.in/docs/sdks/react-native/test/): deep links, deferred links from Google Play and analytics, one check at a time."
   },
   {
    "page": "Deferred deep links in Expo, end to end",
@@ -518,7 +511,7 @@
    "group": "Recipes",
    "section": "2. Add the package and the Play Install Referrer",
    "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#2-add-the-package-and-the-play-install-referrer",
-   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The package reads it once you pass `play_install_referrer` in. Add the git dependency:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk:\n    git:\n      url: https://github.com/bazingga08/strait-sdk-flutter\n      ref: v0.8.0\n```\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\nCreate `lib/links.dart` exactly as in [Install & set up, step 2](https://straitlink.in/docs/sdks/flutter/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add the intent filters and `flutter_deeplinking_enabled` from [step 3](https://straitlink.in/docs/sdks/flutter/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** `flutter pub get` finishes, and the app starts as before after a full `flutter run` (not a hot restart: the plugins are native)."
+   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The package reads it once you pass `play_install_referrer` in. Add the git dependency:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk:\n    git:\n      url: https://github.com/bazingga08/strait-sdk-flutter\n      ref: v0.8.1\n```\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\nCreate `lib/links.dart` exactly as in [Install & set up, step 2](https://straitlink.in/docs/sdks/flutter/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add the intent filters and `flutter_deeplinking_enabled` from [step 3](https://straitlink.in/docs/sdks/flutter/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** `flutter pub get` finishes, and the app starts as before after a full `flutter run` (not a hot restart: the plugins are native)."
   },
   {
    "page": "Deferred deep links in Flutter, end to end",
@@ -595,7 +588,7 @@
    "group": "Platforms",
    "section": "What's tested",
    "url": "https://straitlink.in/docs/sdks/#whats-tested",
-   "markdown": "The iOS (Swift), Flutter and Unity SDKs are at version 0.8.0, the React Native SDK at 0.8.1, the Android SDK at 0.7.2, the Node SDK at 0.6.3 and the web SDK at 0.6.1. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS** is in beta: covered by automated tests, not yet proven on a real iPhone.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
+   "markdown": "The iOS (Swift) and Unity SDKs are at version 0.8.0, the React Native SDK at 0.8.1, the Flutter SDK at 0.8.1, the Android SDK at 0.7.2, the Node SDK at 0.6.3 and the web SDK at 0.6.1. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS** is in beta: covered by automated tests, not yet proven on a real iPhone.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
   },
   {
    "page": "React Native deep linking",
@@ -952,7 +945,7 @@
    "group": "Platforms",
    "section": "1. Install the package",
    "url": "https://straitlink.in/docs/sdks/flutter/#1-install-the-package",
-   "markdown": "It isn't on pub.dev yet, so add it as a git dependency:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk:\n    git:\n      url: https://github.com/bazingga08/strait-sdk-flutter\n      ref: v0.8.0\n```\n\nThen the helper packages:\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n[`app_links`](https://pub.dev/packages/app_links) delivers links, [`shared_preferences`](https://pub.dev/packages/shared_preferences) stores the once-per-install flag and unsent reports, [`play_install_referrer`](https://pub.dev/packages/play_install_referrer) gives Android installs an exact match, and [`flutter_timezone`](https://pub.dev/packages/flutter_timezone) provides the IANA time zone the iPhone match needs.\n\n**You should see:** `flutter pub get` finishes without errors."
+   "markdown": "It isn't on pub.dev yet, so add it as a git dependency:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk:\n    git:\n      url: https://github.com/bazingga08/strait-sdk-flutter\n      ref: v0.8.1\n```\n\nThen the helper packages:\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n[`app_links`](https://pub.dev/packages/app_links) delivers links, [`shared_preferences`](https://pub.dev/packages/shared_preferences) stores the once-per-install flag and unsent reports, [`play_install_referrer`](https://pub.dev/packages/play_install_referrer) gives Android installs an exact match, and [`flutter_timezone`](https://pub.dev/packages/flutter_timezone) provides the IANA time zone the iPhone match needs.\n\n**You should see:** `flutter pub get` finishes without errors."
   },
   {
    "page": "Flutter deep linking",
@@ -1743,7 +1736,7 @@
    "group": "Links",
    "section": "Custom domains",
    "url": "https://straitlink.in/docs/link-domains/#custom-domains",
-   "markdown": "Custom domains: coming soon. Today every workspace gets `<handle>.strait.link`, with HTTPS, on every plan. Serving links on your own domain (such as `links.yourcompany.com`) needs automatic certificates and domain verification, which we haven't built yet. We'll update this page when it's ready.\n\n:::note\nAfter changing your app's signing keys or team ID, phones and Google's verifier re-read the files on their own schedule. We serve them with a short cache (10 minutes), but Android can take longer to re-verify an installed app. Reinstalling the app forces a fresh check.\n:::"
+   "markdown": "Custom domains are coming soon, and founding apps get them first. Today every workspace gets `<handle>.strait.link`, with HTTPS, on every plan. Serving links on your own domain (such as `links.yourcompany.com`) needs automatic certificates and domain verification, which we haven't built yet. We'll update this page when it's ready.\n\n:::note\nAfter changing your app's signing keys or team ID, phones and Google's verifier re-read the files on their own schedule. We serve them with a short cache (10 minutes), but Android can take longer to re-verify an installed app. Reinstalling the app forces a fresh check.\n:::"
   },
   {
    "page": "Deferred deep linking",

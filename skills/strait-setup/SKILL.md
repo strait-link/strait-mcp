@@ -49,7 +49,7 @@ store or website when it is not, and keep the destination through the install (d
 4. **Install the SDK** (versions are pinned here and on each docs page):
    - React Native / Expo: `npm install github:bazingga08/strait-sdk-react-native#v0.8.1 @react-native-async-storage/async-storage react-native-play-install-referrer`
      → https://straitlink.in/docs/sdks/react-native/ (Expo: https://straitlink.in/docs/sdks/expo/)
-   - Flutter: in `pubspec.yaml`, `strait_sdk` as a git dependency (url `https://github.com/bazingga08/strait-sdk-flutter`, ref `v0.8.0`),
+   - Flutter: in `pubspec.yaml`, `strait_sdk` as a git dependency (url `https://github.com/bazingga08/strait-sdk-flutter`, ref `v0.8.1`),
      then `flutter pub add app_links shared_preferences play_install_referrer flutter_timezone`
      → https://straitlink.in/docs/sdks/flutter/
    - Android: `implementation("com.github.bazingga08:strait-sdk-android:v0.7.2")` (JitPack: add `maven("https://jitpack.io")`) plus

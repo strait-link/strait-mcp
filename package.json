@@ -17,7 +17,11 @@
     "test": "vitest run",
     "docs-index": "node scripts/build-docs-index.mjs",
     "start": "node dist/stdio.js",
-    "inspect": "npx -y @modelcontextprotocol/inspector@0.17.5 --cli node dist/stdio.js --method tools/list"
+    "inspect": "npx -y @modelcontextprotocol/inspector@0.17.5 --cli node dist/stdio.js --method tools/list",
+    "dev:remote": "npx -y wrangler@4 dev",
+    "deploy:check": "npx -y wrangler@4 deploy --dry-run --env production --outdir .wrangler/dry-run",
+    "deploy:preflight": "tsx scripts/deploy-preflight.ts",
+    "skill:sync": "node scripts/sync-skill.mjs"
   },
   "engines": {
     "node": ">=20"

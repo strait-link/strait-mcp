@@ -1,19 +1,49 @@
-// Remote Strait MCP server (planned at mcp.strait.link). NOT DEPLOYED.
-// To try it locally: set REMOTE_MCP to "on" in .dev.vars, create a KV namespace
-// (`npx wrangler kv namespace create OAUTH_KV`) and put its id below, then `npx wrangler dev`.
-// Deploying needs the founder's approval (council ground rules: agents never deploy).
+// Remote Strait MCP server at https://mcp.strait.link. BUILT, NOT DEPLOYED.
+// Deploy steps (founder only; agents never deploy): README.md → "Deploy the remote server".
+// Check without deploying: npm run deploy:check   (wrangler dry run of the production env)
+//
+// Two configs in one file:
+//  - top level  = local `npx wrangler@4 dev` only. The server stays off (404) unless .dev.vars sets REMOTE_MCP=on.
+//  - env.production = mcp.strait.link, deployed with `npx wrangler@4 deploy --env production`.
+// Keep comments on their own lines: test/deploy-config.test.ts reads this file.
 {
   "name": "strait-mcp",
   "main": "src/worker.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
+  "preview_urls": false,
+  "upload_source_maps": true,
   "vars": {
     "REMOTE_MCP": "off",
     "STRAIT_API_URL": "https://strait.link",
-    "MCP_ORIGIN": "https://mcp.strait.link"
+    "MCP_ORIGIN": "http://localhost:8787"
   },
   "kv_namespaces": [
-    { "binding": "OAUTH_KV", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }
-  ]
+    { "binding": "OAUTH_KV", "id": "local-dev-oauth-kv" }
+  ],
+  "env": {
+    "production": {
+      // Same Worker name as the top level, so the deployed script is "strait-mcp" (not "strait-mcp-production").
+      "name": "strait-mcp",
+      "workers_dev": false,
+      "preview_urls": false,
+      // A Custom Domain: Cloudflare creates the DNS record and certificate for mcp.strait.link on the strait.link zone.
+      "routes": [
+        { "pattern": "mcp.strait.link", "custom_domain": true }
+      ],
+      "vars": {
+        "REMOTE_MCP": "on",
+        "STRAIT_API_URL": "https://strait.link",
+        "MCP_ORIGIN": "https://mcp.strait.link"
+      },
+      // OAuth clients, grants and tokens (the provider encrypts grant props with the token).
+      // Create it once with `npx wrangler@4 kv namespace create OAUTH_KV --env production` and paste the id here.
+      "kv_namespaces": [
+        { "binding": "OAUTH_KV", "id": "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID" }
+      ],
+      // Request logs in the Cloudflare dashboard. The Worker never logs keys or tokens.
+      "observability": { "enabled": true, "head_sampling_rate": 1 }
+    }
+  }
 }

@@ -3,6 +3,14 @@
 Use Strait from AI tools such as Claude Code, Cursor and Claude Desktop: create deep links, change them, read
 analytics, check App Links / Universal Links files, see where taps on a link go, and search the Strait docs.
 
+It is a local stdio server with 10 tools. Three of them write (`create_link`, `batch_create_links`,
+`update_link`); the other seven only read. Eight need your secret key; `check_app_links`, `search_docs` and demo
+`trace_tap` work without one. Other deep-link vendors also ship MCP servers that can create links, so this README
+makes no "first" or "only" claim; it describes what this server does today.
+
+**iPhone is in beta.** iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play
+Install Referrer. The tools report iPhone results the same way, but treat iPhone install attribution as beta.
+
 > **Preview.** The package is not on npm yet, so `npx @straitlink/mcp` does not work today. Until it is published,
 > run it from a checkout (see "From a checkout" below). The remote server (`mcp.strait.link`) is built and
 > deploy-ready but not deployed (see "Deploy the remote server").
@@ -16,13 +24,14 @@ analytics, check App Links / Universal Links files, see where taps on a link go,
 | `get_link` | Read one link by slug | secret |
 | `list_links` | List links, one page at a time | secret |
 | `update_link` | Change destination, title, tags or expiry. **Asks for `confirm: true`**: without it you get a preview and nothing changes | secret |
-| `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform (`GET /v1/analytics`) | secret |
+| `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform (`GET /v1/analytics`). iPhone installs come from beta install matching | secret |
 | `check_app_links` | Check a domain's `assetlinks.json` and `apple-app-site-association`, with a fix for each problem | none |
 | `simulate_tap` | Dry-run one tap from one device or app (nothing recorded or billed) | secret |
 | `trace_tap` | Walk a link through WhatsApp, Instagram, Facebook, Chrome, Safari, iPad, computer and preview bots; or read a Live Tap Trace from the website demo | secret (link) / none (demo token) |
 | `search_docs` | Search the Strait docs offline (bundled index) | none |
 
 Every tool carries MCP annotations (`readOnlyHint`, `destructiveHint`, …). Only `update_link` is destructive.
+`create_link` and `batch_create_links` write new links but never change existing ones. There is no delete tool.
 
 ## Keys
 
@@ -79,11 +88,40 @@ In Cursor or Claude Desktop use `"command": "node", "args": ["/absolute/path/to/
 
 ## Try it
 
-- "Create a Strait link `diwali` to https://shop.example.com/sale/diwali with the title Diwali sale."
+- "Create a Strait link `summer` to https://shop.hilltop.example/summer with the title Summer sale."
 - "Which channel brought the most installs last month?"
-- "My links open the browser instead of the app. Check acme.strait.link and shop.example.com."
-- "What happens when someone taps `diwali` inside Instagram on an iPhone?"
+- "My links open the browser instead of the app. Check hilltop.strait.link and shop.hilltop.example."
+- "What happens when someone taps `summer` inside Instagram on an iPhone?"
 - "How do I receive links in Expo Router?"
+
+Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop used in examples.
+
+## MCP registry listing (drafted, not published)
+
+`server.json` and the `mcpName` field in `package.json` are drafts for the
+[official MCP registry](https://registry.modelcontextprotocol.io). Nothing has been published: the npm package does
+not exist yet, and the registry checks that `mcpName` in the published npm package matches `server.json` `name`
+([package types](https://github.com/modelcontextprotocol/registry/blob/main/docs/modelcontextprotocol-io/package-types.mdx)).
+
+- **Namespace `in.straitlink/mcp` (recommended).** Reverse-DNS of `straitlink.in`, so the listing carries the
+  product's own domain. It needs DNS authentication: the founder adds a TXT record on the apex `straitlink.in`
+  (`v=MCPv1; k=ed25519; p=<public key>`) and runs `mcp-publisher login dns --domain straitlink.in --private-key …`
+  ([authentication](https://github.com/modelcontextprotocol/registry/blob/main/docs/modelcontextprotocol-io/authentication.mdx)).
+  Keep the private key out of the repo.
+- **Alternative `io.github.<owner>/strait-mcp`.** Uses GitHub OAuth (`mcp-publisher login github`) and needs no DNS
+  change, but the name shows a personal GitHub account rather than the product domain, and it requires the public
+  GitHub repo, which does not exist yet. To switch, change `name` in `server.json` and `mcpName` in `package.json`
+  together (a test checks they match).
+- `remotes` is left out until `mcp.strait.link` is deployed; add
+  `{"type": "streamable-http", "url": "https://mcp.strait.link/mcp"}` then. `repository` is left out until the
+  GitHub repo exists.
+- Order when the founder is ready: choose a licence, create the repo, publish `@straitlink/mcp` to npm, add the
+  TXT record, then `mcp-publisher publish`.
+
+## Licence
+
+`package.json` says `"license": "UNLICENSED"` on purpose. The licence is a founder decision (D16 in the company
+plan) and has not been made, so this package must not be published until it is.
 
 ## Remote server (built, not deployed)
 

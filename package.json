@@ -1,6 +1,7 @@
 {
   "name": "@straitlink/mcp",
   "version": "0.1.0",
+  "mcpName": "in.straitlink/mcp",
   "description": "Strait MCP server: create and inspect deep links, read analytics, check App Links / Universal Links files and search the docs from AI tools.",
   "type": "module",
   "bin": {

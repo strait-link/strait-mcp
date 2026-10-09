@@ -27,14 +27,14 @@ describe('MCP protocol', () => {
 
   it('calls a tool', async () => {
     const { client, calls } = await connect();
-    const r = (await client.callTool({ name: 'create_link', arguments: { slug: 'summer', longUrl: 'https://shop.example.com/summer' } })) as { content: Array<{ text: string }> };
+    const r = (await client.callTool({ name: 'create_link', arguments: { slug: 'summer', longUrl: 'https://shop.hilltop.example/summer' } })) as { content: Array<{ text: string }> };
     expect(JSON.parse(r.content[0]!.text).slug).toBe('summer');
     expect(calls).toHaveLength(1);
   });
 
   it('rejects invalid input before any API call (http destination, bad slug)', async () => {
     const { client, calls } = await connect();
-    const r1 = (await client.callTool({ name: 'create_link', arguments: { slug: 'summer', longUrl: 'http://shop.example.com/summer' } })) as { isError?: boolean };
+    const r1 = (await client.callTool({ name: 'create_link', arguments: { slug: 'summer', longUrl: 'http://shop.hilltop.example/summer' } })) as { isError?: boolean };
     const r2 = (await client.callTool({ name: 'get_link', arguments: { slug: '../etc' } })) as { isError?: boolean };
     expect(r1.isError).toBe(true);
     expect(r2.isError).toBe(true);

@@ -65,15 +65,15 @@ describe('keys', () => {
 describe('link tools', () => {
   it('create_link posts the link and returns it', async () => {
     const { client, calls } = mockClient(() => ({ status: 201, body: LINK }));
-    const r = await runTool(byName('create_link'), client, { slug: 'summer', longUrl: 'https://shop.example.com/summer' });
+    const r = await runTool(byName('create_link'), client, { slug: 'summer', longUrl: 'https://shop.hilltop.example/summer' });
     expect(r.isError).toBeUndefined();
     expect(parse(r).shortUrl).toBe(LINK.shortUrl);
-    expect(calls[0]).toMatchObject({ method: 'POST', body: { slug: 'summer', longUrl: 'https://shop.example.com/summer' } });
+    expect(calls[0]).toMatchObject({ method: 'POST', body: { slug: 'summer', longUrl: 'https://shop.hilltop.example/summer' } });
   });
 
   it('API errors become tool errors with the message', async () => {
     const { client } = mockClient(() => ({ status: 409, body: { error: 'slug already exists in this workspace' } }));
-    const r = await runTool(byName('create_link'), client, { slug: 'summer', longUrl: 'https://shop.example.com/summer' });
+    const r = await runTool(byName('create_link'), client, { slug: 'summer', longUrl: 'https://shop.hilltop.example/summer' });
     expect(r.isError).toBe(true);
     expect(r.content[0]!.text).toMatch(/createLink: slug already exists in this workspace \(HTTP 409\)/);
   });
@@ -94,17 +94,17 @@ describe('link tools', () => {
 
   it('update_link without confirm previews and changes nothing', async () => {
     const { client, calls } = mockClient(() => ({ body: LINK }));
-    const r = parse(await runTool(byName('update_link'), client, { slug: 'summer', longUrl: 'https://shop.example.com/winter' }));
-    expect(r).toMatchObject({ preview: true, applied: false, current: { longUrl: LINK.longUrl }, proposed: { longUrl: 'https://shop.example.com/winter' } });
+    const r = parse(await runTool(byName('update_link'), client, { slug: 'summer', longUrl: 'https://shop.hilltop.example/winter' }));
+    expect(r).toMatchObject({ preview: true, applied: false, current: { longUrl: LINK.longUrl }, proposed: { longUrl: 'https://shop.hilltop.example/winter' } });
     expect(calls.map((c) => c.method)).toEqual(['GET']);
   });
 
   it('update_link with confirm: true patches', async () => {
-    const { client, calls } = mockClient((c) => ({ body: c.method === 'PATCH' ? { ...LINK, longUrl: 'https://shop.example.com/winter' } : LINK }));
-    const r = parse(await runTool(byName('update_link'), client, { slug: 'summer', longUrl: 'https://shop.example.com/winter', confirm: true }));
+    const { client, calls } = mockClient((c) => ({ body: c.method === 'PATCH' ? { ...LINK, longUrl: 'https://shop.hilltop.example/winter' } : LINK }));
+    const r = parse(await runTool(byName('update_link'), client, { slug: 'summer', longUrl: 'https://shop.hilltop.example/winter', confirm: true }));
     expect(r.applied).toBe(true);
     expect(calls).toHaveLength(1);
-    expect(calls[0]).toMatchObject({ method: 'PATCH', body: { longUrl: 'https://shop.example.com/winter' } });
+    expect(calls[0]).toMatchObject({ method: 'PATCH', body: { longUrl: 'https://shop.hilltop.example/winter' } });
     expect(calls[0]!.body).not.toHaveProperty('confirm');
   });
 

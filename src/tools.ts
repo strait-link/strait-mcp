@@ -27,7 +27,7 @@ export interface StraitTool<S extends z.ZodRawShape = z.ZodRawShape> {
 const tool = <S extends z.ZodRawShape>(t: StraitTool<S>) => t as unknown as StraitTool;
 
 // ── shared input pieces ─────────────────────────────────────────────────────
-const slug = z.string().regex(/^[a-zA-Z0-9_-]{1,64}$/, 'letters, digits, - and _ (1–64)').describe("The link's slug: the part after the link domain, e.g. `summer` in https://acme.strait.link/summer");
+const slug = z.string().regex(/^[a-zA-Z0-9_-]{1,64}$/, 'letters, digits, - and _ (1–64)').describe("The link's slug: the part after the link domain, e.g. `summer` in https://hilltop.strait.link/summer");
 const httpsUrl = z.string().url().refine((u) => u.startsWith('https://'), 'must be an https URL');
 const when = z.union([z.string(), z.number()]).describe('ISO date-time (2026-12-31T23:59:59Z) or epoch ms');
 
@@ -185,7 +185,7 @@ export const TOOLS: StraitTool[] = [
       "Check a domain's App Links (Android, /.well-known/assetlinks.json) and Universal Links (iPhone, apple-app-site-association) " +
       'files: each finding has a severity (ok / warn / error) and a fix. Use it when links open the browser instead of the app. ' +
       'It checks the files the domain serves, not how one particular phone behaves. No key needed.',
-    inputSchema: { domain: z.string().min(3).max(253).describe('A domain such as acme.strait.link or shop.example.com (a full URL is reduced to its host)') },
+    inputSchema: { domain: z.string().min(3).max(253).describe('A domain such as hilltop.strait.link or shop.hilltop.example (a full URL is reduced to its host)') },
     annotations: { title: 'Check App Links / Universal Links files', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     needsKey: false,
     run: async (c, a) => compactReport(await c.checkAppLinks(a.domain)),

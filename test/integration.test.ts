@@ -38,7 +38,7 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
     hasAnalytics = '/v1/analytics' in (openapiSpec('http://x') as { paths: object }).paths;
     const store = new MemoryStore();
     store.addTenant(
-      { id: 'ten_mcp', name: 'MCP test', publishableKey: 'st_pub_test_mcpintegration', config: { androidBundleId: 'com.acme.shop', androidScheme: 'acme', fallbackUrl: 'https://shop.example.com' } },
+      { id: 'ten_mcp', name: 'MCP test', publishableKey: 'st_pub_test_mcpintegration', config: { androidBundleId: 'com.example.hilltop', androidScheme: 'hilltop', fallbackUrl: 'https://shop.hilltop.example' } },
       ['127.0.0.1'],
     );
     store.apiKeys.push({ id: 'k_mcp', tenantId: 'ten_mcp', keyHash: hashApiKey(SECRET) });
@@ -80,9 +80,9 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
   });
 
   it('creates a link and reads it back', async () => {
-    const created = await call('create_link', { slug: 'mcp-summer', longUrl: 'https://shop.example.com/sale/summer', title: 'Summer sale', tags: ['mcp'] });
+    const created = await call('create_link', { slug: 'mcp-summer', longUrl: 'https://shop.hilltop.example/sale/summer', title: 'Summer sale', tags: ['mcp'] });
     expect(created.r.isError).toBeFalsy();
-    expect(created.json).toMatchObject({ slug: 'mcp-summer', longUrl: 'https://shop.example.com/sale/summer', title: 'Summer sale' });
+    expect(created.json).toMatchObject({ slug: 'mcp-summer', longUrl: 'https://shop.hilltop.example/sale/summer', title: 'Summer sale' });
     expect(created.json.shortUrl).toMatch(/\/mcp-summer$/);
 
     const got = await call('get_link', { slug: 'mcp-summer' });
@@ -93,24 +93,24 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
   });
 
   it('a duplicate slug comes back as a tool error, not a crash', async () => {
-    const dup = await call('create_link', { slug: 'mcp-summer', longUrl: 'https://shop.example.com/x' });
+    const dup = await call('create_link', { slug: 'mcp-summer', longUrl: 'https://shop.hilltop.example/x' });
     expect(dup.r.isError).toBe(true);
     expect(dup.r.content[0]!.text).toMatch(/409/);
   });
 
   it('batch-creates links', async () => {
-    const b = await call('batch_create_links', { links: [{ slug: 'mcp-a', longUrl: 'https://shop.example.com/a' }, { slug: 'mcp-summer', longUrl: 'https://shop.example.com/b' }] });
+    const b = await call('batch_create_links', { links: [{ slug: 'mcp-a', longUrl: 'https://shop.hilltop.example/a' }, { slug: 'mcp-summer', longUrl: 'https://shop.hilltop.example/b' }] });
     expect(b.json.summary).toEqual({ total: 2, created: 1, failed: 1 });
   });
 
   it('update_link previews first, then applies with confirm', async () => {
-    const preview = await call('update_link', { slug: 'mcp-summer', longUrl: 'https://shop.example.com/sale/winter' });
-    expect(preview.json).toMatchObject({ preview: true, applied: false, current: { longUrl: 'https://shop.example.com/sale/summer' } });
-    expect((await call('get_link', { slug: 'mcp-summer' })).json.longUrl).toBe('https://shop.example.com/sale/summer');
+    const preview = await call('update_link', { slug: 'mcp-summer', longUrl: 'https://shop.hilltop.example/sale/winter' });
+    expect(preview.json).toMatchObject({ preview: true, applied: false, current: { longUrl: 'https://shop.hilltop.example/sale/summer' } });
+    expect((await call('get_link', { slug: 'mcp-summer' })).json.longUrl).toBe('https://shop.hilltop.example/sale/summer');
 
-    const applied = await call('update_link', { slug: 'mcp-summer', longUrl: 'https://shop.example.com/sale/winter', confirm: true });
-    expect(applied.json).toMatchObject({ applied: true, link: { longUrl: 'https://shop.example.com/sale/winter' } });
-    expect((await call('get_link', { slug: 'mcp-summer' })).json.longUrl).toBe('https://shop.example.com/sale/winter');
+    const applied = await call('update_link', { slug: 'mcp-summer', longUrl: 'https://shop.hilltop.example/sale/winter', confirm: true });
+    expect(applied.json).toMatchObject({ applied: true, link: { longUrl: 'https://shop.hilltop.example/sale/winter' } });
+    expect((await call('get_link', { slug: 'mcp-summer' })).json.longUrl).toBe('https://shop.hilltop.example/sale/winter');
   });
 
   it('simulates and traces taps on the link', async () => {

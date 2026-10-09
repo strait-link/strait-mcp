@@ -25,4 +25,4 @@ export function mockClient(respond: (c: Call) => { status?: number; body?: unkno
   return { client: new StraitClient({ apiUrl: 'https://api.test', secretKey: opts.secretKey, fetch: fetchImpl }), calls };
 }
 
-export const LINK = { id: 'lnk_1', slug: 'summer', shortUrl: 'https://acme.strait.link/summer', longUrl: 'https://shop.example.com/summer', title: 'Summer', tags: [], isActive: true };
+export const LINK = { id: 'lnk_1', slug: 'summer', shortUrl: 'https://hilltop.strait.link/summer', longUrl: 'https://shop.hilltop.example/summer', title: 'Summer', tags: [], isActive: true };

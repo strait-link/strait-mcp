@@ -104,7 +104,7 @@ not exist yet, and the registry checks that `mcpName` in the published npm packa
 ([package types](https://github.com/modelcontextprotocol/registry/blob/main/docs/modelcontextprotocol-io/package-types.mdx)).
 
 - **Namespace `in.straitlink/mcp` (recommended).** Reverse-DNS of `straitlink.in`, so the listing carries the
-  product's own domain. It needs DNS authentication: the founder adds a TXT record on the apex `straitlink.in`
+  product's own domain. It needs DNS authentication: the Strait team adds a TXT record on the apex `straitlink.in`
   (`v=MCPv1; k=ed25519; p=<public key>`) and runs `mcp-publisher login dns --domain straitlink.in --private-key …`
   ([authentication](https://github.com/modelcontextprotocol/registry/blob/main/docs/modelcontextprotocol-io/authentication.mdx)).
   Keep the private key out of the repo.
@@ -115,12 +115,12 @@ not exist yet, and the registry checks that `mcpName` in the published npm packa
 - `remotes` is left out until `mcp.strait.link` is deployed; add
   `{"type": "streamable-http", "url": "https://mcp.strait.link/mcp"}` then. `repository` is left out until the
   GitHub repo exists.
-- Order when the founder is ready: choose a licence, create the repo, publish `@straitlink/mcp` to npm, add the
+- Order when the Strait team is ready: choose a licence, create the repo, publish `@straitlink/mcp` to npm, add the
   TXT record, then `mcp-publisher publish`.
 
 ## Licence
 
-`package.json` says `"license": "UNLICENSED"` on purpose. The licence is a founder decision (D16 in the company
+`package.json` says `"license": "UNLICENSED"` on purpose. The licence is an open Strait decision (D16 in the company
 plan) and has not been made, so this package must not be published until it is.
 
 ## Remote server (built, not deployed)
@@ -149,9 +149,9 @@ curl http://localhost:8787/healthz
 npx -y @modelcontextprotocol/inspector@0.17.5   # connect to http://localhost:8787/mcp
 ```
 
-### Deploy the remote server (founder only)
+### Deploy the remote server (Strait team only)
 
-Agents prepare this; only the founder deploys. Needs the Cloudflare account that holds the `strait.link` zone
+Agents prepare this; only the Strait team deploys. Needs the Cloudflare account that holds the `strait.link` zone
 (`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` from `redirect-engine/.env` work). The bundle is about 1.9 MB
 (360 KB gzipped), inside the free plan's size limit; Workers Paid (already planned) is recommended for its higher
 CPU time per request.

@@ -1,7 +1,19 @@
-# Strait MCP server (preview)
+<h1 align="center">Strait MCP server</h1>
 
-Strait: straight to the screen, on the record. A tap on a Strait link goes straight to the exact screen in your
-app (Straight), and every tap is recorded (Stamped).
+<p align="center"><strong>Straight to the screen. On the record.</strong><br>
+A tap on a Strait link goes straight to the exact screen in your app (Straight), and every tap is recorded (Stamped).</p>
+
+<p align="center">
+  <a href="https://straitlink.in/docs/">Docs</a> ·
+  <a href="https://straitlink.in/platform-status/">Platform status</a> ·
+  <a href="#docs-and-support">Talk to the Strait team</a>
+</p>
+
+`@straitlink/mcp` (preview)
+
+```sh
+claude mcp add strait --env STRAIT_SECRET_KEY=st_live_your_key -- npx -y @straitlink/mcp
+```
 
 Use Strait from AI tools such as Claude Code, Cursor and Claude Desktop: create deep links, change them, read
 analytics, check App Links / Universal Links files, see where taps on a link go, and search the Strait docs.
@@ -16,9 +28,8 @@ Install Referrer. On iPhone the workspace chooses the method in Dashboard → Se
 matching, paste handoff, both or neither), and the SDK reads that choice at runtime. Device matching is off for new
 workspaces. The tools report iPhone results the same way, but treat iPhone install attribution as beta.
 
-> **Preview.** The package is not on npm yet, so `npx @straitlink/mcp` does not work today. Until it is published,
-> run it from a checkout (see "From a checkout" below). The remote server (`mcp.strait.link`) is built and
-> deploy-ready but not deployed (see "Deploy the remote server").
+> **Preview.** The remote server (`mcp.strait.link`) is built and deploy-ready but not deployed (see "Deploy the
+> remote server"). Until then, use the local server above.
 
 ## Tools
 
@@ -82,7 +93,7 @@ claude mcp add strait --env STRAIT_SECRET_KEY=st_live_your_key -- npx -y @strait
 
 Settings → Developer → Edit config, then add the same `"strait"` entry under `mcpServers` and restart.
 
-### From a checkout (works today)
+### From a checkout
 
 ```sh
 cd mcp-server && npm ci && npm run build
@@ -104,8 +115,7 @@ Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop use
 ## MCP registry listing (drafted, not published)
 
 `server.json` and the `mcpName` field in `package.json` are drafts for the
-[official MCP registry](https://registry.modelcontextprotocol.io). Nothing has been published: the npm package does
-not exist yet, and the registry checks that `mcpName` in the published npm package matches `server.json` `name`
+[official MCP registry](https://registry.modelcontextprotocol.io). The registry checks that `mcpName` in the published npm package matches `server.json` `name`
 ([package types](https://github.com/modelcontextprotocol/registry/blob/main/docs/modelcontextprotocol-io/package-types.mdx)).
 
 - **Namespace `in.straitlink/mcp` (recommended).** Reverse-DNS of `straitlink.in`, so the listing carries the
@@ -118,15 +128,14 @@ not exist yet, and the registry checks that `mcpName` in the published npm packa
   GitHub repo, which does not exist yet. To switch, change `name` in `server.json` and `mcpName` in `package.json`
   together (a test checks they match).
 - `remotes` is left out until `mcp.strait.link` is deployed; add
-  `{"type": "streamable-http", "url": "https://mcp.strait.link/mcp"}` then. `repository` is left out until the
-  GitHub repo exists.
-- Order when the Strait team is ready: choose a licence, create the repo, publish `@straitlink/mcp` to npm, add the
-  TXT record, then `mcp-publisher publish`.
+  `{"type": "streamable-http", "url": "https://mcp.strait.link/mcp"}` then. Add `"repository": {"url": "https://github.com/bazingga08/strait-mcp", "source": "github"}`
+  once the GitHub repo exists.
+- Order when the Strait team is ready: create the repo, publish `@straitlink/mcp` to npm, add the TXT record, then
+  `mcp-publisher publish`.
 
 ## Licence
 
-`package.json` says `"license": "UNLICENSED"` on purpose. The licence is an open Strait decision (D16 in the company
-plan) and has not been made, so this package must not be published until it is.
+MIT. See [LICENSE](LICENSE).
 
 ## Remote server (built, not deployed)
 
@@ -207,3 +216,10 @@ npm run deploy:check  # wrangler dry run of the production Worker (nothing uploa
 The end-to-end test (`test/integration.test.ts`) starts the real engine from `../redirect-engine` (or
 `ENGINE_DIR`) with its in-memory store, runs this server over stdio as a child process, creates a link and reads
 it back. It is skipped when no engine checkout with installed dependencies is next to this repo.
+
+## Docs and support
+
+- **Docs:** [straitlink.in/docs/](https://straitlink.in/docs/) · [platform status](https://straitlink.in/platform-status/) · [troubleshooting](https://straitlink.in/docs/troubleshooting/)
+- **Talk to the Strait team:** [support@straitlink.in](mailto:support@straitlink.in) (replies within 1 working day, IST) or call +91 81218 61890.
+- **Bugs and feature requests:** [open an issue](https://github.com/bazingga08/strait-mcp/issues) on this repo.
+- **Security:** never in a public issue. Write to security@straitlink.in.

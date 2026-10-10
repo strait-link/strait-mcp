@@ -1,40 +1,43 @@
 name: Release
 # Push a tag vX.Y.Z (matching package.json "version") to publish @straitlink/mcp to npm.
-# Inert until the NPM_TOKEN repo secret exists: tests still run, publish is skipped.
-# Setup: docs/REGISTRY-SETUP.md in the workspace (npm org "straitlink", automation token).
+# Auth is npm Trusted Publishing (OIDC): no NPM_TOKEN secret exists or is needed.
+# One-time setup (first publish by hand, then link this workflow on npmjs.com):
+# strait/docs/PUBLISH-NOW.md in the workspace.
 on:
   push:
     tags: ['v*']
 permissions:
   contents: read
-  id-token: write # npm provenance (signed build attestation)
+  id-token: write # OIDC token for npm trusted publishing + provenance attestation
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: 22
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24' # trusted publishing needs Node >= 22.14
           cache: npm
           registry-url: https://registry.npmjs.org
+      - name: npm >= 11.5.1 (required for trusted publishing)
+        run: |
+          npm install -g npm@^11.5.1
+          node -e "const [a,b,c]=process.argv[1].split('.').map(Number);if(a<11||(a===11&&(b<5||(b===5&&c<1)))){console.error('npm '+process.argv[1]+' < 11.5.1');process.exit(1)}" "$(npm --version)"
+          node --version; npm --version
       - run: npm ci
       - name: Tag matches package.json version
         run: |
           v="$(node -p "require('./package.json').version")"
           [ "$GITHUB_REF_NAME" = "v$v" ] || { echo "::error::tag $GITHUB_REF_NAME does not match package.json version $v"; exit 1; }
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
-      - name: Point package.json at this repo (provenance checks repository.url)
-        run: npm pkg set repository.type=git "repository.url=git+https://github.com/${GITHUB_REPOSITORY}.git" "bugs.url=https://github.com/${GITHUB_REPOSITORY}/issues"
-      - run: npm pack --dry-run
-      - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: package.json names this repo (provenance checks repository.url)
         run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::notice::NPM_TOKEN secret not set, so nothing was published (see REGISTRY-SETUP.md)."
-            exit 0
-          fi
-          npm publish --provenance --access public
+          want="git+https://github.com/${GITHUB_REPOSITORY}.git"
+          got="$(node -p "require('./package.json').repository.url")"
+          [ "$got" = "$want" ] || { echo "::error::repository.url is $got, expected $want"; exit 1; }
+      - run: npm run typecheck
+      - run: npm test # includes the server.json / SERVER_VERSION version match
+      - run: npm pack --dry-run # prepack builds dist/
+      - name: Publish to npm (trusted publishing, provenance on)
+        run: npm publish --access public

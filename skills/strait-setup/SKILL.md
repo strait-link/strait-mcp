@@ -23,7 +23,8 @@ store or website when it is not, and keep the destination through the install (d
    true; don't add a second deep-link handler for the link domain (React Navigation `linking`, Expo Router default
    routing). `onLink` replays past events to late subscribers, so subscribing after `start()` is fine.
 3. **iPhone is in beta.** Say so when you set up iOS. Don't add clipboard reading: iPhone install matching works
-   without it, and the clipboard boost is opt-in (a dashboard switch plus `clipboardBoost: true` in the SDK).
+   without it, and the clipboard boost is opt-in with one dashboard switch the SDK reads at runtime
+   (`clipboardBoost` in the SDK is deprecated and ignored).
 4. **Android deferred links** use the Google Play Install Referrer, so testing them needs a build installed from
    Google Play (internal testing is enough). Sideloaded builds can't test them.
 5. **The SDKs are not on npm, pub.dev or Maven Central yet.** Install from GitHub, pinned to a tag, with the exact

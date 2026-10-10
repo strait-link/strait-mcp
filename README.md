@@ -1,5 +1,8 @@
 # Strait MCP server (preview)
 
+Strait: straight to the screen, on the record. A tap on a Strait link goes straight to the exact screen in your
+app (Straight), and every tap is recorded (Stamped).
+
 Use Strait from AI tools such as Claude Code, Cursor and Claude Desktop: create deep links, change them, read
 analytics, check App Links / Universal Links files, see where taps on a link go, and search the Strait docs.
 
@@ -9,7 +12,9 @@ It is a local stdio server with 10 tools. Three of them write (`create_link`, `b
 makes no "first" or "only" claim; it describes what this server does today.
 
 **iPhone is in beta.** iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play
-Install Referrer. The tools report iPhone results the same way, but treat iPhone install attribution as beta.
+Install Referrer. On iPhone the workspace chooses the method in Dashboard → Settings → iPhone installs (device
+matching, paste handoff, both or neither), and the SDK reads that choice at runtime. Device matching is off for new
+workspaces. The tools report iPhone results the same way, but treat iPhone install attribution as beta.
 
 > **Preview.** The package is not on npm yet, so `npx @straitlink/mcp` does not work today. Until it is published,
 > run it from a checkout (see "From a checkout" below). The remote server (`mcp.strait.link`) is built and

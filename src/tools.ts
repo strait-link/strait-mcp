@@ -267,5 +267,5 @@ export const SERVER_INSTRUCTIONS = [
   'Share a link by its shortUrl. Prefer batch_create_links over many create_link calls.',
   'update_link changes where live links go: call it without confirm first, show the user the preview, and only then call it with confirm: true.',
   'When a link opens the browser instead of the app, run check_app_links on the link domain and the app domain, then trace_tap on the link.',
-  'iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play Install Referrer. Use search_docs before answering setup questions.',
+  'iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play Install Referrer. On iPhone the workspace picks the method (device matching, paste handoff, both or neither) in Dashboard → Settings → iPhone installs, read by the SDK at runtime; device matching is off for new workspaces. Use search_docs before answering setup questions.',
 ].join('\n');

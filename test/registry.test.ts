@@ -25,8 +25,9 @@ describe('MCP registry draft (server.json + package.json mcpName)', () => {
     expect(server.description.length).toBeLessThanOrEqual(100);
   });
 
-  it('leaves the licence to the founder and lists no undeployed remote', () => {
-    expect(pkg.license).toBe('UNLICENSED');
+  it('is MIT (founder decision D16) and lists no undeployed remote', () => {
+    expect(pkg.license).toBe('MIT');
+    expect(readFileSync(new URL('../LICENSE', import.meta.url), 'utf8')).toMatch(/^MIT License/);
     expect(server.remotes).toBeUndefined();
   });
 });

@@ -130,8 +130,19 @@ Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop use
 - `remotes` is left out until `mcp.strait.link` is deployed; add
   `{"type": "streamable-http", "url": "https://mcp.strait.link/mcp"}` then. Add `"repository": {"url": "https://github.com/bazingga08/strait-mcp", "source": "github"}`
   once the GitHub repo exists.
-- Order when the Strait team is ready: create the repo, publish `@straitlink/mcp` to npm, add the TXT record, then
-  `mcp-publisher publish`.
+- Order when the Strait team is ready: create the repo, publish `@straitlink/mcp` to npm (done: 0.1.0 on 15 Oct,
+  `mcpName` matches), add the TXT record, then run the **MCP registry** workflow (`.github/workflows/registry.yml`).
+  Without the `MCP_DNS_PRIVATE_KEY` secret it only validates `server.json` (schema, name, version, npm) and stops.
+
+### Founder steps (about 10 minutes, after the GitHub repo exists)
+
+1. Claude makes a key pair on the Mac (`openssl genpkey -algorithm ed25519`) and shows you only the **public** part.
+2. In the DNS settings for **straitlink.in**, add a **TXT** record on the root (`@`) with the value
+   `v=MCPv1; k=ed25519; p=<public key>`. Save. It can take up to an hour to appear.
+3. In GitHub, repo **strait-mcp → Settings → Secrets → Actions**, add `MCP_DNS_PRIVATE_KEY` with the private key
+   (Claude puts it there if you allow secret writes).
+4. Actions → **MCP registry** → Run workflow. When it's green, search "Strait" on
+   registry.modelcontextprotocol.io: that's how you know it worked.
 
 ## Licence
 

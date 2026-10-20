@@ -1,0 +1,55 @@
+name: MCP registry
+# List @straitlink/mcp on the official MCP registry (https://registry.modelcontextprotocol.io) as
+# in.straitlink/mcp. Run by hand (Actions -> MCP registry -> Run workflow) AFTER the npm version in
+# server.json is published. Namespace auth is DNS: a TXT record on straitlink.in holds the public
+# key; the private key lives only in the MCP_DNS_PRIVATE_KEY secret. Without that secret the job
+# validates server.json and stops (nothing is published).
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: server.json matches package.json (name, version) and the published npm package
+        run: |
+          node -e '
+            const s=require("./server.json"), p=require("./package.json");
+            const bad=[];
+            if (s.name!==p.mcpName) bad.push(`server.json name ${s.name} != package.json mcpName ${p.mcpName}`);
+            if (s.version!==p.version || s.packages[0].version!==p.version) bad.push(`server.json version != package.json ${p.version}`);
+            if (bad.length) { console.error(bad.join("\n")); process.exit(1); }'
+          npm view "@straitlink/mcp@$(node -p 'require("./package.json").version')" mcpName | grep -qx "$(node -p 'require("./server.json").name')" \
+            || { echo "::error::that version is not on npm with this mcpName yet: publish it first"; exit 1; }
+      - name: server.json is valid against the registry schema
+        run: |
+          npm install --no-save --no-package-lock ajv@8.17.1 ajv-formats@3.0.1
+          curl -fsSL "$(node -p 'require("./server.json").$schema')" -o /tmp/server.schema.json
+          node -e '
+            const Ajv=require("ajv"), add=require("ajv-formats"); const ajv=new Ajv({strict:false,allErrors:true}); add(ajv);
+            const v=ajv.compile(require("/tmp/server.schema.json"));
+            if (!v(require("./server.json"))) { console.error(JSON.stringify(v.errors,null,1)); process.exit(1); }
+            console.log("server.json valid")'
+      - name: Stop here until the DNS key exists
+        id: gate
+        env:
+          KEY: ${{ secrets.MCP_DNS_PRIVATE_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then echo "::notice::MCP_DNS_PRIVATE_KEY not set: validated only, nothing published (see README, MCP registry listing)"; echo "go=0" >> "$GITHUB_OUTPUT"; else echo "go=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Install mcp-publisher v1.8.1 (checksum pinned)
+        if: steps.gate.outputs.go == '1'
+        run: |
+          curl -fsSL -o /tmp/mp.tgz https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz
+          echo "a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc  /tmp/mp.tgz" | sha256sum -c -
+          tar -xzf /tmp/mp.tgz -C /tmp mcp-publisher
+      - name: Log in (DNS) and publish
+        if: steps.gate.outputs.go == '1'
+        env:
+          KEY: ${{ secrets.MCP_DNS_PRIVATE_KEY }}
+        run: |
+          /tmp/mcp-publisher login dns --domain straitlink.in --private-key "$KEY"
+          /tmp/mcp-publisher publish

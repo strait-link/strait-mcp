@@ -13,10 +13,12 @@ const byName = (n: string) => {
 const parse = (r: { content: Array<{ text: string }> }) => JSON.parse(r.content[0]!.text);
 
 describe('tool list', () => {
-  it('has the ten council tools, each with a description and annotations', () => {
+  it('has the ten council tools plus the six 0.2 tools, each with a description and annotations', () => {
     expect(TOOLS.map((t) => t.name)).toEqual([
       'create_link', 'batch_create_links', 'get_link', 'list_links', 'update_link',
-      'get_analytics', 'check_app_links', 'simulate_tap', 'trace_tap', 'search_docs',
+      'get_analytics', 'check_app_links', 'simulate_tap', 'trace_tap',
+      'get_usage', 'get_referrals', 'list_webhook_deliveries', 'test_webhook', 'redeliver_webhook_delivery', 'deactivate_link',
+      'search_docs',
     ]);
     for (const t of TOOLS) {
       expect(t.description.length, t.name).toBeGreaterThan(40);
@@ -24,8 +26,8 @@ describe('tool list', () => {
     }
   });
 
-  it('only update_link is destructive, and the read tools are read-only', () => {
-    expect(TOOLS.filter((t) => t.annotations.destructiveHint).map((t) => t.name)).toEqual(['update_link']);
+  it('only update_link and deactivate_link are destructive, and the read tools are read-only', () => {
+    expect(TOOLS.filter((t) => t.annotations.destructiveHint).map((t) => t.name)).toEqual(['update_link', 'deactivate_link']);
     for (const n of ['get_link', 'list_links', 'get_analytics', 'check_app_links', 'simulate_tap', 'trace_tap', 'search_docs']) {
       expect(byName(n).annotations.readOnlyHint, n).toBe(true);
     }

@@ -1,8 +1,8 @@
 {
   "name": "@straitlink/mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "mcpName": "in.straitlink/mcp",
-  "description": "Strait MCP server: create and inspect deep links, read analytics, check App Links / Universal Links files and search the docs from AI tools.",
+  "description": "Strait MCP server: create, inspect and deactivate deep links, read analytics, usage and referrals, check and redeliver webhooks, check App Links / Universal Links files and search the docs from AI tools.",
   "keywords": [
     "mcp",
     "model-context-protocol",

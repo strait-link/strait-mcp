@@ -65,10 +65,11 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
     await new Promise((ok) => server?.close(ok));
   });
 
-  it('lists the ten tools with their schemas', async () => {
+  it('lists the sixteen tools with their schemas', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(
-      ['batch_create_links', 'check_app_links', 'create_link', 'get_analytics', 'get_link', 'list_links', 'search_docs', 'simulate_tap', 'trace_tap', 'update_link'],
+      ['batch_create_links', 'check_app_links', 'create_link', 'deactivate_link', 'get_analytics', 'get_link', 'get_referrals', 'get_usage',
+        'list_links', 'list_webhook_deliveries', 'redeliver_webhook_delivery', 'search_docs', 'simulate_tap', 'test_webhook', 'trace_tap', 'update_link'],
     );
     const create = tools.find((t) => t.name === 'create_link')!;
     expect(create.inputSchema.required).toEqual(expect.arrayContaining(['slug', 'longUrl']));
@@ -131,6 +132,31 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
     }
     expect(a.r.isError).toBeFalsy();
     expect(a.json).toMatchObject({ group: 'channel', timezone: 'UTC', totals: { taps: 0 } });
+  });
+
+  it('0.2 reads: usage, the webhook list, and an unknown webhook is a clean 404', async () => {
+    const u = await call('get_usage', {});
+    expect(u.r.isError).toBeFalsy();
+    expect(u.json).toMatchObject({ taps: expect.any(Object), level: expect.any(String) });
+    const hooks = await call('list_webhook_deliveries', {});
+    expect(hooks.json).toMatchObject({ webhooks: [] });
+    const t = await call('test_webhook', { webhookId: '00000000-0000-4000-8000-000000000000' });
+    expect(t.r.isError).toBe(true);
+    expect(t.r.content[0]!.text).toMatch(/testWebhook: webhook not found \(HTTP 404\)/);
+    const r = await call('get_referrals', {});
+    expect(r.r.isError).toBeFalsy(); // switched off in this engine: explained, not an error
+  });
+
+  it('deactivate_link previews, then turns the link off', async () => {
+    await call('create_link', { slug: 'mcp-off', longUrl: 'https://shop.hilltop.example/off' });
+    const p = await call('deactivate_link', { slug: 'mcp-off' });
+    expect(p.json).toMatchObject({ preview: true, applied: false, slug: 'mcp-off' });
+    expect((await call('get_link', { slug: 'mcp-off' })).r.isError).toBeFalsy();
+    const d = await call('deactivate_link', { slug: 'mcp-off', confirm: true });
+    expect(d.json).toMatchObject({ applied: true, deactivated: true });
+    expect((await call('get_link', { slug: 'mcp-off' })).r.isError).toBe(true);
+    const again = await call('deactivate_link', { slug: 'mcp-off', confirm: true });
+    expect(again.r.content[0]!.text).toMatch(/no active link with slug "mcp-off".*HTTP 404/);
   });
 
   it('search_docs answers offline', async () => {

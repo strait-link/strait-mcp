@@ -15,12 +15,13 @@ A tap on a Strait link goes straight to the exact screen in your app (Straight),
 claude mcp add strait --env STRAIT_SECRET_KEY=st_live_your_key -- npx -y @straitlink/mcp
 ```
 
-Use Strait from AI tools such as Claude Code, Cursor and Claude Desktop: create deep links, change them, read
-analytics, check App Links / Universal Links files, see where taps on a link go, and search the Strait docs.
+Use Strait from AI tools such as Claude Code, Cursor and Claude Desktop: create deep links, change or turn them off,
+read analytics, usage and referrals, check App Links / Universal Links files, see where taps on a link go, look after
+webhooks (deliveries, test, redeliver) and search the Strait docs.
 
-It is a local stdio server with 10 tools. Three of them write (`create_link`, `batch_create_links`,
-`update_link`); the other seven only read. Eight need your secret key; `check_app_links`, `search_docs` and demo
-`trace_tap` work without one. Other deep-link vendors also ship MCP servers that can create links, so this README
+It is a local stdio server with 16 tools. Six of them write (`create_link`, `batch_create_links`, `update_link`,
+`deactivate_link`, `test_webhook`, `redeliver_webhook_delivery`); the other ten only read. Fourteen need your secret
+key; `check_app_links`, `search_docs` and demo `trace_tap` work without one. Other deep-link vendors also ship MCP servers that can create links, so this README
 makes no "first" or "only" claim; it describes what this server does today.
 
 **iPhone is in beta.** iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play
@@ -44,10 +45,19 @@ workspaces. The tools report iPhone results the same way, but treat iPhone insta
 | `check_app_links` | Check a domain's `assetlinks.json` and `apple-app-site-association`, with a fix for each problem | none |
 | `simulate_tap` | Dry-run one tap from one device or app (nothing recorded or billed) | secret |
 | `trace_tap` | Walk a link through WhatsApp, Instagram, Facebook, Chrome, Safari, iPad, computer and preview bots; or read a Live Tap Trace from the website demo | secret (link) / none (demo token) |
+| `get_usage` | This month's taps and new links against the plan, `level` (ok / warn / over) and `new_links_paused` (`GET /v1/usage`) | secret |
+| `get_referrals` | Referral report: taps and referred installs per code (`GET /v1/referrals`, a preview: says "not switched on yet" until it is) | secret |
+| `list_webhook_deliveries` | A webhook's deliveries (status, attempts, last HTTP status, next retry; no payloads). Without `webhookId`: the workspace's webhooks (id, receiver host, events) | secret |
+| `test_webhook` | Send one `ping` to a webhook now and see the receiver's status and time (not stored, not retried) | secret |
+| `redeliver_webhook_delivery` | Send a failed delivery again (same `X-Strait-Delivery` id). **Asks for `confirm: true`** | secret |
+| `deactivate_link` | Turn a link off: taps then get the "link not found" page. **Asks for `confirm: true`**; the API can't turn it back on yet | secret |
 | `search_docs` | Search the Strait docs offline (bundled index) | none |
 
-Every tool carries MCP annotations (`readOnlyHint`, `destructiveHint`, …). Only `update_link` is destructive.
-`create_link` and `batch_create_links` write new links but never change existing ones. There is no delete tool.
+Every tool carries MCP annotations (`readOnlyHint`, `destructiveHint`, …) and its description starts with
+"Read-only." or "Write." for the 0.2 tools. `update_link` and `deactivate_link` are destructive; they and
+`redeliver_webhook_delivery` show a preview first and act only with `confirm: true`. `create_link` and
+`batch_create_links` write new links but never change existing ones. There is no delete tool: a deactivated link
+keeps its history.
 
 ## Keys
 
@@ -57,6 +67,8 @@ links, so:
 - Create a separate key for your AI tools, so you can revoke it on its own.
 - Keep it in the MCP client's config or environment, never in app or website code.
 - A publishable key (`st_pub_live_…`) does not work here: it is for the SDKs in your apps.
+- The server sends the key only as an `Authorization: Bearer` header to `STRAIT_API_URL`, never logs it, and
+  replaces anything shaped like a secret key in tool output or errors with `st_…[redacted]`.
 
 Without a key, `check_app_links`, `search_docs` and demo `trace_tap` still work.
 
@@ -109,6 +121,10 @@ In Cursor or Claude Desktop use `"command": "node", "args": ["/absolute/path/to/
 - "My links open the browser instead of the app. Check hilltop.strait.link and shop.hilltop.example."
 - "What happens when someone taps `summer` inside Instagram on an iPhone?"
 - "How do I receive links in Expo Router?"
+- "How much of this month's plan have we used?"
+- "My webhook stopped firing. Show me its last deliveries, send it a test, and resend the failed ones."
+- "Turn off the `spring-sale` link." (you'll see a preview first)
+- "Which referral codes brought the most installs in October?"
 
 Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop used in examples.
 

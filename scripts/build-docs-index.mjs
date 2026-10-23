@@ -3,11 +3,14 @@
  * docs: ../site/content/docs/*.md, in sidebar order (site/lib/nav.mjs), with the
  * {{placeholders}} filled from site/site.config.json. One entry per ## section.
  *   npm run docs-index            (SITE_DIR=/path/to/site to use another checkout)
+ * Build from what is LIVE: SITE_DIR = an export of the site's origin/main, SITE_COMMIT = its short sha
+ * (written into the index as siteCommit so a stale index is easy to spot).
  * Run it whenever the docs change; the index is committed so the server works offline.
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const siteDir = resolve(process.env.SITE_DIR ?? new URL('../../site', import.meta.url).pathname);
 if (!existsSync(join(siteDir, 'content/docs'))) {
@@ -60,6 +63,12 @@ for (const group of DOCS_NAV) {
 }
 
 const out = new URL('../src/docs-index.json', import.meta.url);
-const json = JSON.stringify({ source: origin, builtFrom: 'site/content/docs', sections: entries }, null, 1) + '\n';
+let siteCommit = process.env.SITE_COMMIT ?? null;
+if (!siteCommit) {
+  try {
+    siteCommit = execFileSync('git', ['-C', siteDir, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {}
+}
+const json = JSON.stringify({ source: origin, builtFrom: 'site/content/docs', siteCommit, sections: entries }, null, 1) + '\n';
 writeFileSync(out, json);
 console.log(`docs-index.json: ${entries.length} sections from ${DOCS_NAV.flatMap((g) => g.items).length} pages, ${(json.length / 1024).toFixed(0)} KB`);

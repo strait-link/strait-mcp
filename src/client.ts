@@ -52,6 +52,8 @@ export interface LinkPatchInput {
   expiresAt?: string | number | null;
   expiredAction?: 'page' | 'store' | 'url' | null;
   expiredUrl?: string | null;
+  /** Sent alone (engine ADR 0041): false pauses, true turns a paused link back on. */
+  isActive?: boolean;
 }
 
 export interface Link {
@@ -125,8 +127,8 @@ export class StraitClient {
   getLink(slug: string) {
     return this.call<Link>('getLink', 'GET', `/v1/links/${encodeURIComponent(slug)}`);
   }
-  listLinks(opts: { limit?: number; cursor?: string } = {}) {
-    return this.call<{ links: Link[]; nextCursor: string | null }>('listLinks', 'GET', '/v1/links', { query: { limit: opts.limit ?? 50, cursor: opts.cursor } });
+  listLinks(opts: { limit?: number; cursor?: string; status?: 'active' | 'paused' } = {}) {
+    return this.call<{ links: Link[]; nextCursor: string | null }>('listLinks', 'GET', '/v1/links', { query: { limit: opts.limit ?? 50, cursor: opts.cursor, status: opts.status } });
   }
   updateLink(slug: string, patch: LinkPatchInput) {
     return this.call<Link>('updateLink', 'PATCH', `/v1/links/${encodeURIComponent(slug)}`, { body: patch });

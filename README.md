@@ -39,8 +39,8 @@ workspaces. The tools report iPhone results the same way, but treat iPhone insta
 | `create_link` | Create one link and get its `shortUrl` | secret |
 | `batch_create_links` | Create up to 500 links in one call (safe to re-run: existing slugs are per-item 409s) | secret |
 | `get_link` | Read one link by slug | secret |
-| `list_links` | List links, one page at a time | secret |
-| `update_link` | Change destination, title, tags or expiry. **Asks for `confirm: true`**: without it you get a preview and nothing changes | secret |
+| `list_links` | List links, one page at a time. `status: "paused"` lists turned-off links (0.2.1) | secret |
+| `update_link` | Change destination, title, tags or expiry, or `isActive` on its own (false pauses, true turns a paused link back on; 0.2.1). **Asks for `confirm: true`**: without it you get a preview and nothing changes | secret |
 | `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform (`GET /v1/analytics`). iPhone installs come from beta install matching | secret |
 | `check_app_links` | Check a domain's `assetlinks.json` and `apple-app-site-association`, with a fix for each problem | none |
 | `simulate_tap` | Dry-run one tap from one device or app (nothing recorded or billed) | secret |
@@ -50,7 +50,7 @@ workspaces. The tools report iPhone results the same way, but treat iPhone insta
 | `list_webhook_deliveries` | A webhook's deliveries (status, attempts, last HTTP status, next retry; no payloads). Without `webhookId`: the workspace's webhooks (id, receiver site, events) | secret |
 | `test_webhook` | Send one `ping` to a webhook now and see the receiver's status and time (not stored, not retried) | secret |
 | `redeliver_webhook_delivery` | Send a failed delivery again (same `X-Strait-Delivery` id). **Asks for `confirm: true`** | secret |
-| `deactivate_link` | Turn a link off: taps then get the "link not found" page. **Asks for `confirm: true`**; the API can't turn it back on yet | secret |
+| `deactivate_link` | Turn a link off: taps then get the "link not found" page. **Asks for `confirm: true`**; turn it back on with `update_link` `isActive: true` | secret |
 | `search_docs` | Search the Strait docs offline (bundled index) | none |
 
 Every tool carries MCP annotations (`readOnlyHint`, `destructiveHint`, …) and its description starts with

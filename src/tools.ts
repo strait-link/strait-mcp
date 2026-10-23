@@ -96,6 +96,37 @@ function hostOf(url: string): string {
 
 const UPDATE_FIELDS = ['longUrl', 'title', 'tags', 'expiresAt', 'expiredAction', 'expiredUrl'] as const;
 
+/** Paused pages a turn-back-on preview reads to find the link (100 each). */
+const PAUSED_PREVIEW_PAGES = 5;
+
+/** update_link with isActive (engine ADR 0041: PATCH { isActive } sent alone). */
+async function setActive(c: StraitClient, slug: string, isActive: boolean, confirm: boolean, otherFields: boolean) {
+  if (otherFields) throw new Error('send isActive on its own, then other fields in a second update_link call');
+  if (confirm) return { applied: true, link: await c.updateLink(slug, { isActive }) };
+  const next = `Nothing has changed yet. Show this to the user; if they agree, call update_link again with slug "${slug}", isActive: ${isActive} and confirm: true.`;
+  const live = await c.getLink(slug).catch((err) => {
+    if (err instanceof StraitApiError && err.status === 404) return null;
+    throw err;
+  });
+  if (!isActive) {
+    if (!live) throw new StraitApiError(404, { error: `no active link with slug "${slug}" in this workspace` }, 'updateLink');
+    return { preview: true, applied: false, slug, shortUrl: live.shortUrl, current: { isActive: true, longUrl: live.longUrl }, proposed: { isActive: false }, next };
+  }
+  if (live) return { preview: true, applied: false, alreadyOn: true, slug, shortUrl: live.shortUrl, longUrl: live.longUrl, next: 'This link is already on. Nothing to do.' };
+  let cursor: string | undefined;
+  for (let page = 0; page < PAUSED_PREVIEW_PAGES; page++) {
+    const r = await c.listLinks({ status: 'paused', limit: 100, cursor });
+    const hit = r.links.find((l) => l.slug === slug);
+    if (hit) return { preview: true, applied: false, slug, shortUrl: hit.shortUrl, current: { isActive: false, longUrl: hit.longUrl, title: hit.title ?? null }, proposed: { isActive: true }, next };
+    if (!r.nextCursor) break;
+    cursor = r.nextCursor;
+  }
+  return {
+    preview: true, applied: false, found: false, slug,
+    next: `No paused link "${slug}" in the newest ${PAUSED_PREVIEW_PAGES * 100} paused links (list_links status: paused shows them). Confirming answers 404 if there is none.`,
+  };
+}
+
 export const TOOLS: StraitTool[] = [
   tool({
     name: 'create_link',
@@ -128,10 +159,13 @@ export const TOOLS: StraitTool[] = [
   }),
   tool({
     name: 'list_links',
-    description: 'List active links, newest first, one page at a time. Pass nextCursor back as cursor until it is null.',
+    description:
+      'List links, newest first, one page at a time. Pass nextCursor back as cursor until it is null. ' +
+      'status: active (default) or paused (turned off, and can be turned back on with update_link isActive: true; links disabled for abuse are not listed).',
     inputSchema: {
       limit: z.number().int().min(1).max(100).optional().describe('Page size, default 50'),
       cursor: z.string().optional().describe('nextCursor from the previous page'),
+      status: z.enum(['active', 'paused']).optional().describe('active (default) or paused'),
     },
     annotations: { title: 'List links', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     needsKey: true,
@@ -140,9 +174,11 @@ export const TOOLS: StraitTool[] = [
   tool({
     name: 'update_link',
     description:
-      'Change a live link: its destination, title, tags or expiry. People who tap the link afterwards go to the new destination, ' +
+      'Change a link: its destination, title, tags or expiry, or turn it off or back on with isActive. People who tap the link afterwards get the change, ' +
       'so this needs confirm: true. Without it nothing changes: you get a preview of the current and proposed values to show the user first. ' +
-      'null clears expiresAt / expiredAction / expiredUrl.',
+      'null clears expiresAt / expiredAction / expiredUrl. isActive is sent on its own: false pauses the link (taps get the "link not found" page), ' +
+      'true turns a paused link back on (taps follow within about 30 seconds). A link disabled for breaking the acceptable use policy cannot be turned back on, ' +
+      'and if another active link now uses the slug, pause or rename that one first.',
     inputSchema: {
       slug,
       longUrl: httpsUrl.optional(),
@@ -151,11 +187,13 @@ export const TOOLS: StraitTool[] = [
       expiresAt: when.nullable().optional(),
       expiredAction: z.enum(['page', 'store', 'url']).nullable().optional(),
       expiredUrl: httpsUrl.nullable().optional(),
+      isActive: z.boolean().optional().describe('Alone: false pauses the link, true turns a paused link back on'),
       confirm: z.boolean().optional().describe('true to apply the change; omit or false to preview it'),
     },
     annotations: { title: 'Update a link', readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
     needsKey: true,
     run: async (c, a) => {
+      if (a.isActive !== undefined) return setActive(c, a.slug, a.isActive, a.confirm === true, UPDATE_FIELDS.some((f) => a[f] !== undefined));
       const patch: LinkPatchInput = {};
       for (const f of UPDATE_FIELDS) if (a[f] !== undefined) (patch as Record<string, unknown>)[f] = a[f];
       if (!Object.keys(patch).length) throw new Error('nothing to change: give at least one of ' + UPDATE_FIELDS.join(', '));
@@ -348,7 +386,7 @@ export const TOOLS: StraitTool[] = [
     name: 'deactivate_link',
     description:
       'Write. Turns a link off: afterwards every tap on it gets the "link not found" page instead of the app, store or website. ' +
-      'Its history stays in analytics. The API has no way to turn a link back on yet, so this needs confirm: true; without it ' +
+      'Its history stays in analytics, and it can be turned back on with update_link with isActive: true. This needs confirm: true; without it ' +
       'nothing changes and you get a preview of the link to show the user first.',
     inputSchema: {
       slug,
@@ -366,7 +404,7 @@ export const TOOLS: StraitTool[] = [
           shortUrl: current.shortUrl,
           longUrl: current.longUrl,
           title: current.title ?? null,
-          next: 'Nothing has changed yet. After deactivation taps get the "link not found" page, and the API cannot turn it back on. If the user agrees, call deactivate_link again with confirm: true.',
+          next: 'Nothing has changed yet. After deactivation taps get the "link not found" page until it is turned back on (update_link isActive: true). If the user agrees, call deactivate_link again with confirm: true.',
         };
       }
       await c.deactivateLink(a.slug);
@@ -406,6 +444,7 @@ export const SERVER_INSTRUCTIONS = [
   'Keys: the secret key (st_live_…) is for servers and this MCP server only. Never put it in app or website code. Apps and websites use the publishable key (st_pub_live_…) with the Strait SDKs.',
   'Share a link by its shortUrl. Prefer batch_create_links over many create_link calls.',
   'update_link, deactivate_link and redeliver_webhook_delivery change live behaviour: call them without confirm first, show the user the preview, and only then call them with confirm: true.',
+  'To turn a paused link back on: list_links with status: paused to find it, then update_link with isActive: true (preview, then confirm: true).',
   'When a webhook seems to have stopped: list_webhook_deliveries (without webhookId to find the id), then test_webhook, then redeliver_webhook_delivery for failed deliveries.',
   'When a link opens the browser instead of the app, run check_app_links on the link domain and the app domain, then trace_tap on the link.',
   'iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play Install Referrer. On iPhone the workspace picks the method (device matching, paste handoff, both or neither) in Dashboard → Settings → iPhone installs, read by the SDK at runtime; device matching is off for new workspaces. Use search_docs before answering setup questions.',

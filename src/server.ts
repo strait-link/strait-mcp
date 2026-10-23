@@ -10,7 +10,7 @@ export const SERVER_NAME = 'strait';
 export const SERVER_VERSION = '0.2.0';
 
 /** Anything shaped like a secret key (st_live_… / st_test_…) never leaves the server in a tool result. */
-const SECRET_KEY_SHAPE = /st_(?:live|test)_[A-Za-z0-9_-]{6,}/g;
+const SECRET_KEY_SHAPE = /(?<![A-Za-z0-9])st_(?:live|test)_[A-Za-z0-9_-]+/g;
 export const redactSecrets = (text: string) => text.replace(SECRET_KEY_SHAPE, 'st_…[redacted]');
 
 type ToolResult = { content: Array<{ type: 'text'; text: string }>; isError?: boolean };

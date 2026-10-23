@@ -83,10 +83,12 @@ function compactReport(report: unknown): unknown {
   return r;
 }
 
-/** "hooks.zapier.com" from a receiver URL (the path can be a secret). */
+/** "zapier.com" from a receiver URL: the path, and on some services (Pipedream, ngrok) the subdomain, can be a secret. */
 function hostOf(url: string): string {
   try {
-    return new URL(url).host;
+    const { hostname } = new URL(url);
+    if (/^[\d.]+$/.test(hostname) || hostname.startsWith('[')) return hostname;
+    return hostname.split('.').slice(-2).join('.');
   } catch {
     return '(invalid URL)';
   }
@@ -270,7 +272,8 @@ export const TOOLS: StraitTool[] = [
       try {
         return await c.getReferrals(a);
       } catch (err) {
-        if (err instanceof StraitApiError && err.status === 404) {
+        // The engine's unmounted-route answer, not any 404 (e.g. a wrong STRAIT_API_URL serving HTML).
+        if (err instanceof StraitApiError && err.status === 404 && (err.body as { error?: unknown } | null)?.error === 'not found') {
           return { available: false, note: 'The referral report is a preview and is not switched on for the API yet. Referral codes still travel on links; the report appears here once it is switched on.' };
         }
         throw err;
@@ -282,7 +285,8 @@ export const TOOLS: StraitTool[] = [
     description:
       "Read-only. A webhook's delivery history, newest first (kept 30 days): each event sent, its status (pending = waiting " +
       'for a retry, delivered, failed = gave up after 6 attempts), attempts, last HTTP status or error and the next retry time. ' +
-      'Payloads are never returned. Without webhookId it lists the workspace\'s webhooks (id, receiver host, events, active) ' +
+      'A permanent error (e.g. unsafe_target) fails at once. Payloads are never returned. Without webhookId it lists the ' +
+      'workspace\'s webhooks (id, receiver site, events, active) ' +
       'so you can pick one. Use it when a webhook seems to have stopped.',
     inputSchema: {
       webhookId: uuid.optional().describe('The webhook id; omit to list the webhooks first'),
@@ -296,7 +300,7 @@ export const TOOLS: StraitTool[] = [
       const { webhooks } = await c.listWebhooks();
       return {
         // Receiver URLs are often capability URLs (Zapier, Slack): only the host leaves the engine's answer.
-        webhooks: webhooks.map((w) => ({ id: w.id, host: hostOf(w.url), events: w.events, active: w.active, createdAt: w.createdAt })),
+        webhooks: webhooks.map((w) => ({ id: w.id, site: hostOf(w.url), events: w.events, active: w.active, createdAt: w.createdAt })),
         next: webhooks.length
           ? 'Call list_webhook_deliveries again with webhookId set to one of these ids.'
           : 'This workspace has no webhooks. Add one in Dashboard → Settings → Webhooks.',
@@ -320,7 +324,8 @@ export const TOOLS: StraitTool[] = [
       "Write. Sends one past webhook delivery again, right away, to the webhook's current URL, with the same X-Strait-Delivery id " +
       '(receivers that de-duplicate on it are safe); its retry schedule starts over. For failed deliveries. This re-sends a real ' +
       'event into the receiving system, so it needs confirm: true; without it nothing is sent. Refused (409) when already ' +
-      'delivered or being sent right now.',
+      'delivered or being sent right now. A paused webhook must be turned back on first (Dashboard → Settings → Webhooks), ' +
+      'otherwise the redelivery fails at once.',
     inputSchema: {
       deliveryId: uuid.describe('The delivery id, from list_webhook_deliveries'),
       confirm: z.boolean().optional().describe('true to send it; omit or false to preview'),

@@ -22,13 +22,14 @@ store or website when it is not, and keep the destination through the install (d
    open after install) through one `onLink` callback. Route from `e.path` and `e.params` when `e.matched` is
    true; don't add a second deep-link handler for the link domain (React Navigation `linking`, Expo Router default
    routing). `onLink` replays past events to late subscribers, so subscribing after `start()` is fine.
-3. **iPhone is in beta.** Say so when you set up iOS. Don't add clipboard reading: iPhone install matching works
-   without it, and the clipboard boost is opt-in with one dashboard switch the SDK reads at runtime
-   (`clipboardBoost` in the SDK is deprecated and ignored).
+3. **iPhone links are live; iPhone install matching is opt-in.** Say so when you set up iOS: the screen after an App Store install is an Estimated match the owner switches on. Don't add clipboard reading yourself. On iPhone the app owner
+   chooses the method in the dashboard (Settings → iPhone installs: device matching and/or paste handoff), and the SDK
+   reads that choice from the server at runtime, so changing it needs no app release. New workspaces start with both
+   off (`clipboardBoost` in the SDK is deprecated and ignored).
 4. **Android deferred links** use the Google Play Install Referrer, so testing them needs a build installed from
    Google Play (internal testing is enough). Sideloaded builds can't test them.
-5. **The SDKs are not on npm, pub.dev or Maven Central yet.** Install from GitHub, pinned to a tag, with the exact
-   command below or on the docs page. Don't guess a registry package name.
+5. **Install the SDKs** with the exact command below or on the docs page.
+   Install the SDKs with the exact command on each SDK page: npm for React Native, Expo, web and Node, pub.dev for Flutter, JitPack (built from GitHub) for Android and git for Swift Package Manager and Unity. Don't guess a package name or version.
 6. Don't promise numbers (speed, match rates) the docs don't state.
 
 ## Steps
@@ -48,20 +49,20 @@ store or website when it is not, and keep the destination through the install (d
    - Expo: `scheme`, `android.intentFilters` (with `autoVerify`) and `ios.associatedDomains` in `app.json`, then a
      **development build** (`npx expo run:android` or EAS). Expo Go cannot test this.
 4. **Install the SDK** (versions are pinned here and on each docs page):
-   - React Native / Expo: `npm install github:bazingga08/strait-sdk-react-native#v0.8.1 @react-native-async-storage/async-storage react-native-play-install-referrer`
+   - React Native / Expo: `npm install @straitlink/react-native@0.9.2 @react-native-async-storage/async-storage react-native-play-install-referrer`
      → https://straitlink.in/docs/sdks/react-native/ (Expo: https://straitlink.in/docs/sdks/expo/)
-   - Flutter: in `pubspec.yaml`, `strait_sdk` as a git dependency (url `https://github.com/bazingga08/strait-sdk-flutter`, ref `v0.8.1`),
+   - Flutter: in `pubspec.yaml`, `strait_sdk` as a git dependency (url `https://github.com/strait-link/strait-sdk-flutter`, ref `v0.9.3`),
      then `flutter pub add app_links shared_preferences play_install_referrer flutter_timezone`
      → https://straitlink.in/docs/sdks/flutter/
-   - Android: `implementation("com.github.bazingga08:strait-sdk-android:v0.7.2")` (JitPack: add `maven("https://jitpack.io")`) plus
+   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.8.1")` (JitPack: add `maven("https://jitpack.io")`) plus
      `com.android.installreferrer:installreferrer:2.2` → https://straitlink.in/docs/sdks/android/
-   - iOS: Swift Package `https://github.com/bazingga08/strait-sdk-swift` from `0.8.0` → https://straitlink.in/docs/sdks/ios/
-   - Unity: Package Manager → Add package from git URL → `https://github.com/bazingga08/strait-sdk-unity.git?path=src#v0.8.0` → https://straitlink.in/docs/sdks/unity/
-   - Web (deferred links on a website): `npm install github:bazingga08/strait-sdk-web#v0.6.1` → https://straitlink.in/docs/sdks/web/
+   - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.9.3` → https://straitlink.in/docs/sdks/ios/
+   - Unity: Package Manager → Add package from git URL → `https://github.com/strait-link/strait-sdk-unity.git?path=src#v0.8.6` → https://straitlink.in/docs/sdks/unity/
+   - Web (deferred links on a website): `npm install @straitlink/web@0.6.3` → https://straitlink.in/docs/sdks/web/
    - Capacitor / Ionic: there is no plugin yet. Use `@capacitor/app` (`getLaunchUrl`, `appUrlOpen`) and the REST
      calls the SDKs make (`POST /v1/resolve`, `/v1/referrer`, `/v1/match`, `/v1/open`) with the publishable key
      → https://straitlink.in/guides/capacitor-deep-linking/
-   - Server (creates links, sends events; secret key from an environment variable): `npm install github:bazingga08/strait-sdk-node#v0.6.3`
+   - Server (creates links, sends events; secret key from an environment variable): `npm install @straitlink/node@0.6.5`
      → https://straitlink.in/docs/sdks/node/
 5. **Wire it** exactly as the platform's docs page shows: create the client once with `publishableKey` and
    `endpoint: 'https://<handle>.strait.link'` (plus storage and the install referrer where the page says so), call

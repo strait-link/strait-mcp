@@ -20,7 +20,7 @@ export function mockClient(respond: (c: Call) => { status?: number; body?: unkno
     calls.push(call);
     const r = respond(call);
     const status = r.status ?? 200;
-    return new Response(status === 204 ? null : JSON.stringify(r.body ?? {}), { status, headers: { 'content-type': 'application/json' } });
+    return new Response(status === 204 || r.body === undefined ? null : JSON.stringify(r.body), { status, headers: { 'content-type': 'application/json' } });
   }) as typeof fetch;
   return { client: new StraitClient({ apiUrl: 'https://api.test', secretKey: opts.secretKey, fetch: fetchImpl }), calls };
 }

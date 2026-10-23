@@ -79,6 +79,12 @@ describe('get_usage and get_referrals', () => {
     expect(parse(r).note).toMatch(/not switched on/);
   });
 
+  it('get_referrals does not hide a 404 that is not the engine\'s (e.g. a wrong STRAIT_API_URL)', async () => {
+    const { client } = mockClient(() => ({ status: 404, body: { message: 'Page not found' } }));
+    const r = await runTool(byName('get_referrals'), client, {});
+    expect(r.isError).toBe(true);
+  });
+
   it('get_referrals still fails on other errors', async () => {
     const { client } = mockClient(() => ({ status: 429, body: { error: 'rate limited' } }));
     const r = await runTool(byName('get_referrals'), client, {});
@@ -102,19 +108,17 @@ describe('webhook tools', () => {
     const r = parse(await runTool(byName('list_webhook_deliveries'), client, {}));
     expect(calls[0]!.url.pathname).toBe('/v1/export');
     expect(calls[0]!.url.searchParams.get('part')).toBe('webhooks');
-    expect(r.webhooks).toEqual([{ id: HOOK, host: 'hooks.zapier.com', events: ['link.clicked'], active: true, createdAt: '2026-10-01T00:00:00.000Z' }]);
+    expect(r.webhooks).toEqual([{ id: HOOK, site: 'zapier.com', events: ['link.clicked'], active: true, createdAt: '2026-10-01T00:00:00.000Z' }]);
     expect(JSON.stringify(r)).not.toContain('SECRETPATH');
     expect(r.next).toMatch(/webhookId/);
   });
 
-  it('refuses a webhook or delivery id that is not a UUID before calling anything', async () => {
-    const { client, calls } = mockClient(() => ({ body: {} }));
+  it('the input schemas refuse a webhook or delivery id that is not a UUID', async () => {
     const { z } = await import('zod');
     for (const [n, field] of [['list_webhook_deliveries', 'webhookId'], ['test_webhook', 'webhookId'], ['redeliver_webhook_delivery', 'deliveryId']] as const) {
       const schema = z.object(byName(n).inputSchema);
       expect(schema.safeParse({ [field]: '../links/summer' }).success, n).toBe(false);
     }
-    expect(calls).toHaveLength(0);
   });
 
   it('test_webhook posts to the test endpoint and returns the attempt', async () => {
@@ -172,7 +176,7 @@ describe('deactivate_link', () => {
     const { client } = mockClient(() => ({ status: 404 }));
     const r = await runTool(byName('deactivate_link'), client, { slug: 'summer', confirm: true });
     expect(r.isError).toBe(true);
-    expect(r.content[0]!.text).toMatch(/deactivateLink: .*HTTP 404/);
+    expect(r.content[0]!.text).toMatch(/deactivateLink: no active link with slug "summer" in this workspace \(HTTP 404\)/);
   });
 });
 
@@ -194,6 +198,23 @@ describe('secret hygiene (cso)', () => {
     } finally {
       for (const s of spies) s.mockRestore();
     }
+  });
+
+  it('webhook sites drop secret subdomains (Pipedream) and keep IPs', async () => {
+    const exp = { webhooks: [
+      { id: HOOK, url: 'https://eo1a2b3c4d5e6f.m.pipedream.net/', events: [], active: true },
+      { id: HOOK, url: 'https://203.0.113.9/hook', events: [], active: false },
+    ] };
+    const { client } = mockClient(() => ({ body: exp }));
+    const r = parse(await runTool(byName('list_webhook_deliveries'), client, {}));
+    expect(r.webhooks.map((w: { site: string }) => w.site)).toEqual(['pipedream.net', '203.0.113.9']);
+  });
+
+  it('redaction leaves ordinary words that contain _live_ or _test_ alone', async () => {
+    const { client } = mockClient(() => ({ body: { ...LINK, longUrl: 'https://shop.example/fastest_live_results', slug: 'best_test_drive1' } }));
+    const r = parse(await runTool(byName('get_link'), client, { slug: 'best_test_drive1' }));
+    expect(r.longUrl).toBe('https://shop.example/fastest_live_results');
+    expect(r.slug).toBe('best_test_drive1');
   });
 
   it('redacts key-shaped strings in successful output too', async () => {

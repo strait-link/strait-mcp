@@ -141,11 +141,11 @@ Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop use
   Keep the private key out of the repo.
 - **Alternative `io.github.<owner>/strait-mcp`.** Uses GitHub OAuth (`mcp-publisher login github`) and needs no DNS
   change, but the name shows a personal GitHub account rather than the product domain, and it requires the public
-  GitHub repo, which does not exist yet. To switch, change `name` in `server.json` and `mcpName` in `package.json`
+  GitHub repo (strait-link/strait-mcp). To switch, change `name` in `server.json` and `mcpName` in `package.json`
   together (a test checks they match).
 - `remotes` is left out until `mcp.strait.link` is deployed; add
-  `{"type": "streamable-http", "url": "https://mcp.strait.link/mcp"}` then. Add `"repository": {"url": "https://github.com/bazingga08/strait-mcp", "source": "github"}`
-  once the GitHub repo exists.
+  `{"type": "streamable-http", "url": "https://mcp.strait.link/mcp"}` then. Add `"repository": {"url": "https://github.com/strait-link/strait-mcp", "source": "github"}`
+  (the GitHub repo exists since 23 Oct 2026).
 - Order when the Strait team is ready: create the repo, publish `@straitlink/mcp` to npm (done: 0.1.0 on 15 Oct,
   `mcpName` matches), add the TXT record, then run the **MCP registry** workflow (`.github/workflows/registry.yml`).
   Without the `MCP_DNS_PRIVATE_KEY` secret it only validates `server.json` (schema, name, version, npm) and stops.
@@ -248,5 +248,5 @@ it back. It is skipped when no engine checkout with installed dependencies is ne
 
 - **Docs:** [straitlink.in/docs/](https://straitlink.in/docs/) · [platform status](https://straitlink.in/platform-status/) · [troubleshooting](https://straitlink.in/docs/troubleshooting/)
 - **Talk to the Strait team:** [support@straitlink.in](mailto:support@straitlink.in) (replies within 1 working day, IST) or call +91 81218 61890.
-- **Bugs and feature requests:** [open an issue](https://github.com/bazingga08/strait-mcp/issues) on this repo.
+- **Bugs and feature requests:** [open an issue](https://github.com/strait-link/strait-mcp/issues) on this repo.
 - **Security:** never in a public issue. Write to security@straitlink.in.

@@ -14,11 +14,11 @@
   ],
   "homepage": "https://straitlink.in/docs/",
   "bugs": {
-    "url": "https://github.com/bazingga08/strait-mcp/issues"
+    "url": "https://github.com/strait-link/strait-mcp/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bazingga08/strait-mcp.git"
+    "url": "git+https://github.com/strait-link/strait-mcp.git"
   },
   "license": "MIT",
   "author": "The Strait team <support@straitlink.in>",

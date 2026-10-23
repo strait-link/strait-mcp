@@ -171,6 +171,20 @@ describe('search_docs', () => {
     expect(top!.url).toMatch(/migrate-from-firebase/);
   });
 
+  // Index rebuilt from the live site (23 Oct 2026): today's install lines, not the 16 Oct git recipe.
+  it('answers install questions with the published packages, not the old git dependency', () => {
+    const flutter = searchDocs('flutter install strait_sdk pubspec', 8);
+    expect(flutter.some((h) => h.markdown.includes('strait_sdk: ^0.9.3'))).toBe(true);
+    for (const h of searchDocs('flutter install', 10)) expect(h.markdown).not.toMatch(/Add the git dependency/);
+    const rn = searchDocs('install react native sdk npm', 8);
+    expect(rn.some((h) => h.markdown.includes('npm install @straitlink/react-native'))).toBe(true);
+  });
+
+  it('knows the CLI and MCP pages added on 23 Oct', () => {
+    expect(searchDocs('strait init cli dry-run', 5).some((h) => h.url.includes('/docs/cli/'))).toBe(true);
+    expect(searchDocs('mcp server claude add', 5).some((h) => h.url.includes('/docs/mcp/'))).toBe(true);
+  });
+
   it('returns nothing for an empty or stop-word query', () => {
     expect(searchDocs('the and of')).toEqual([]);
     expect(tokens('How do I use React-Native?')).toEqual(['use', 'react-native']);

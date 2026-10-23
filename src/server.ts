@@ -7,7 +7,7 @@ import { StraitApiError, type StraitClient } from './client.js';
 import { SERVER_INSTRUCTIONS, TOOLS, type StraitTool } from './tools.js';
 
 export const SERVER_NAME = 'strait';
-export const SERVER_VERSION = '0.2.0';
+export const SERVER_VERSION = '0.2.1';
 
 /** Anything shaped like a secret key (st_live_… / st_test_…) never leaves the server in a tool result. */
 const SECRET_KEY_SHAPE = /(?<![A-Za-z0-9])st_(?:live|test)_[A-Za-z0-9_-]+/g;

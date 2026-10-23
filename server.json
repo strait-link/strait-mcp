@@ -3,14 +3,14 @@
   "name": "in.straitlink/mcp",
   "title": "Strait",
   "description": "Create, inspect and deactivate deep links; read analytics, usage, webhooks; check App Links files.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "websiteUrl": "https://straitlink.in",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@straitlink/mcp",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         {

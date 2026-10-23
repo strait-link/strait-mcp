@@ -3,14 +3,14 @@
   "name": "in.straitlink/mcp",
   "title": "Strait",
   "description": "Create and inspect deep links, read tap analytics and check App Links / Universal Links files.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "websiteUrl": "https://straitlink.in",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@straitlink/mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         {

@@ -140,6 +140,41 @@ export class StraitClient {
   checkAppLinks(domain: string) {
     return this.call<unknown>('checkAppLinks', 'GET', '/v1/tools/app-links', { query: { domain }, auth: false });
   }
+  getUsage() {
+    return this.call<Record<string, unknown>>('getUsage', 'GET', '/v1/usage');
+  }
+  /** Referral report (preview): the engine answers 404 until referrals are switched on. */
+  getReferrals(q: { from?: string; to?: string } = {}) {
+    return this.call<Record<string, unknown>>('getReferrals', 'GET', '/v1/referrals', { query: q });
+  }
+  /** The workspace's webhooks, from the export (configuration only: the engine never exports signing secrets). */
+  listWebhooks() {
+    return this.call<{ webhooks: Array<{ id: string; url: string; events: string[]; active: boolean; createdAt?: string }> }>(
+      'exportData', 'GET', '/v1/export', { query: { part: 'webhooks' } },
+    );
+  }
+  listWebhookDeliveries(webhookId: string, opts: { limit?: number; cursor?: string } = {}) {
+    return this.call<{ deliveries: unknown[]; nextCursor: string | null }>(
+      'listWebhookDeliveries', 'GET', `/v1/webhooks/${encodeURIComponent(webhookId)}/deliveries`, { query: { limit: opts.limit, cursor: opts.cursor } },
+    );
+  }
+  testWebhook(webhookId: string) {
+    return this.call<Record<string, unknown>>('testWebhook', 'POST', `/v1/webhooks/${encodeURIComponent(webhookId)}/test`);
+  }
+  redeliverWebhookDelivery(deliveryId: string) {
+    return this.call<Record<string, unknown>>('redeliverWebhookDelivery', 'POST', `/v1/webhook-deliveries/${encodeURIComponent(deliveryId)}/redeliver`);
+  }
+  /** DELETE /v1/links/{slug}: 204 deactivated; 404 (empty body) = no active link with that slug. */
+  async deactivateLink(slug: string): Promise<void> {
+    try {
+      await this.call<void>('deactivateLink', 'DELETE', `/v1/links/${encodeURIComponent(slug)}`);
+    } catch (err) {
+      if (err instanceof StraitApiError && err.status === 404 && !err.body) {
+        throw new StraitApiError(404, { error: `no active link with slug "${slug}" in this workspace` }, 'deactivateLink');
+      }
+      throw err;
+    }
+  }
   /** Live Tap Trace of the website demo (204 = no tap yet → null). */
   getTapTrace(token: string) {
     return this.call<unknown>('getTapTrace', 'GET', `/v1/trace/${encodeURIComponent(token)}`, { auth: false }).then((r) => r ?? null);

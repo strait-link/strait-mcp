@@ -7,7 +7,11 @@ import { StraitApiError, type StraitClient } from './client.js';
 import { SERVER_INSTRUCTIONS, TOOLS, type StraitTool } from './tools.js';
 
 export const SERVER_NAME = 'strait';
-export const SERVER_VERSION = '0.1.0';
+export const SERVER_VERSION = '0.2.0';
+
+/** Anything shaped like a secret key (st_live_… / st_test_…) never leaves the server in a tool result. */
+const SECRET_KEY_SHAPE = /st_(?:live|test)_[A-Za-z0-9_-]{6,}/g;
+export const redactSecrets = (text: string) => text.replace(SECRET_KEY_SHAPE, 'st_…[redacted]');
 
 type ToolResult = { content: Array<{ type: 'text'; text: string }>; isError?: boolean };
 
@@ -21,7 +25,7 @@ export async function runTool(t: StraitTool, client: StraitClient, args: unknown
       };
     }
     const out = await t.run(client, args as never);
-    return { content: [{ type: 'text', text: JSON.stringify(out ?? { ok: true }, null, 2) }] };
+    return { content: [{ type: 'text', text: redactSecrets(JSON.stringify(out ?? { ok: true }, null, 2)) }] };
   } catch (err) {
     const text =
       err instanceof StraitApiError
@@ -29,7 +33,7 @@ export async function runTool(t: StraitTool, client: StraitClient, args: unknown
         : err instanceof Error
           ? err.message
           : String(err);
-    return { isError: true, content: [{ type: 'text', text }] };
+    return { isError: true, content: [{ type: 'text', text: redactSecrets(text) }] };
   }
 }
 

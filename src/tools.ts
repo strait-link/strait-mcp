@@ -3,7 +3,7 @@
  * the stdio server, the remote Worker and the tests all register the same list.
  */
 import { z } from 'zod';
-import type { StraitClient, NewLinkInput, LinkPatchInput } from './client.js';
+import { StraitApiError, type StraitClient, type NewLinkInput, type LinkPatchInput } from './client.js';
 import { searchDocs } from './docs.js';
 
 export interface ToolAnnotations {
@@ -29,6 +29,7 @@ const tool = <S extends z.ZodRawShape>(t: StraitTool<S>) => t as unknown as Stra
 // ── shared input pieces ─────────────────────────────────────────────────────
 const slug = z.string().regex(/^[a-zA-Z0-9_-]{1,64}$/, 'letters, digits, - and _ (1–64)').describe("The link's slug: the part after the link domain, e.g. `summer` in https://hilltop.strait.link/summer");
 const httpsUrl = z.string().url().refine((u) => u.startsWith('https://'), 'must be an https URL');
+const uuid = z.string().uuid();
 const when = z.union([z.string(), z.number()]).describe('ISO date-time (2026-12-31T23:59:59Z) or epoch ms');
 
 const newLinkShape = {
@@ -80,6 +81,15 @@ function compactReport(report: unknown): unknown {
     for (const f of ['file', 'legacyFile']) if (p[f]) delete p[f].body;
   }
   return r;
+}
+
+/** "hooks.zapier.com" from a receiver URL (the path can be a secret). */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return '(invalid URL)';
+  }
 }
 
 const UPDATE_FIELDS = ['longUrl', 'title', 'tags', 'expiresAt', 'expiredAction', 'expiredUrl'] as const;
@@ -234,6 +244,131 @@ export const TOOLS: StraitTool[] = [
     },
   }),
   tool({
+    name: 'get_usage',
+    description:
+      "Read-only. This calendar month's usage (UTC) against the workspace's plan: billed taps used and included, new links " +
+      'created and included (null = no limit), level (ok, warn from 80 % of included taps, over from 100 %) and new_links_paused. ' +
+      'Going over never stops a redirect; new_links_paused means create_link answers 402 until an upgrade or the month ends.',
+    inputSchema: {},
+    annotations: { title: 'Read this month\'s usage', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    needsKey: true,
+    run: (c) => c.getUsage(),
+  }),
+  tool({
+    name: 'get_referrals',
+    description:
+      'Read-only. The referral report (a preview): for each referral code in a date range, the taps that carried it and the ' +
+      'referred installs, most conversions first. Days are UTC; at most 92 days per call (default: the last 30 days). ' +
+      'If referrals are not switched on for the workspace yet, says so instead of failing.',
+    inputSchema: {
+      from: z.string().optional().describe('Inclusive start: 2026-10-01, an ISO date-time or epoch ms'),
+      to: z.string().optional().describe('Exclusive end, same formats; default now'),
+    },
+    annotations: { title: 'Read the referral report', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    needsKey: true,
+    run: async (c, a) => {
+      try {
+        return await c.getReferrals(a);
+      } catch (err) {
+        if (err instanceof StraitApiError && err.status === 404) {
+          return { available: false, note: 'The referral report is a preview and is not switched on for the API yet. Referral codes still travel on links; the report appears here once it is switched on.' };
+        }
+        throw err;
+      }
+    },
+  }),
+  tool({
+    name: 'list_webhook_deliveries',
+    description:
+      "Read-only. A webhook's delivery history, newest first (kept 30 days): each event sent, its status (pending = waiting " +
+      'for a retry, delivered, failed = gave up after 6 attempts), attempts, last HTTP status or error and the next retry time. ' +
+      'Payloads are never returned. Without webhookId it lists the workspace\'s webhooks (id, receiver host, events, active) ' +
+      'so you can pick one. Use it when a webhook seems to have stopped.',
+    inputSchema: {
+      webhookId: uuid.optional().describe('The webhook id; omit to list the webhooks first'),
+      limit: z.number().int().min(1).max(100).optional().describe('Page size, default 20'),
+      cursor: z.string().optional().describe('nextCursor from the previous page'),
+    },
+    annotations: { title: 'List webhook deliveries', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    needsKey: true,
+    run: async (c, a) => {
+      if (a.webhookId) return c.listWebhookDeliveries(a.webhookId, a);
+      const { webhooks } = await c.listWebhooks();
+      return {
+        // Receiver URLs are often capability URLs (Zapier, Slack): only the host leaves the engine's answer.
+        webhooks: webhooks.map((w) => ({ id: w.id, host: hostOf(w.url), events: w.events, active: w.active, createdAt: w.createdAt })),
+        next: webhooks.length
+          ? 'Call list_webhook_deliveries again with webhookId set to one of these ids.'
+          : 'This workspace has no webhooks. Add one in Dashboard → Settings → Webhooks.',
+      };
+    },
+  }),
+  tool({
+    name: 'test_webhook',
+    description:
+      'Write. Sends one test event (event: ping) to a webhook right now, even if it is paused, and returns whether the receiver ' +
+      'accepted it, its HTTP status and the time taken (never its response body). The ping is not stored or retried and ' +
+      'changes nothing in Strait. Get the id from list_webhook_deliveries without webhookId.',
+    inputSchema: { webhookId: uuid.describe('The webhook id') },
+    annotations: { title: 'Send a test webhook', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    needsKey: true,
+    run: (c, a) => c.testWebhook(a.webhookId),
+  }),
+  tool({
+    name: 'redeliver_webhook_delivery',
+    description:
+      "Write. Sends one past webhook delivery again, right away, to the webhook's current URL, with the same X-Strait-Delivery id " +
+      '(receivers that de-duplicate on it are safe); its retry schedule starts over. For failed deliveries. This re-sends a real ' +
+      'event into the receiving system, so it needs confirm: true; without it nothing is sent. Refused (409) when already ' +
+      'delivered or being sent right now.',
+    inputSchema: {
+      deliveryId: uuid.describe('The delivery id, from list_webhook_deliveries'),
+      confirm: z.boolean().optional().describe('true to send it; omit or false to preview'),
+    },
+    annotations: { title: 'Redeliver a webhook delivery', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    needsKey: true,
+    run: async (c, a) => {
+      if (a.confirm !== true) {
+        return {
+          preview: true,
+          applied: false,
+          deliveryId: a.deliveryId,
+          next: 'Nothing has been sent. This re-sends a real event to the webhook receiver. If the user agrees, call redeliver_webhook_delivery again with confirm: true.',
+        };
+      }
+      return { applied: true, delivery: await c.redeliverWebhookDelivery(a.deliveryId) };
+    },
+  }),
+  tool({
+    name: 'deactivate_link',
+    description:
+      'Write. Turns a link off: afterwards every tap on it gets the "link not found" page instead of the app, store or website. ' +
+      'Its history stays in analytics. The API has no way to turn a link back on yet, so this needs confirm: true; without it ' +
+      'nothing changes and you get a preview of the link to show the user first.',
+    inputSchema: {
+      slug,
+      confirm: z.boolean().optional().describe('true to deactivate; omit or false to preview'),
+    },
+    annotations: { title: 'Deactivate a link', readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+    needsKey: true,
+    run: async (c, a) => {
+      if (a.confirm !== true) {
+        const current = await c.getLink(a.slug);
+        return {
+          preview: true,
+          applied: false,
+          slug: a.slug,
+          shortUrl: current.shortUrl,
+          longUrl: current.longUrl,
+          title: current.title ?? null,
+          next: 'Nothing has changed yet. After deactivation taps get the "link not found" page, and the API cannot turn it back on. If the user agrees, call deactivate_link again with confirm: true.',
+        };
+      }
+      await c.deactivateLink(a.slug);
+      return { applied: true, slug: a.slug, deactivated: true };
+    },
+  }),
+  tool({
     name: 'search_docs',
     description:
       'Search the Strait documentation (SDK setup for React Native / Expo, Flutter, Android, iOS, Unity, web and Node; App Links and ' +
@@ -265,7 +400,8 @@ export const SERVER_INSTRUCTIONS = [
   'Strait makes links open the right screen in a mobile app (deep links), including after an install (deferred deep links), and reports what happened to each tap.',
   'Keys: the secret key (st_live_…) is for servers and this MCP server only. Never put it in app or website code. Apps and websites use the publishable key (st_pub_live_…) with the Strait SDKs.',
   'Share a link by its shortUrl. Prefer batch_create_links over many create_link calls.',
-  'update_link changes where live links go: call it without confirm first, show the user the preview, and only then call it with confirm: true.',
+  'update_link, deactivate_link and redeliver_webhook_delivery change live behaviour: call them without confirm first, show the user the preview, and only then call them with confirm: true.',
+  'When a webhook seems to have stopped: list_webhook_deliveries (without webhookId to find the id), then test_webhook, then redeliver_webhook_delivery for failed deliveries.',
   'When a link opens the browser instead of the app, run check_app_links on the link domain and the app domain, then trace_tap on the link.',
   'iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play Install Referrer. On iPhone the workspace picks the method (device matching, paste handoff, both or neither) in Dashboard → Settings → iPhone installs, read by the SDK at runtime; device matching is off for new workspaces. Use search_docs before answering setup questions.',
 ].join('\n');

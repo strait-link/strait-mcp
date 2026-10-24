@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1 (24 Oct 2026)
+
+- `search_docs` index and the bundled skill rebuilt from the live site (c888cd5): the hosted MCP guide and one page per
+  tool group, secret key access (Full / Links only / Read only) and the `key_scope` error.
+
 ## 0.4.0 (24 Oct 2026)
 
 - Three MCP prompts (starter requests in a client's prompt picker): `weekly_review` (this week against last week, top

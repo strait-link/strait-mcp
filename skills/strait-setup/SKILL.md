@@ -51,10 +51,10 @@ store or website when it is not, and keep the destination through the install (d
 4. **Install the SDK** (versions are pinned here and on each docs page):
    - React Native / Expo: `npm install @straitlink/react-native@0.9.3 @react-native-async-storage/async-storage react-native-play-install-referrer`
      → https://straitlink.in/docs/sdks/react-native/ (Expo: https://straitlink.in/docs/sdks/expo/)
-   - Flutter: in `pubspec.yaml`, `strait_sdk` as a git dependency (url `https://github.com/strait-link/strait-sdk-flutter`, ref `v0.9.3`),
+   - Flutter: in `pubspec.yaml`, `strait_sdk: ^0.9.4` (pub.dev),
      then `flutter pub add app_links shared_preferences play_install_referrer flutter_timezone`
      → https://straitlink.in/docs/sdks/flutter/
-   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.8.3")` (JitPack: add `maven("https://jitpack.io")`) plus
+   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.8.4")` (JitPack: add `maven("https://jitpack.io")`) plus
      `com.android.installreferrer:installreferrer:2.2` → https://straitlink.in/docs/sdks/android/
    - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.9.4` → https://straitlink.in/docs/sdks/ios/
    - Unity: Package Manager → Add package from git URL → `https://github.com/strait-link/strait-sdk-unity.git?path=src#v0.8.7` → https://straitlink.in/docs/sdks/unity/

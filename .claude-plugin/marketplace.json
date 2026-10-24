@@ -1,0 +1,15 @@
+{
+  "name": "strait-link",
+  "owner": {
+    "name": "The Strait team",
+    "email": "support@straitlink.in"
+  },
+  "description": "Strait for Claude Code: the hosted MCP server and the app setup skill.",
+  "plugins": [
+    {
+      "name": "strait",
+      "source": "./",
+      "description": "The hosted Strait MCP server and the strait-setup skill for Claude Code."
+    }
+  ]
+}

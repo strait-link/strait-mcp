@@ -239,6 +239,10 @@ export class StraitClient {
   checkAppLinks(domain: string) {
     return this.call<unknown>('checkAppLinks', 'GET', '/v1/tools/app-links', { query: { domain }, auth: false });
   }
+  /** GET /v1/workspace: the key's workspace, link domain, plan and the key's own access. */
+  getWorkspace() {
+    return this.call<{ name: string; handle: string | null; linkBase: string; linkDomain: string; customDomains: string[]; plan: string | null; key: { scope: 'full' | 'links' | 'read'; prefix: string | null } }>('getWorkspace', 'GET', '/v1/workspace');
+  }
   getUsage() {
     return this.call<Record<string, unknown>>('getUsage', 'GET', '/v1/usage');
   }

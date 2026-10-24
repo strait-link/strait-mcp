@@ -1,6 +1,6 @@
 {
   "name": "@straitlink/mcp",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "mcpName": "in.straitlink/mcp",
   "description": "Strait MCP server: create, search, pause and resume deep links, QR codes, analytics comparisons and top links, recent taps and events, custom domains, webhooks, App Links / Universal Links checks and the docs, from AI tools. Stdio command and a library for remote hosts.",
   "keywords": [

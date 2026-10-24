@@ -178,9 +178,9 @@ Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop use
   change, but the name shows a personal GitHub account rather than the product domain, and it requires the public
   GitHub repo (strait-link/strait-mcp). To switch, change `name` in `server.json` and `mcpName` in `package.json`
   together (a test checks they match).
-- `remotes` is left out until `mcp.strait.link` is deployed; add
-  `{"type": "streamable-http", "url": "https://mcp.strait.link/mcp"}` then. Add `"repository": {"url": "https://github.com/strait-link/strait-mcp", "source": "github"}`
-  (the GitHub repo exists since 23 Oct 2026).
+- `remotes` lists the hosted server `https://strait.link/mcp` (Streamable HTTP, `Authorization: Bearer` secret key,
+  live since 24 Oct 2026), and `repository` points at github.com/strait-link/strait-mcp. The OAuth Worker
+  (`mcp.strait.link`) is not listed until it is deployed.
 - Order when the Strait team is ready: create the repo, publish `@straitlink/mcp` to npm (done: 0.1.0 on 15 Oct,
   `mcpName` matches), add the TXT record, then run the **MCP registry** workflow (`.github/workflows/registry.yml`).
   Without the `MCP_DNS_PRIVATE_KEY` secret it only validates `server.json` (schema, name, version, npm) and stops.

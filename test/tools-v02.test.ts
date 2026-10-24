@@ -8,7 +8,7 @@ const byName = (n: string) => {
   if (!t) throw new Error(`no tool ${n}`);
   return t;
 };
-const parse = (r: { content: Array<{ text: string }> }) => JSON.parse(r.content[0]!.text);
+const parse = (r: { content: Array<{ text?: string }> }) => JSON.parse(r.content[0]!.text!);
 const HOOK = '7f3e2c1a-9b4d-4e8f-a6c5-2d1b0e9f8a73';
 const DELIVERY = '3c9e1a7b-5d2f-4e8a-b6c1-9f0d2e4a7b58';
 const KEY = 'st_live_test_mockkey';

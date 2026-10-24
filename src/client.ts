@@ -70,6 +70,62 @@ export interface Link {
 
 export type AnalyticsGroup = 'none' | 'day' | 'channel' | 'link' | 'platform';
 
+export interface Domain {
+  hostname: string;
+  verified: boolean;
+  status: string;
+  records?: Array<{ type: string; name: string; value: string; purpose?: string }>;
+  [k: string]: unknown;
+}
+
+export interface DomainList {
+  enabled: boolean;
+  writes?: boolean;
+  allowed: boolean;
+  cnameTarget: string | null;
+  max: number;
+  domains: Domain[];
+}
+
+export type ExportPart = 'links' | 'taps' | 'events';
+
+export interface QrOptions {
+  format?: 'png' | 'svg';
+  size?: number;
+  margin?: number;
+  color?: string;
+  background?: string;
+  logo?: boolean;
+  track?: boolean;
+}
+
+export interface NewEventInput {
+  event: string;
+  value?: number;
+  currency?: string;
+  clickId?: string;
+  linkId?: string;
+  eventId?: string;
+  platform?: string;
+  data?: Record<string, string | number | boolean | null>;
+}
+
+interface CallOptions {
+  query?: Record<string, string | number | boolean | undefined>;
+  body?: unknown;
+  auth?: boolean;
+  accept?: string;
+}
+
+/** A non-JSON answer read by StraitClient.raw(). */
+export interface RawAnswer {
+  bytes: Uint8Array;
+  /** true when the answer was longer than maxBytes and was cut there. */
+  truncated: boolean;
+  contentType: string;
+  headers: Headers;
+}
+
 /** True when this looks like a secret key (never a publishable key). */
 export function isSecretKey(key: string | undefined): boolean {
   return !!key && /^st_(live|test)_[A-Za-z0-9_-]+$/.test(key) && !key.startsWith('st_pub_');
@@ -92,18 +148,22 @@ export class StraitClient {
     return isSecretKey(this.secretKey);
   }
 
-  private async call<T>(operation: string, method: string, path: string, opts: { query?: Record<string, string | number | undefined>; body?: unknown; auth?: boolean } = {}): Promise<T> {
+  private async send(operation: string, method: string, path: string, opts: CallOptions = {}): Promise<Response> {
     const auth = opts.auth ?? true;
     if (auth && !this.hasSecretKey) {
       throw new StraitApiError(401, { error: 'no secret key configured: set STRAIT_SECRET_KEY to a key from Dashboard → Settings → Secret keys (st_live_…)' }, operation);
     }
     const url = new URL(this.apiUrl + path);
     for (const [k, v] of Object.entries(opts.query ?? {})) if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
-    const headers: Record<string, string> = { accept: 'application/json' };
+    const headers: Record<string, string> = { accept: opts.accept ?? 'application/json' };
     if (auth) headers.authorization = `Bearer ${this.secretKey}`;
     if (opts.body !== undefined) headers['content-type'] = 'application/json';
     if (this.userAgent) headers['user-agent'] = this.userAgent;
-    const res = await this.fetchImpl(url, { method, headers, body: opts.body === undefined ? undefined : JSON.stringify(opts.body) });
+    return this.fetchImpl(url, { method, headers, body: opts.body === undefined ? undefined : JSON.stringify(opts.body) });
+  }
+
+  private async call<T>(operation: string, method: string, path: string, opts: CallOptions = {}): Promise<T> {
+    const res = await this.send(operation, method, path, opts);
     if (res.status === 204) return undefined as T;
     const text = await res.text();
     let json: unknown = text;
@@ -114,6 +174,43 @@ export class StraitClient {
     }
     if (!res.ok) throw new StraitApiError(res.status, json, operation);
     return json as T;
+  }
+
+  /** A non-JSON answer (an image, CSV, NDJSON), read up to maxBytes; the rest is cancelled, not downloaded. */
+  private async raw(operation: string, method: string, path: string, opts: CallOptions & { maxBytes: number }): Promise<RawAnswer> {
+    const res = await this.send(operation, method, path, opts);
+    if (!res.ok) {
+      const text = await res.text();
+      let json: unknown = text;
+      try {
+        json = text ? JSON.parse(text) : null;
+      } catch {
+        // not JSON
+      }
+      throw new StraitApiError(res.status, json, operation);
+    }
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    let truncated = false;
+    const reader = res.body?.getReader();
+    while (reader) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      size += value.byteLength;
+      if (size >= opts.maxBytes) {
+        truncated = true;
+        await reader.cancel().catch(() => undefined);
+        break;
+      }
+    }
+    const bytes = new Uint8Array(size);
+    let at = 0;
+    for (const c of chunks) {
+      bytes.set(c, at);
+      at += c.byteLength;
+    }
+    return { bytes: truncated ? bytes.slice(0, opts.maxBytes) : bytes, truncated, contentType: res.headers.get('content-type') ?? '', headers: res.headers };
   }
 
   createLink(link: NewLinkInput) {
@@ -176,6 +273,33 @@ export class StraitClient {
       }
       throw err;
     }
+  }
+  /** GET /v1/links/{slug}/qr: a PNG or SVG QR code (X-Strait-Qr-Url = the encoded URL). */
+  getLinkQr(slug: string, q: QrOptions = {}) {
+    const accept = q.format === 'svg' ? 'image/svg+xml' : 'image/png';
+    return this.raw('getLinkQr', 'GET', `/v1/links/${encodeURIComponent(slug)}/qr`, { query: { ...q }, accept, maxBytes: 4 * 1024 * 1024 });
+  }
+  /** GET /v1/export?part=links|taps|events as text (NDJSON / CSV), cut at maxBytes. Owners and admins' keys only. */
+  async exportText(part: ExportPart, q: { from?: string | number; to?: string | number } = {}, maxBytes = 4 * 1024 * 1024) {
+    const r = await this.raw('exportData', 'GET', '/v1/export', { query: { part, from: q.from, to: q.to }, accept: '*/*', maxBytes });
+    return { text: new TextDecoder().decode(r.bytes), truncated: r.truncated };
+  }
+  listDomains() {
+    return this.call<DomainList>('listDomains', 'GET', '/v1/domains');
+  }
+  addDomain(hostname: string) {
+    return this.call<Domain>('addDomain', 'POST', '/v1/domains', { body: { hostname } });
+  }
+  removeDomain(hostname: string) {
+    return this.call<void>('removeDomain', 'DELETE', `/v1/domains/${encodeURIComponent(hostname)}`);
+  }
+  /** POST /v1/event with the secret key (sentWith secret_key: trusted server-side revenue). */
+  recordEvent(e: NewEventInput) {
+    return this.call<{ ok: boolean; clickId: string | null; linkId: string | null }>('recordEvent', 'POST', '/v1/event', { body: e });
+  }
+  /** The public link checker (any deep link: Firebase page.link, Branch, Strait…). No key. */
+  checkLink(url: string) {
+    return this.call<Record<string, unknown>>('checkLink', 'POST', '/v1/tools/link-check', { body: { url }, auth: false });
   }
   /** Live Tap Trace of the website demo (204 = no tap yet → null). */
   getTapTrace(token: string) {

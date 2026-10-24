@@ -8,7 +8,7 @@ export interface Call {
 }
 
 /** A StraitClient whose fetch is answered by `respond` and recorded in `calls`. */
-export function mockClient(respond: (c: Call) => { status?: number; body?: unknown }, opts: { secretKey?: string } = { secretKey: 'st_live_test_mockkey' }) {
+export function mockClient(respond: (c: Call) => { status?: number; body?: unknown; raw?: string | Uint8Array; headers?: Record<string, string> }, opts: { secretKey?: string } = { secretKey: 'st_live_test_mockkey' }) {
   const calls: Call[] = [];
   const fetchImpl = (async (input: URL | string | Request, init?: RequestInit) => {
     const call: Call = {
@@ -20,6 +20,7 @@ export function mockClient(respond: (c: Call) => { status?: number; body?: unkno
     calls.push(call);
     const r = respond(call);
     const status = r.status ?? 200;
+    if (r.raw !== undefined) return new Response(r.raw, { status, headers: r.headers ?? { 'content-type': 'text/plain' } });
     return new Response(status === 204 || r.body === undefined ? null : JSON.stringify(r.body), { status, headers: { 'content-type': 'application/json' } });
   }) as typeof fetch;
   return { client: new StraitClient({ apiUrl: 'https://api.test', secretKey: opts.secretKey, fetch: fetchImpl }), calls };

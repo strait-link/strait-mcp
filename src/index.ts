@@ -5,3 +5,4 @@
 export { createStraitServer, runTool, redactSecrets, SERVER_NAME, SERVER_VERSION } from './server.js';
 export { StraitClient, StraitApiError, isSecretKey, DEFAULT_API_URL, type StraitClientOptions } from './client.js';
 export { TOOLS, SERVER_INSTRUCTIONS, type StraitTool } from './tools.js';
+export { PROMPTS, type StraitPrompt } from './prompts.js';

@@ -78,6 +78,16 @@ only with `confirm: true`. `create_link` and
 `batch_create_links` write new links but never change existing ones. There is no delete tool: a deactivated link
 keeps its history.
 
+## Prompts (0.4.0)
+
+Clients that show MCP prompts (Claude Code: type `/`) offer three starters. Each one only reads:
+
+| Prompt | What it does |
+|---|---|
+| `weekly_review` | This week against last week (totals and channels), the top links by installs, and anything down more than 30 % |
+| `debug_link` (slug) | Why a link opens the browser: App Links / Universal Links files, a trace per channel and its recent taps, with the fix |
+| `setup_check` | Usage, custom domains still waiting for DNS, webhooks with failed deliveries, and the App Links files |
+
 ## Keys
 
 The server needs a **secret key** (`st_live_…`) from **Dashboard → Settings → Secret keys**. A secret key can change your

@@ -25,9 +25,13 @@ describe('MCP registry draft (server.json + package.json mcpName)', () => {
     expect(server.description.length).toBeLessThanOrEqual(100);
   });
 
-  it('is MIT (founder decision D16) and lists no undeployed remote', () => {
+  it('is MIT (founder decision D16) and lists only the live hosted remote (engine /mcp, ADR 0054)', () => {
     expect(pkg.license).toBe('MIT');
     expect(readFileSync(new URL('../LICENSE', import.meta.url), 'utf8')).toMatch(/^MIT License/);
-    expect(server.remotes).toBeUndefined();
+    expect(server.remotes).toEqual([
+      expect.objectContaining({ type: 'streamable-http', url: 'https://strait.link/mcp', headers: [expect.objectContaining({ name: 'Authorization', isRequired: true, isSecret: true })] }),
+    ]);
+    expect(JSON.stringify(server)).not.toContain('mcp.strait.link'); // the OAuth Worker is not deployed
+    expect(server.repository).toEqual({ url: 'https://github.com/strait-link/strait-mcp', source: 'github' });
   });
 });

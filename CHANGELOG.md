@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 (24 Oct 2026)
+
+- Three MCP prompts (starter requests in a client's prompt picker): `weekly_review` (this week against last week, top
+  links, drops), `debug_link` (slug: App Links files, a trace and recent taps, with fixes) and `setup_check` (usage,
+  custom domains, failing webhooks, App Links). They only read. `createStraitServer()` registers them; `PROMPTS` is exported.
+
 ## 0.3.0 (24 Oct 2026)
 
 - 14 new tools (30 in all), each on an existing public API endpoint: `pause_link`, `resume_link`, `search_links`,

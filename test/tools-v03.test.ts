@@ -293,3 +293,20 @@ describe('list_webhooks and check_link', () => {
     expect(r.verdict).toBe('works');
   });
 });
+
+describe('get_workspace (0.5)', () => {
+  it('reads GET /v1/workspace with the key', async () => {
+    const ws = { name: 'Hilltop', handle: 'hilltop', linkBase: 'https://hilltop.strait.link', linkDomain: 'hilltop.strait.link', customDomains: [], plan: 'free', key: { scope: 'read', prefix: 'st_live_ab12' } };
+    const { client, calls } = mockClient(() => ({ body: ws }));
+    expect(parse(await run('get_workspace', client, {}))).toEqual({ ...ws, key: { scope: 'read', endsWith: 'ab12' } });
+    expect(calls[0]!.url.pathname).toBe('/v1/workspace');
+    expect(calls[0]!.headers.authorization).toBe(`Bearer ${KEY}`);
+  });
+
+  it('an engine without the route: explained, not an error', async () => {
+    const { client } = mockClient(() => ({ status: 404, body: { error: 'not found' } }));
+    const r = await run('get_workspace', client, {});
+    expect(r.isError).toBeFalsy();
+    expect(parse(r)).toMatchObject({ available: false });
+  });
+});

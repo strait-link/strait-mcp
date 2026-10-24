@@ -66,10 +66,10 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
     await new Promise((ok) => server?.close(ok));
   });
 
-  it('lists the thirty tools with their schemas', async () => {
+  it('lists every tool with its schema', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(TOOLS.map((t) => t.name).sort());
-    expect(tools).toHaveLength(30);
+    expect(tools).toHaveLength(TOOLS.length);
     const create = tools.find((t) => t.name === 'create_link')!;
     expect(create.inputSchema.required).toEqual(expect.arrayContaining(['slug', 'longUrl']));
     expect(tools.find((t) => t.name === 'update_link')!.annotations?.destructiveHint).toBe(true);

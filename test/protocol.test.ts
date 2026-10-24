@@ -15,10 +15,10 @@ async function connect() {
 }
 
 describe('MCP protocol', () => {
-  it('lists thirty tools with JSON Schemas and annotations', async () => {
+  it('lists thirty-one tools with JSON Schemas and annotations', async () => {
     const { client } = await connect();
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(30);
+    expect(tools).toHaveLength(31);
     const batch = tools.find((t) => t.name === 'batch_create_links')!;
     expect(batch.inputSchema).toMatchObject({ type: 'object', required: ['links'] });
     expect(tools.find((t) => t.name === 'search_docs')!.annotations).toMatchObject({ readOnlyHint: true, openWorldHint: false });

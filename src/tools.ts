@@ -378,6 +378,29 @@ export const TOOLS: StraitTool[] = [
     },
   }),
   tool({
+    name: 'get_workspace',
+    description:
+      'Read-only. Who this secret key is: the workspace name, its link domain (the host every shortUrl uses, e.g. ' +
+      'hilltop.strait.link or a verified custom domain), custom domains, the plan, and what the key may do (full, links ' +
+      'or read). Call it first when you need the link domain (for check_app_links) or to know whether the key can write.',
+    inputSchema: {},
+    annotations: { title: 'Read the workspace and key', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    needsKey: true,
+    run: async (c) => {
+      try {
+        const w = await c.getWorkspace();
+        // The prefix looks like a key (st_live_…) and would be redacted: give its last 4 characters instead.
+        const { prefix, ...key } = w.key;
+        return { ...w, key: { ...key, endsWith: prefix ? prefix.slice(-4) : null } };
+      } catch (err) {
+        if (err instanceof StraitApiError && err.status === 404 && (err.body as { error?: unknown } | null)?.error === 'not found') {
+          return { available: false, note: 'This Strait server does not answer GET /v1/workspace yet. list_links shows the link domain in each shortUrl.' };
+        }
+        throw err;
+      }
+    },
+  }),
+  tool({
     name: 'get_usage',
     description:
       "Read-only. This calendar month's usage (UTC) against the workspace's plan: billed taps used and included, new links " +
@@ -871,7 +894,7 @@ export const TOOLS: StraitTool[] = [
 export const SERVER_INSTRUCTIONS = [
   'Strait makes links open the right screen in a mobile app (deep links), including after an install (deferred deep links), and reports what happened to each tap.',
   'Keys: the secret key (st_live_…) is for servers and this MCP server only. Never put it in app or website code. Apps and websites use the publishable key (st_pub_live_…) with the Strait SDKs.',
-  'Share a link by its shortUrl. Prefer batch_create_links over many create_link calls.',
+  'Share a link by its shortUrl. Prefer batch_create_links over many create_link calls. get_workspace names the link domain and whether the key may write (full, links or read).',
   'update_link, pause_link, resume_link, deactivate_link, redeliver_webhook_delivery, record_event, add_domain and remove_domain change live behaviour: call them without confirm first, show the user the preview, and only then call them with confirm: true.',
   'To pause a link use pause_link; to turn a paused link back on, list_links with status: paused to find it, then resume_link.',
   'To find links by destination, title, tag or campaign use search_links. For "this week against last week" use compare_analytics; for the best-performing links use get_top_links.',

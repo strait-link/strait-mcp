@@ -1,0 +1,40 @@
+{
+  "name": "strait",
+  "version": "0.1.0",
+  "description": "Strait deep links in Claude Code: the hosted Strait MCP server (create, find, pause links, analytics, App Links checks, webhooks) and the strait-setup skill that adds Strait to an app.",
+  "author": {
+    "name": "The Strait team",
+    "email": "support@straitlink.in",
+    "url": "https://straitlink.in"
+  },
+  "homepage": "https://straitlink.in/docs/mcp/",
+  "privacyPolicyUrl": "https://straitlink.in/legal/privacy/",
+  "repository": "https://github.com/strait-link/strait-mcp",
+  "license": "MIT",
+  "keywords": [
+    "deep-linking",
+    "deferred-deep-linking",
+    "app-links",
+    "universal-links",
+    "mcp",
+    "firebase-dynamic-links"
+  ],
+  "userConfig": {
+    "secret_key": {
+      "type": "string",
+      "title": "Strait secret key",
+      "description": "A secret key from Dashboard → Settings → Secret keys (st_live_…). Make one just for Claude Code; Read only is enough if Claude should only look.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "mcpServers": {
+    "strait": {
+      "type": "http",
+      "url": "https://strait.link/mcp",
+      "headers": {
+        "Authorization": "Bearer ${user_config.secret_key}"
+      }
+    }
+  }
+}

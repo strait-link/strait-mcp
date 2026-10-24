@@ -109,6 +109,17 @@ Without a key, `check_app_links`, `search_docs` and demo `trace_tap` still work.
 
 ## Install
 
+### Claude Code plugin (hosted server + setup skill)
+
+```text
+/plugin install strait --marketplace strait-link/strait-mcp
+```
+
+(On older Claude Code: `/plugin marketplace add strait-link/strait-mcp`, then `/plugin install strait@strait-link`.) It asks
+for a secret key when you enable it and keeps it in your system's credential store. It connects to the hosted server
+`https://strait.link/mcp` and adds the `strait-setup` skill, which sets Strait up in an app. Privacy:
+https://straitlink.in/legal/privacy/
+
 ### Claude Code
 
 ```sh

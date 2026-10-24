@@ -3,14 +3,14 @@
   "name": "in.straitlink/mcp",
   "title": "Strait",
   "description": "Create, search and pause deep links; QR codes; analytics, taps, events; domains; webhooks.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "websiteUrl": "https://straitlink.in",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@straitlink/mcp",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "transport": {
         "type": "stdio"
       },

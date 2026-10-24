@@ -11,7 +11,9 @@
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@straitlink/mcp",
       "version": "0.4.0",
-      "transport": { "type": "stdio" },
+      "transport": {
+        "type": "stdio"
+      },
       "environmentVariables": [
         {
           "name": "STRAIT_SECRET_KEY",
@@ -24,6 +26,24 @@
           "description": "Engine URL. Default https://strait.link",
           "isRequired": false,
           "isSecret": false
+        }
+      ]
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/strait-link/strait-mcp",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://strait.link/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer and a Strait secret key: \"Bearer st_live_...\" from Dashboard > Settings > Secret keys (a Read only key is enough for reading).",
+          "isRequired": true,
+          "isSecret": true
         }
       ]
     }

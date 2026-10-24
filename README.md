@@ -49,6 +49,7 @@ workspaces. The tools report iPhone results the same way, but treat iPhone insta
 | `check_app_links` | Check a domain's `assetlinks.json` and `apple-app-site-association`, with a fix for each problem | none |
 | `simulate_tap` | Dry-run one tap from one device or app (nothing recorded or billed) | secret |
 | `trace_tap` | Walk a link through WhatsApp, Instagram, Facebook, Chrome, Safari, iPad, computer and preview bots; or read a Live Tap Trace from the website demo | secret (link) / none (demo token) |
+| `get_workspace` | Who the key is: workspace, link domain, custom domains, plan, and the key's access (full / links / read) (`GET /v1/workspace`; 0.5.0, needs engine with that route) | secret |
 | `get_usage` | This month's taps and new links against the plan, `level` (ok / warn / over) and `new_links_paused` (`GET /v1/usage`) | secret |
 | `get_referrals` | Referral report: taps and referred installs per code (`GET /v1/referrals`, a preview: says "not switched on yet" until it is) | secret |
 | `list_webhook_deliveries` | A webhook's deliveries (status, attempts, last HTTP status, next retry; no payloads). Without `webhookId`: the workspace's webhooks (id, receiver site, events) | secret |

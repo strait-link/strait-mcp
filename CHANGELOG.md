@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0 (unreleased)
+
+- `get_workspace`: the key's workspace, link domain, custom domains, plan and access (full, links, read), from
+  `GET /v1/workspace` (engine PR #52). An engine without that route gets a plain "not available yet" answer.
+
 ## 0.4.1 (24 Oct 2026)
 
 - `search_docs` index and the bundled skill rebuilt from the live site (c888cd5): the hosted MCP guide and one page per

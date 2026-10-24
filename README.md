@@ -15,14 +15,16 @@ A tap on a Strait link goes straight to the exact screen in your app (Straight),
 claude mcp add strait --env STRAIT_SECRET_KEY=st_live_your_key -- npx -y @straitlink/mcp
 ```
 
-Use Strait from AI tools such as Claude Code, Cursor and Claude Desktop: create deep links, change or turn them off,
-read analytics, usage and referrals, check App Links / Universal Links files, see where taps on a link go, look after
-webhooks (deliveries, test, redeliver) and search the Strait docs.
+Use Strait from AI tools such as Claude Code, Cursor and Claude Desktop: create, find, pause and resume deep links,
+get their QR codes, read and compare analytics, see recent taps and conversion events, manage custom link domains,
+look after webhooks (list, deliveries, test, redeliver), check App Links / Universal Links files or any vendor's link,
+see where taps on a link go and search the Strait docs.
 
-It is a local stdio server with 16 tools. Six of them write (`create_link`, `batch_create_links`, `update_link`,
-`deactivate_link`, `test_webhook`, `redeliver_webhook_delivery`); the other ten only read. Fourteen need your secret
-key; `check_app_links`, `search_docs` and demo `trace_tap` work without one. Other deep-link vendors also ship MCP servers that can create links, so this README
-makes no "first" or "only" claim; it describes what this server does today.
+It is a local stdio server with 30 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
+`pause_link`, `resume_link`, `deactivate_link`, `record_event`, `add_domain`, `remove_domain`, `test_webhook`,
+`redeliver_webhook_delivery`); the other nineteen only read. `check_app_links`, `check_link`, `search_docs` and demo
+`trace_tap` work without a key; every other tool needs your secret key. Other deep-link vendors also ship MCP servers
+that can create links, so this README makes no "first" or "only" claim; it describes what this server does today.
 
 **iPhone is in beta.** iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play
 Install Referrer. On iPhone the workspace chooses the method in Dashboard → Settings → iPhone installs (device
@@ -51,11 +53,26 @@ workspaces. The tools report iPhone results the same way, but treat iPhone insta
 | `test_webhook` | Send one `ping` to a webhook now and see the receiver's status and time (not stored, not retried) | secret |
 | `redeliver_webhook_delivery` | Send a failed delivery again (same `X-Strait-Delivery` id). **Asks for `confirm: true`** | secret |
 | `deactivate_link` | Turn a link off: taps then get the "link not found" page. **Asks for `confirm: true`**; turn it back on with `update_link` `isActive: true` | secret |
+| `pause_link` | Pause a link (taps get the "link not found" page until it is resumed). **Asks for `confirm: true`** (0.3.0) | secret |
+| `resume_link` | Turn a paused link back on. **Asks for `confirm: true`** (0.3.0) | secret |
+| `search_links` | Find links by text in slug, title, destination, campaign or tags, or by exact tag or campaign; active, inactive or all (0.3.0) | secret (owner/admin) |
+| `get_link_qr` | A link's QR code as a PNG image or SVG, in the workspace's QR style (0.3.0) | secret |
+| `compare_analytics` | Two periods side by side (default: the one just before), totals and per channel / platform / link, with % change (0.3.0) | secret |
+| `get_top_links` | Top links by taps, app opens, installs or conversions, with each one's share (0.3.0) | secret |
+| `list_taps` | Recent taps, newest first, with where each was sent and the open/install it led to (default: last hour) (0.3.0) | secret (owner/admin) |
+| `list_events` | Recent conversion and revenue events, newest first (default: last 7 days) (0.3.0) | secret (owner/admin) |
+| `record_event` | Record a server-side conversion (`POST /v1/event`). **Asks for `confirm: true`** (0.3.0) | secret |
+| `list_domains` | Custom link domains with status and the DNS records to add (0.3.0) | secret |
+| `add_domain` | Add a custom link domain and get its DNS records (Scale and Enterprise). **Asks for `confirm: true`** (0.3.0) | secret |
+| `remove_domain` | Remove a custom link domain. **Asks for `confirm: true`** (0.3.0) | secret |
+| `list_webhooks` | The workspace's webhooks: id, receiver site (host only), events, on/off (0.3.0) | secret |
+| `check_link` | Check any vendor's deep link (Firebase page.link, Branch, Strait): where it goes and what to fix (0.3.0) | none |
 | `search_docs` | Search the Strait docs offline (bundled index) | none |
 
-Every tool carries MCP annotations (`readOnlyHint`, `destructiveHint`, …) and its description starts with
-"Read-only." or "Write." for the 0.2 tools. `update_link` and `deactivate_link` are destructive; they and
-`redeliver_webhook_delivery` show a preview first and act only with `confirm: true`. `create_link` and
+Every tool carries MCP annotations (`readOnlyHint`, `destructiveHint`, …) and the descriptions of the 0.2 and 0.3
+tools start with "Read-only." or "Write.". `update_link`, `pause_link`, `deactivate_link` and `remove_domain` are
+destructive. Every write except `create_link`, `batch_create_links` and `test_webhook` shows a preview first and acts
+only with `confirm: true`. `create_link` and
 `batch_create_links` write new links but never change existing ones. There is no delete tool: a deactivated link
 keeps its history.
 
@@ -125,6 +142,12 @@ In Cursor or Claude Desktop use `"command": "node", "args": ["/absolute/path/to/
 - "My webhook stopped firing. Show me its last deliveries, send it a test, and resend the failed ones."
 - "Turn off the `spring-sale` link." (you'll see a preview first)
 - "Which referral codes brought the most installs in October?"
+- "How did this week do against last week, by channel?"
+- "Which links point at /summer? Pause the old ones."
+- "Did my test tap on `summer` just now get recorded, and did it open the app?"
+- "Give me a QR code for `summer` in dark grey."
+- "Is links.hilltop.example set up yet? Which DNS records are missing?"
+- "Check https://hilltop.page.link/abc before we migrate it."
 
 Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop used in examples.
 

@@ -11,6 +11,7 @@ import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { TOOLS } from '../src/tools.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const ENGINE = resolve(process.env.ENGINE_DIR ?? resolve(ROOT, '../redirect-engine'));
@@ -65,12 +66,10 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
     await new Promise((ok) => server?.close(ok));
   });
 
-  it('lists the sixteen tools with their schemas', async () => {
+  it('lists the thirty tools with their schemas', async () => {
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(
-      ['batch_create_links', 'check_app_links', 'create_link', 'deactivate_link', 'get_analytics', 'get_link', 'get_referrals', 'get_usage',
-        'list_links', 'list_webhook_deliveries', 'redeliver_webhook_delivery', 'search_docs', 'simulate_tap', 'test_webhook', 'trace_tap', 'update_link'],
-    );
+    expect(tools.map((t) => t.name).sort()).toEqual(TOOLS.map((t) => t.name).sort());
+    expect(tools).toHaveLength(30);
     const create = tools.find((t) => t.name === 'create_link')!;
     expect(create.inputSchema.required).toEqual(expect.arrayContaining(['slug', 'longUrl']));
     expect(tools.find((t) => t.name === 'update_link')!.annotations?.destructiveHint).toBe(true);
@@ -157,6 +156,42 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
     expect((await call('get_link', { slug: 'mcp-off' })).r.isError).toBe(true);
     const again = await call('deactivate_link', { slug: 'mcp-off', confirm: true });
     expect(again.r.content[0]!.text).toMatch(/no active link with slug "mcp-off".*HTTP 404/);
+  });
+
+  it('0.3 tools against the real engine routes: search, QR, pause/resume, analytics, exports, domains', async () => {
+    await call('create_link', { slug: 'mcp-v03', longUrl: 'https://shop.hilltop.example/v03', title: 'Diwali v03', tags: ['diwali'], campaign: 'diwali26' });
+    const found = await call('search_links', { tag: 'diwali' });
+    expect(found.json.links.map((l: { slug: string }) => l.slug)).toEqual(['mcp-v03']);
+    expect((await call('search_links', { query: 'DIWALI V03' })).json.matched).toBe(1);
+
+    const qr = await call('get_link_qr', { slug: 'mcp-v03', size: 128 });
+    expect(qr.r.isError, JSON.stringify(qr.r.content)).toBeFalsy();
+    const img = qr.r.content.find((c) => c.type === 'image') as unknown as { data: string; mimeType: string };
+    expect(img.mimeType).toBe('image/png');
+    expect(Buffer.from(img.data, 'base64').subarray(1, 4).toString()).toBe('PNG');
+
+    expect((await call('pause_link', { slug: 'mcp-v03', confirm: true })).json).toMatchObject({ applied: true });
+    expect((await call('get_link', { slug: 'mcp-v03' })).r.isError).toBe(true);
+    expect((await call('search_links', { tag: 'diwali', status: 'inactive' })).json.matched).toBe(1);
+    expect((await call('resume_link', { slug: 'mcp-v03' })).json).toMatchObject({ preview: true, current: { isActive: false } });
+    expect((await call('resume_link', { slug: 'mcp-v03', confirm: true })).json).toMatchObject({ applied: true });
+    expect((await call('get_link', { slug: 'mcp-v03' })).r.isError).toBeFalsy();
+
+    if (hasAnalytics) {
+      expect((await call('compare_analytics', { group: 'channel' })).json.totals.taps).toMatchObject({ now: 0, before: 0 });
+      expect((await call('get_top_links', {})).r.isError).toBeFalsy();
+    }
+    const taps = await call('list_taps', {});
+    expect(taps.r.isError, JSON.stringify(taps.r.content)).toBeFalsy();
+    expect(taps.json).toMatchObject({ taps: [], matched: 0 });
+    expect((await call('list_events', {})).json).toMatchObject({ events: [] });
+    expect((await call('record_event', { event: 'mcp_test', value: 1, currency: 'INR' })).json).toMatchObject({ preview: true });
+    const ev = await call('record_event', { event: 'mcp_test', value: 1, currency: 'INR', eventId: 'mcp_1', confirm: true });
+    expect(ev.json).toMatchObject({ applied: true, ok: true });
+
+    const d = await call('list_domains', {});
+    expect(d.r.isError, JSON.stringify(d.r.content)).toBeFalsy();
+    expect((await call('list_webhooks', {})).json).toEqual({ webhooks: [] });
   });
 
   it('search_docs answers offline', async () => {

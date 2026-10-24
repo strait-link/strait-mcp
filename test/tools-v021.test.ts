@@ -9,7 +9,7 @@ const byName = (n: string) => {
   if (!t) throw new Error(`no tool ${n}`);
   return t;
 };
-const parse = (r: { content: Array<{ text: string }> }) => JSON.parse(r.content[0]!.text);
+const parse = (r: { content: Array<{ text?: string }> }) => JSON.parse(r.content[0]!.text!);
 const PAUSED = { ...LINK, id: 'lnk_9', isActive: false, longUrl: 'https://shop.hilltop.example/old-summer' };
 
 describe('list_links status', () => {

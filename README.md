@@ -31,8 +31,10 @@ Install Referrer. On iPhone the workspace chooses the method in Dashboard → Se
 matching, paste handoff, both or neither), and the SDK reads that choice at runtime. Device matching is off for new
 workspaces. The tools report iPhone results the same way, but treat iPhone install attribution as beta.
 
-> **Preview.** The remote server (`mcp.strait.link`) is built and deploy-ready but not deployed (see "Deploy the
-> remote server"). Until then, use the local server above.
+> **Hosted server.** The same 30 tools are served at `https://strait.link/mcp` (Streamable HTTP, since 24 Oct 2026):
+> `claude mcp add --transport http strait https://strait.link/mcp --header "Authorization: Bearer st_live_your_key"`.
+> It takes a secret key in the `Authorization` header (60 requests burst, then 1 a second, per key); OAuth sign-in is
+> not there yet. The engine serves it with this package's `createStraitServer()` (library entry, 0.3.0).
 
 ## Tools
 
@@ -187,7 +189,9 @@ Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop use
 
 MIT. See [LICENSE](LICENSE).
 
-## Remote server (built, not deployed)
+## OAuth remote server (built, not deployed)
+
+The hosted server above (`strait.link/mcp`) needs a key in a header. This Worker is the later, OAuth version.
 
 `src/worker.ts` is a Cloudflare Worker serving MCP over Streamable HTTP at `https://mcp.strait.link/mcp`. It answers
 404 everywhere unless `REMOTE_MCP=on` (only `env.production` in `wrangler.jsonc` turns it on).

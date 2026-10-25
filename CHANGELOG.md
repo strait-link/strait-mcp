@@ -2,6 +2,11 @@
 
 ## 0.5.0 (unreleased)
 
+- Two more prompts (five in all): `migrate_firebase_links` (optional old_domain: maps Firebase Dynamic Links to Strait
+  fields with the docs' field table and `check_link`, shows the plan, and creates the links with `batch_create_links`
+  only after the user says yes) and `why_not_open` (slug, optional platform and app: the link, App Links files, a
+  simulated tap on that phone and app or a trace, recent taps, and the SDK `doctor()` finding ids from shared-spec
+  ADR 0002).
 - `get_workspace`: the key's workspace, link domain, custom domains, plan and access (full, links, read), from
   `GET /v1/workspace` (engine PR #52). An engine without that route gets a plain "not available yet" answer.
 

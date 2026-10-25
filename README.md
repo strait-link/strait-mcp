@@ -79,15 +79,17 @@ only with `confirm: true`. `create_link` and
 `batch_create_links` write new links but never change existing ones. There is no delete tool: a deactivated link
 keeps its history.
 
-## Prompts (0.4.0)
+## Prompts
 
-Clients that show MCP prompts (Claude Code: type `/`) offer three starters. Each one only reads:
+Clients that show MCP prompts (Claude Code: type `/`) offer five starters. All but `migrate_firebase_links` only read:
 
 | Prompt | What it does |
 |---|---|
 | `weekly_review` | This week against last week (totals and channels), the top links by installs, and anything down more than 30 % |
 | `debug_link` (slug) | Why a link opens the browser: App Links / Universal Links files, a trace per channel and its recent taps, with the fix |
 | `setup_check` | Usage, custom domains still waiting for DNS, webhooks with failed deliveries, and the App Links files |
+| `migrate_firebase_links` (old_domain, optional) | Maps your Firebase Dynamic Links (long links, export rows or short links checked with `check_link`) to Strait fields, shows the plan, and runs `batch_create_links` only after you answer yes. Re-running is safe: existing slugs come back as a per-item 409 |
+| `why_not_open` (slug; platform `android` / `iphone` and app `browser` / `whatsapp` / `instagram` / `facebook`, optional) | Why a link opened the store, browser or nothing: the link, the App Links / Universal Links files, the tap on that phone and app, its recent taps, and a pasted SDK `doctor()` report read by finding id (`key.secret`, `host.file_missing`, `app.missing`, `cert.missing`…) |
 
 ## Keys
 

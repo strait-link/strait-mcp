@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 (unreleased)
+## 0.5.0 (26 Oct 2026)
 
 - Two more prompts (five in all): `migrate_firebase_links` (optional old_domain: maps Firebase Dynamic Links to Strait
   fields with the docs' field table and `check_link`, shows the plan, and creates the links with `batch_create_links`

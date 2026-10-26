@@ -20,9 +20,9 @@ get their QR codes, read and compare analytics, see recent taps and conversion e
 look after webhooks (list, deliveries, test, redeliver), check App Links / Universal Links files or any vendor's link,
 see where taps on a link go and search the Strait docs.
 
-It is a local stdio server with 30 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
+It is a local stdio server with 31 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
 `pause_link`, `resume_link`, `deactivate_link`, `record_event`, `add_domain`, `remove_domain`, `test_webhook`,
-`redeliver_webhook_delivery`); the other nineteen only read. `check_app_links`, `check_link`, `search_docs` and demo
+`redeliver_webhook_delivery`); the other twenty only read. `check_app_links`, `check_link`, `search_docs` and demo
 `trace_tap` work without a key; every other tool needs your secret key. Other deep-link vendors also ship MCP servers
 that can create links, so this README makes no "first" or "only" claim; it describes what this server does today.
 
@@ -31,7 +31,7 @@ Install Referrer. On iPhone the workspace chooses the method in Dashboard → Se
 matching, paste handoff, both or neither), and the SDK reads that choice at runtime. Device matching is off for new
 workspaces. The tools report iPhone results the same way, but treat iPhone install attribution as beta.
 
-> **Hosted server.** The same 30 tools are served at `https://strait.link/mcp` (Streamable HTTP, since 24 Oct 2026):
+> **Hosted server.** The same tools are served at `https://strait.link/mcp` (Streamable HTTP, since 24 Oct 2026):
 > `claude mcp add --transport http strait https://strait.link/mcp --header "Authorization: Bearer st_live_your_key"`.
 > It takes a secret key in the `Authorization` header (60 requests burst, then 1 a second, per key); OAuth sign-in is
 > not there yet. The engine serves it with this package's `createStraitServer()` (library entry, 0.3.0).

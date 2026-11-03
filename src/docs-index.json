@@ -15,7 +15,7 @@
    "group": "Get started",
    "section": "How it fits together",
    "url": "https://straitlink.in/docs/#how-it-fits-together",
-   "markdown": "1. Your workspace gets a link domain, `<your-handle>.strait.link`, and two keys: a publishable key for your app and a secret key for your server ([Keys](https://straitlink.in/docs/keys/)).\n2. You create links in the dashboard or with the [REST API](https://straitlink.in/docs/api/).\n3. The Strait SDK in your app gets one `onLink` callback for every way a link opens it, and reports each open for Analytics.\n\nAndroid, iPhone and web links are live. iPhone install matching is opt-in. Live service health is on the [status page](https://status.strait.link). Free up to 10,000 taps a month, no card; app opens are never billed ([pricing](https://straitlink.in/pricing/))."
+   "markdown": "1. Your workspace gets a link domain, `<your-handle>.strait.link`, and two keys: a publishable key for your app and a secret key for your server ([Keys](https://straitlink.in/docs/keys/)).\n2. You create links in the dashboard or with the [REST API](https://straitlink.in/docs/api/).\n3. The Strait SDK in your app gets one `onLink` callback for every way a link opens it, and reports each open for Analytics.\n\nAndroid, iPhone and web links are live. iPhone install matching is opt-in. Live service health is on the [status page](https://status.strait.link). Free up to 25,000 taps a month, no card; app opens are never billed ([pricing](https://straitlink.in/pricing/))."
   },
   {
    "page": "What is Strait?",
@@ -92,7 +92,7 @@
    "group": "Get started",
    "section": "Next steps",
    "url": "https://straitlink.in/docs/quick-start/#next-steps",
-   "markdown": ":::tip You're done. What it costs\nFree up to 10,000 taps a month, no card. App opens are never billed. New users who install first? The same `onLink` fires with `kind: 'deferred'`, no extra code: [set up deferred links](https://straitlink.in/docs/deferred-deep-linking/#what-your-app-sees).\n:::\n\n- [Open the right screen](https://straitlink.in/docs/sdks/react-native/receive-links/): send `e.path` to a screen with React Navigation, or see [Expo Router](https://straitlink.in/docs/sdks/expo/).\n- [Go-live checklist](https://straitlink.in/docs/production-checklist/): links that skip the browser, links after an install, and iPhone."
+   "markdown": ":::tip You're done. What it costs\nFree up to 25,000 taps a month, no card. App opens are never billed. New users who install first? The same `onLink` fires with `kind: 'deferred'`, no extra code: [set up deferred links](https://straitlink.in/docs/deferred-deep-linking/#what-your-app-sees).\n:::\n\n- [Open the right screen](https://straitlink.in/docs/sdks/react-native/receive-links/): send `e.path` to a screen with React Navigation, or see [Expo Router](https://straitlink.in/docs/sdks/expo/).\n- [Go-live checklist](https://straitlink.in/docs/production-checklist/): links that skip the browser, links after an install, and iPhone."
   },
   {
    "page": "Quickstart for iPhone: open your Swift app from a link",
@@ -246,7 +246,7 @@
    "group": "Get started",
    "section": "Frequently asked questions",
    "url": "https://straitlink.in/docs/migrate-from-firebase/#frequently-asked-questions",
-   "markdown": "### Is Firebase Dynamic Links still working?\n\nNo. Google shut it down on 25 August 2025. It no longer opens apps, keeps a link through an install or counts taps, and you can't make new links.\n\n### Can I keep my page.link domain?\n\nNo. `page.link` belongs to Google. You can rebuild your old codes on your own link address, and people who have your app can keep opening it from old links if your next build keeps the domain.\n\n### What does Strait cost after the move?\n\nFree up to 10,000 taps a month, no card. App opens are never billed. Paid plans are on [Pricing](https://straitlink.in/pricing/)."
+   "markdown": "### Is Firebase Dynamic Links still working?\n\nNo. Google shut it down on 25 August 2025. It no longer opens apps, keeps a link through an install or counts taps, and you can't make new links.\n\n### Can I keep my page.link domain?\n\nNo. `page.link` belongs to Google. You can rebuild your old codes on your own link address, and people who have your app can keep opening it from old links if your next build keeps the domain.\n\n### What does Strait cost after the move?\n\nFree up to 25,000 taps a month, no card. App opens are never billed. Paid plans are on [Pricing](https://straitlink.in/pricing/)."
   },
   {
    "page": "Migrate from Firebase Dynamic Links",
@@ -547,7 +547,7 @@
    "group": "Get started",
    "section": "Frequently asked questions",
    "url": "https://straitlink.in/docs/migrate-from-branch/#frequently-asked-questions",
-   "markdown": "### What doesn't move from Branch?\n\nAnalytics history: Branch's clicks, installs and attribution stay in Branch, so export the reports you need first. Also not moved: the `app.link` domain (Branch owns it), custom link data beyond the path and query, and settings like `$one_time_use`, journeys and banners. Separate iOS and Android deep link paths become one path; the Android one is kept and the row warns you.\n\n### Can I bring my Branch custom domain?\n\nNot yet. Custom domains are coming soon. Until then, new links use `<handle>.strait.link`.\n\n### What does Strait cost?\n\nFree up to 10,000 taps a month, no card. App opens are never billed. Paid plans are on [Pricing](https://straitlink.in/pricing/)."
+   "markdown": "### What doesn't move from Branch?\n\nAnalytics history: Branch's clicks, installs and attribution stay in Branch, so export the reports you need first. Also not moved: the `app.link` domain (Branch owns it), custom link data beyond the path and query, and settings like `$one_time_use`, journeys and banners. Separate iOS and Android deep link paths become one path; the Android one is kept and the row warns you.\n\n### Can I bring my Branch custom domain?\n\nNot yet. Custom domains are coming soon. Until then, new links use `<handle>.strait.link`.\n\n### What does Strait cost?\n\nFree up to 25,000 taps a month, no card. App opens are never billed. Paid plans are on [Pricing](https://straitlink.in/pricing/)."
   },
   {
    "page": "Migrate from Branch",

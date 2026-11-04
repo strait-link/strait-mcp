@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (4 Nov 2026)
+
+- `get_campaign_qr_zip` (new, read-only): every live link of a campaign as QR codes in one ZIP (`GET /v1/qr.zip`), SVG by
+  default or PNG up to 1024 px, in the workspace's style or a saved one. Returns a summary (codes, format, logo, file name)
+  and the ZIP as an embedded resource (`application/zip`, up to 8 MB; bigger: use SVG or the dashboard).
+- `get_link_qr`: `preset` picks a saved QR style (Dashboard → Settings → QR codes).
+- `get_workspace`: also returns the saved QR styles (`qrStyles`: id, name, colours, logo) when the engine sends them.
+
 ## 0.5.1 (4 Nov 2026)
 
 - `search_docs`: the Free plan is 25,000 taps a month (was 10,000).

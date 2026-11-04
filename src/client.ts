@@ -91,6 +91,8 @@ export type ExportPart = 'links' | 'taps' | 'events';
 
 export interface QrOptions {
   format?: 'png' | 'svg';
+  /** A saved QR style id (GET /v1/workspace qrStyles). */
+  preset?: string;
   size?: number;
   margin?: number;
   color?: string;
@@ -241,7 +243,11 @@ export class StraitClient {
   }
   /** GET /v1/workspace: the key's workspace, link domain, plan and the key's own access. */
   getWorkspace() {
-    return this.call<{ name: string; handle: string | null; linkBase: string; linkDomain: string; customDomains: string[]; plan: string | null; key: { scope: 'full' | 'links' | 'read'; prefix: string | null } }>('getWorkspace', 'GET', '/v1/workspace');
+    return this.call<{
+      name: string; handle: string | null; linkBase: string; linkDomain: string; customDomains: string[]; plan: string | null;
+      key: { scope: 'full' | 'links' | 'read'; prefix: string | null };
+      qrStyles?: Array<{ id: string; name: string; color: string | null; background: string | null; logo: boolean | null }>;
+    }>('getWorkspace', 'GET', '/v1/workspace');
   }
   getUsage() {
     return this.call<Record<string, unknown>>('getUsage', 'GET', '/v1/usage');
@@ -283,6 +289,11 @@ export class StraitClient {
     const accept = q.format === 'svg' ? 'image/svg+xml' : 'image/png';
     return this.raw('getLinkQr', 'GET', `/v1/links/${encodeURIComponent(slug)}/qr`, { query: { ...q }, accept, maxBytes: 4 * 1024 * 1024 });
   }
+  /** GET /v1/qr.zip: every live link of a campaign as one ZIP of QR codes. Cut at maxBytes (see RawAnswer.truncated). */
+  getCampaignQrZip(campaign: string, q: QrOptions = {}, maxBytes = 8 * 1024 * 1024) {
+    return this.raw('getCampaignQrZip', 'GET', '/v1/qr.zip', { query: { campaign, ...q }, accept: 'application/zip', maxBytes });
+  }
+
   /** GET /v1/export?part=links|taps|events as text (NDJSON / CSV), cut at maxBytes. Owners and admins' keys only. */
   async exportText(part: ExportPart, q: { from?: string | number; to?: string | number } = {}, maxBytes = 4 * 1024 * 1024) {
     const r = await this.raw('exportData', 'GET', '/v1/export', { query: { part, from: q.from, to: q.to }, accept: '*/*', maxBytes });

@@ -27,7 +27,10 @@ export interface StraitTool<S extends z.ZodRawShape = z.ZodRawShape> {
 
 const tool = <S extends z.ZodRawShape>(t: StraitTool<S>) => t as unknown as StraitTool;
 
-export type ContentBlock = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string; text?: undefined };
+export type ContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; data: string; mimeType: string; text?: undefined }
+  | { type: 'resource'; resource: { uri: string; mimeType: string; blob: string }; text?: undefined };
 
 /** A tool answer that is more than JSON (e.g. a QR image). runTool passes its blocks through as-is (text redacted). */
 export class ToolContent {
@@ -39,6 +42,8 @@ const slug = z.string().regex(/^[a-zA-Z0-9_-]{1,64}$/, 'letters, digits, - and _
 const httpsUrl = z.string().url().refine((u) => u.startsWith('https://'), 'must be an https URL');
 const uuid = z.string().uuid();
 const when = z.union([z.string(), z.number()]).describe('ISO date-time (2026-12-31T23:59:59Z) or epoch ms');
+const qrPreset = z.string().regex(/^[a-z0-9-]{1,32}$/, 'a saved QR style id, e.g. p-packaging').describe('A saved QR style (its id from get_workspace qrStyles); color, background and logo still override it');
+const hex = z.string().regex(/^#?[0-9a-fA-F]{6}$/);
 
 const newLinkShape = {
   slug,
@@ -381,8 +386,9 @@ export const TOOLS: StraitTool[] = [
     name: 'get_workspace',
     description:
       'Read-only. Who this secret key is: the workspace name, its link domain (the host every shortUrl uses, e.g. ' +
-      'hilltop.strait.link or a verified custom domain), custom domains, the plan, and what the key may do (full, links ' +
-      'or read). Call it first when you need the link domain (for check_app_links) or to know whether the key can write.',
+      'hilltop.strait.link or a verified custom domain), custom domains, the plan, what the key may do (full, links ' +
+      'or read) and the saved QR styles (qrStyles: their id is the preset for get_link_qr and get_campaign_qr_zip). Call it first ' +
+      'when you need the link domain (for check_app_links) or to know whether the key can write.',
     inputSchema: {},
     annotations: { title: 'Read the workspace and key', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     needsKey: true,
@@ -603,14 +609,15 @@ export const TOOLS: StraitTool[] = [
     name: 'get_link_qr',
     description:
       'Read-only. A print-ready QR code for a link, in the workspace\'s QR style (Dashboard → Settings → QR codes); the options override it ' +
-      'for this one code. Returns the image (PNG, or SVG markup) and the exact URL in the code. By default scans add utm_source=qr, so ' +
+      'for this one code, or pass preset to use a saved style (get_workspace lists them). Returns the image (PNG, or SVG markup) and the exact URL in the code. By default scans add utm_source=qr, so ' +
       'they show as the qr channel in analytics. Refused (400) if the colours have under 3:1 contrast.',
     inputSchema: {
       slug,
       format: z.enum(['png', 'svg']).optional().describe('png (default) or svg'),
       size: z.number().int().min(128).max(2048).optional().describe('Width and height in pixels, default 512'),
-      color: z.string().regex(/^#?[0-9a-fA-F]{6}$/).optional().describe('Code colour as hex, e.g. 1f2937'),
-      background: z.string().regex(/^#?[0-9a-fA-F]{6}$/).optional().describe('Background colour as hex, e.g. ffffff'),
+      preset: qrPreset.optional(),
+      color: hex.optional().describe('Code colour as hex, e.g. 1f2937'),
+      background: hex.optional().describe('Background colour as hex, e.g. ffffff'),
       logo: z.boolean().optional().describe('Put the app icon in the middle (default: the workspace setting)'),
       track: z.boolean().optional().describe('Add utm_source=qr so scans count as the qr channel (default true)'),
     },
@@ -621,6 +628,7 @@ export const TOOLS: StraitTool[] = [
       const r = await c.getLinkQr(a.slug, {
         format,
         size: a.size ?? 512,
+        preset: a.preset,
         color: a.color?.replace(/^#/, ''),
         background: a.background?.replace(/^#/, ''),
         logo: a.logo,
@@ -629,6 +637,48 @@ export const TOOLS: StraitTool[] = [
       const about = { slug: a.slug, format, encodedUrl: r.headers.get('x-strait-qr-url'), logo: r.headers.get('x-strait-qr-logo') };
       if (format === 'svg') return new ToolContent([{ type: 'text', text: JSON.stringify(about, null, 2) }, { type: 'text', text: new TextDecoder().decode(r.bytes) }]);
       return new ToolContent([{ type: 'text', text: JSON.stringify(about, null, 2) }, { type: 'image', data: toBase64(r.bytes), mimeType: 'image/png' }]);
+    },
+  }),
+
+  tool({
+    name: 'get_campaign_qr_zip',
+    description:
+      'Read-only. Every live link of one campaign as print-ready QR codes in one ZIP (one file per link, `<slug>-qr.svg` or .png, sorted ' +
+      'by slug), in the workspace\'s QR style or a saved style (preset; get_workspace lists them as qrStyles). SVG by default (vector, ' +
+      'for print); PNG at most 1024 px and 50 links. Returns a summary and the ZIP as an embedded file. Scans add utm_source=qr by ' +
+      'default. Limit: 3 ZIPs a minute per workspace. For very large campaigns use Dashboard -> Links -> filter by campaign -> QR ZIP.',
+    inputSchema: {
+      campaign: z.string().min(1).max(200).describe("The links' campaign name, e.g. diwali_sale (case-insensitive, as in the dashboard's links filter)"),
+      format: z.enum(['svg', 'png']).optional().describe('svg (default) or png'),
+      size: z.number().int().min(128).max(2048).optional().describe('Width and height in pixels (default 1024; PNG at most 1024)'),
+      preset: qrPreset.optional(),
+      color: hex.optional().describe('Code colour as hex, overrides the style'),
+      background: hex.optional().describe('Background colour as hex, overrides the style'),
+      logo: z.boolean().optional().describe('Put the app icon in the middle, overrides the style'),
+      track: z.boolean().optional().describe('Add utm_source=qr so scans count as the qr channel (default true)'),
+    },
+    annotations: { title: 'Get a campaign\'s QR codes as a ZIP', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    needsKey: true,
+    run: async (c, a) => {
+      const format = a.format ?? 'svg';
+      if (format === 'png' && (a.size ?? 1024) > 1024) throw new Error('PNG codes in a ZIP are at most 1024 px: use a smaller size, or format svg');
+      const r = await c.getCampaignQrZip(a.campaign, {
+        format,
+        size: a.size,
+        preset: a.preset,
+        color: a.color?.replace(/^#/, ''),
+        background: a.background?.replace(/^#/, ''),
+        logo: a.logo,
+        track: a.track,
+      });
+      if (r.truncated) throw new Error('The ZIP is over 8 MB, too big to hand over here: use format svg or a smaller size, or download it in Dashboard -> Links (filter by campaign -> QR ZIP).');
+      const fileName = `${a.campaign.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'campaign'}-qr-codes.zip`;
+      const count = Number(r.headers.get('x-strait-qr-count'));
+      const about = { campaign: a.campaign, codes: Number.isFinite(count) && count > 0 ? count : null, format, logo: r.headers.get('x-strait-qr-logo'), fileName, bytes: r.bytes.length };
+      return new ToolContent([
+        { type: 'text', text: JSON.stringify(about, null, 2) },
+        { type: 'resource', resource: { uri: `strait://qr/${fileName}`, mimeType: 'application/zip', blob: toBase64(r.bytes) } },
+      ]);
     },
   }),
 

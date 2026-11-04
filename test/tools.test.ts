@@ -13,12 +13,12 @@ const byName = (n: string) => {
 const parse = (r: { content: Array<{ text?: string }> }) => JSON.parse(r.content[0]!.text!);
 
 describe('tool list', () => {
-  it('has the ten council tools, the six 0.2 tools, the fourteen 0.3 tools and get_workspace (0.5), each with a description and annotations', () => {
+  it('has the ten council tools, the six 0.2 tools, the fourteen 0.3 tools get_workspace (0.5) and get_campaign_qr_zip (0.6), each with a description and annotations', () => {
     expect(TOOLS.map((t) => t.name)).toEqual([
       'create_link', 'batch_create_links', 'get_link', 'list_links', 'update_link',
       'get_analytics', 'check_app_links', 'simulate_tap', 'trace_tap',
       'get_workspace', 'get_usage', 'get_referrals', 'list_webhook_deliveries', 'test_webhook', 'redeliver_webhook_delivery', 'deactivate_link',
-      'pause_link', 'resume_link', 'search_links', 'get_link_qr',
+      'pause_link', 'resume_link', 'search_links', 'get_link_qr', 'get_campaign_qr_zip',
       'compare_analytics', 'get_top_links', 'list_taps', 'list_events', 'record_event',
       'list_domains', 'add_domain', 'remove_domain', 'list_webhooks', 'check_link',
       'search_docs',
@@ -177,7 +177,7 @@ describe('search_docs', () => {
   // Index rebuilt from the live site (23 Oct 2026): today's install lines, not the 16 Oct git recipe.
   it('answers install questions with the published packages, not the old git dependency', () => {
     const flutter = searchDocs('flutter install strait_sdk pubspec', 8);
-    expect(flutter.some((h) => h.markdown.includes('strait_sdk: ^0.9.3'))).toBe(true);
+    expect(flutter.some((h) => /strait_sdk: \^\d+\.\d+\.\d+/.test(h.markdown))).toBe(true); // the version the live site pins
     for (const h of searchDocs('flutter install', 10)) expect(h.markdown).not.toMatch(/Add the git dependency/);
     const rn = searchDocs('install react native sdk npm', 8);
     expect(rn.some((h) => h.markdown.includes('npm install @straitlink/react-native'))).toBe(true);

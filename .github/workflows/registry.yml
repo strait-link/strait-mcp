@@ -27,9 +27,10 @@ jobs:
             || { echo "::error::that version is not on npm with this mcpName yet: publish it first"; exit 1; }
       - name: server.json is valid against the registry schema
         run: |
-          npm install --no-save --no-package-lock ajv@8.17.1 ajv-formats@3.0.1
+          # Outside the repo: \`npm install --no-save\` here fails without node_modules ("reading 'edgesOut'").
+          npm install --prefix /tmp/ajv --no-save --no-package-lock ajv@8.17.1 ajv-formats@3.0.1
           curl -fsSL "$(node -p 'require("./server.json").$schema')" -o /tmp/server.schema.json
-          node -e '
+          NODE_PATH=/tmp/ajv/node_modules node -e '
             const Ajv=require("ajv"), add=require("ajv-formats"); const ajv=new Ajv({strict:false,allErrors:true}); add(ajv);
             const v=ajv.compile(require("/tmp/server.schema.json"));
             if (!v(require("./server.json"))) { console.error(JSON.stringify(v.errors,null,1)); process.exit(1); }

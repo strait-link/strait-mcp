@@ -8,7 +8,7 @@ import { PROMPTS, type StraitPrompt } from './prompts.js';
 import { SERVER_INSTRUCTIONS, TOOLS, ToolContent, type ContentBlock, type StraitTool } from './tools.js';
 
 export const SERVER_NAME = 'strait';
-export const SERVER_VERSION = '0.5.0';
+export const SERVER_VERSION = '0.5.1';
 
 /** Anything shaped like a secret key (st_live_… / st_test_…) never leaves the server in a tool result. */
 const SECRET_KEY_SHAPE = /(?<![A-Za-z0-9])st_(?:live|test)_[A-Za-z0-9_-]+/g;
@@ -39,6 +39,28 @@ export async function runTool(t: StraitTool, client: StraitClient, args: unknown
           : String(err);
     return { isError: true, content: [{ type: 'text', text: redactSecrets(text) }] };
   }
+}
+
+/** How long toolsForKey waits for GET /v1/workspace before offering every tool. */
+export const KEY_SCOPE_TIMEOUT_MS = 3000;
+
+/**
+ * The tools to offer this key. A read-only key (engine ADR 0056) is offered only the tools that
+ * read, so an AI tool never plans a write it cannot make (the API refuses it anyway). When the
+ * scope can't be read (no key, an engine without /v1/workspace, a links-only key, a slow or
+ * failed call) every tool is offered: hiding is a convenience, the API is the guard.
+ */
+export async function toolsForKey(client: StraitClient, tools: StraitTool[] = TOOLS, timeoutMs = KEY_SCOPE_TIMEOUT_MS): Promise<StraitTool[]> {
+  if (!client.hasSecretKey) return tools;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const scope = await Promise.race([
+    client.getWorkspace().then((w) => w?.key?.scope, () => undefined),
+    new Promise<undefined>((resolve) => {
+      timer = setTimeout(() => resolve(undefined), timeoutMs);
+    }),
+  ]);
+  if (timer !== undefined) clearTimeout(timer);
+  return scope === 'read' ? tools.filter((t) => t.annotations.readOnlyHint) : tools;
 }
 
 export function createStraitServer(client: StraitClient, tools: StraitTool[] = TOOLS, prompts: StraitPrompt[] = PROMPTS): McpServer {

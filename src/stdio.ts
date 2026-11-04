@@ -8,7 +8,7 @@
  */
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StraitClient, isSecretKey } from './client.js';
-import { createStraitServer, SERVER_VERSION } from './server.js';
+import { createStraitServer, SERVER_VERSION, toolsForKey } from './server.js';
 
 const secretKey = process.env.STRAIT_SECRET_KEY?.trim() || undefined;
 if (secretKey && !isSecretKey(secretKey)) {
@@ -25,6 +25,7 @@ const client = new StraitClient({
   secretKey,
   userAgent: `strait-mcp/${SERVER_VERSION} (stdio)`,
 });
-const server = createStraitServer(client);
+// A read-only key is offered only the tools that read (one GET /v1/workspace at start).
+const server = createStraitServer(client, await toolsForKey(client));
 await server.connect(new StdioServerTransport());
 if (!secretKey) console.error('strait-mcp: no STRAIT_SECRET_KEY set; link and analytics tools will ask for one.');

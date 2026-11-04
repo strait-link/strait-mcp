@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1 (4 Nov 2026)
+
+- `search_docs`: the Free plan is 25,000 taps a month (was 10,000).
+- A read-only secret key is offered only the tools that read (`tools/list` hides create, update, pause, resume,
+  deactivate, record_event, domains and webhook sends). The stdio command asks `GET /v1/workspace` once at start;
+  the remote Worker asks only on `tools/list`. If the access can't be read (older engine, links-only key, network,
+  3 s timeout) every tool is offered as before; the API is still the guard. `toolsForKey()` is exported.
+
 ## 0.5.0 (26 Oct 2026)
 
 - Two more prompts (five in all): `migrate_firebase_links` (optional old_domain: maps Firebase Dynamic Links to Strait

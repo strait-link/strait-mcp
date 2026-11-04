@@ -38,6 +38,10 @@ workspaces. The tools report iPhone results the same way, but treat iPhone insta
 
 ## Tools
 
+A read-only secret key (Dashboard → Settings → Secret keys, access "Read only") is offered only the tools that read
+(0.5.1; the hosted server already did this). Full and links-only keys see every tool; the API still refuses anything
+outside the key's access.
+
 | Tool | What it does | Key needed |
 |---|---|---|
 | `create_link` | Create one link and get its `shortUrl` | secret |

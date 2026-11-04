@@ -17,6 +17,7 @@ const ROOT = resolve(import.meta.dirname, '..');
 const ENGINE = resolve(process.env.ENGINE_DIR ?? resolve(ROOT, '../redirect-engine'));
 const haveEngine = existsSync(resolve(ENGINE, 'src/app.ts')) && existsSync(resolve(ENGINE, 'node_modules/express'));
 const SECRET = 'st_live_test_mcpintegration';
+const READ_SECRET = 'st_live_test_mcpintegration_read';
 
 type TextResult = { content: Array<{ type: string; text: string }>; isError?: boolean };
 
@@ -43,6 +44,7 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
       ['127.0.0.1'],
     );
     store.apiKeys.push({ id: 'k_mcp', tenantId: 'ten_mcp', keyHash: hashApiKey(SECRET) });
+    store.apiKeys.push({ id: 'k_mcp_read', tenantId: 'ten_mcp', keyHash: hashApiKey(READ_SECRET), scope: 'read' });
     const app = createApp(store, { platformHosts: ['127.0.0.1'], matchRateLimit: { capacity: 0, refillPerSec: 0 } });
     server = await new Promise<Server>((ok) => {
       const s = app.listen(0, '127.0.0.1', () => ok(s));
@@ -73,6 +75,28 @@ describe.skipIf(!haveEngine)('MCP server over stdio against a local engine', () 
     const create = tools.find((t) => t.name === 'create_link')!;
     expect(create.inputSchema.required).toEqual(expect.arrayContaining(['slug', 'longUrl']));
     expect(tools.find((t) => t.name === 'update_link')!.annotations?.destructiveHint).toBe(true);
+  });
+
+  it('a read-only key (real engine GET /v1/workspace) is offered only the tools that read', async () => {
+    const ro = new Client({ name: 'strait-integration-test-read', version: '0.0.0' });
+    await ro.connect(
+      new StdioClientTransport({
+        command: process.execPath,
+        args: ['--import', 'tsx', resolve(ROOT, 'src/stdio.ts')],
+        cwd: ROOT,
+        env: { ...(process.env as Record<string, string>), STRAIT_SECRET_KEY: READ_SECRET, STRAIT_API_URL: base },
+        stderr: 'pipe',
+      }),
+    );
+    try {
+      const names = (await ro.listTools()).tools.map((t) => t.name).sort();
+      expect(names).toEqual(TOOLS.filter((t) => t.annotations.readOnlyHint).map((t) => t.name).sort());
+      expect(names).not.toContain('create_link');
+      const r = (await ro.callTool({ name: 'list_links', arguments: { limit: 1 } })) as TextResult;
+      expect(r.isError).toBeFalsy();
+    } finally {
+      await ro.close();
+    }
   });
 
   it('server instructions carry the key rules', () => {

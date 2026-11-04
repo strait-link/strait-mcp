@@ -38,6 +38,8 @@ const rpc = (body: unknown, headers: Record<string, string> = {}) =>
   });
 
 describe('remote MCP worker', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
   it('answers 404 everywhere unless REMOTE_MCP is "on"', async () => {
     for (const flag of [undefined, 'off', 'true']) {
       const r = await worker.fetch(rpc({}), env({ REMOTE_MCP: flag }), ctx);
@@ -46,6 +48,7 @@ describe('remote MCP worker', () => {
   });
 
   it('bearer-key mode: a secret key gets the tool list', async () => {
+    vi.stubGlobal('fetch', async () => Response.json({ name: 'w', key: { scope: 'full', prefix: null } }));
     const auth = { authorization: 'Bearer st_live_test_remote' };
     const init = await worker.fetch(
       rpc({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 't', version: '0' } } }, auth),
@@ -59,6 +62,29 @@ describe('remote MCP worker', () => {
     const names = ((await list.json()) as any).result.tools.map((t: { name: string }) => t.name);
     expect(names).toHaveLength(31);
     expect(names).toContain('create_link');
+  });
+
+  it('bearer-key mode: a read-only key lists only the tools that read; workspace is asked on tools/list only', async () => {
+    const seen: string[] = [];
+    vi.stubGlobal('fetch', async (input: RequestInfo | URL) => {
+      const url = new URL(String(input instanceof Request ? input.url : input));
+      seen.push(url.pathname);
+      return Response.json({ name: 'w', key: { scope: 'read', prefix: null } });
+    });
+    const auth = { authorization: 'Bearer st_live_test_readonly', 'mcp-protocol-version': '2025-06-18' };
+    const init = await worker.fetch(
+      rpc({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 't', version: '0' } } }, auth),
+      env(),
+      ctx,
+    );
+    expect(init.status).toBe(200);
+    expect(seen).toEqual([]);
+    const list = await worker.fetch(rpc({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} }, auth), env(), ctx);
+    const names = ((await list.json()) as any).result.tools.map((t: { name: string }) => t.name);
+    expect(seen).toEqual(['/v1/workspace']);
+    expect(names).toContain('get_link');
+    expect(names).not.toContain('create_link');
+    expect(names).not.toContain('remove_domain');
   });
 
   it('a publishable key is not a bearer key: it goes to OAuth, which refuses it', async () => {

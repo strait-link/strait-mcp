@@ -13,7 +13,7 @@
 import { AuthorizationError, OAuthProvider, authorizationErrorRedirect, type OAuthHelpers } from '@cloudflare/workers-oauth-provider';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { StraitClient, isSecretKey } from './client.js';
-import { createStraitServer, SERVER_VERSION } from './server.js';
+import { createStraitServer, SERVER_VERSION, toolsForKey } from './server.js';
 
 export interface Env {
   /** "on" enables the server; anything else answers 404 everywhere. */
@@ -35,7 +35,9 @@ const USER_AGENT = `strait-mcp/${SERVER_VERSION} (remote)`;
 /** One stateless MCP exchange for this request, as the given key. */
 export async function handleMcp(request: Request, secretKey: string, env: Pick<Env, 'STRAIT_API_URL'>): Promise<Response> {
   const client = new StraitClient({ apiUrl: env.STRAIT_API_URL, secretKey, userAgent: USER_AGENT });
-  const server = createStraitServer(client);
+  // A read-only key sees only the tools that read. One GET /v1/workspace, only when the tool list is asked for.
+  const listsTools = request.method === 'POST' && (await request.clone().text().catch(() => '')).includes('"tools/list"');
+  const server = createStraitServer(client, listsTools ? await toolsForKey(client) : undefined);
   const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
   await server.connect(transport);
   return transport.handleRequest(request);

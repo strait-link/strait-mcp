@@ -20,9 +20,9 @@ get their QR codes, read and compare analytics, see recent taps and conversion e
 look after webhooks (list, deliveries, test, redeliver), check App Links / Universal Links files or any vendor's link,
 see where taps on a link go and search the Strait docs.
 
-It is a local stdio server with 31 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
+It is a local stdio server with 32 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
 `pause_link`, `resume_link`, `deactivate_link`, `record_event`, `add_domain`, `remove_domain`, `test_webhook`,
-`redeliver_webhook_delivery`); the other twenty only read. `check_app_links`, `check_link`, `search_docs` and demo
+`redeliver_webhook_delivery`); the other twenty-one only read. `check_app_links`, `check_link`, `search_docs` and demo
 `trace_tap` work without a key; every other tool needs your secret key. Other deep-link vendors also ship MCP servers
 that can create links, so this README makes no "first" or "only" claim; it describes what this server does today.
 
@@ -53,7 +53,7 @@ outside the key's access.
 | `check_app_links` | Check a domain's `assetlinks.json` and `apple-app-site-association`, with a fix for each problem | none |
 | `simulate_tap` | Dry-run one tap from one device or app (nothing recorded or billed) | secret |
 | `trace_tap` | Walk a link through WhatsApp, Instagram, Facebook, Chrome, Safari, iPad, computer and preview bots; or read a Live Tap Trace from the website demo | secret (link) / none (demo token) |
-| `get_workspace` | Who the key is: workspace, link domain, custom domains, plan, and the key's access (full / links / read) (`GET /v1/workspace`; 0.5.0, needs engine with that route) | secret |
+| `get_workspace` | Who the key is: workspace, link domain, custom domains, plan, the key's access (full / links / read) and the saved QR styles (`qrStyles`, 0.6.0) (`GET /v1/workspace`; 0.5.0, needs engine with that route) | secret |
 | `get_usage` | This month's taps and new links against the plan, `level` (ok / warn / over) and `new_links_paused` (`GET /v1/usage`) | secret |
 | `get_referrals` | Referral report: taps and referred installs per code (`GET /v1/referrals`, a preview: says "not switched on yet" until it is) | secret |
 | `list_webhook_deliveries` | A webhook's deliveries (status, attempts, last HTTP status, next retry; no payloads). Without `webhookId`: the workspace's webhooks (id, receiver site, events) | secret |
@@ -63,7 +63,8 @@ outside the key's access.
 | `pause_link` | Pause a link (taps get the "link not found" page until it is resumed). **Asks for `confirm: true`** (0.3.0) | secret |
 | `resume_link` | Turn a paused link back on. **Asks for `confirm: true`** (0.3.0) | secret |
 | `search_links` | Find links by text in slug, title, destination, campaign or tags, or by exact tag or campaign; active, inactive or all (0.3.0) | secret (owner/admin) |
-| `get_link_qr` | A link's QR code as a PNG image or SVG, in the workspace's QR style (0.3.0) | secret |
+| `get_link_qr` | A link's QR code as a PNG image or SVG, in the workspace's QR style or a saved style (`preset`, 0.6.0) (0.3.0) | secret |
+| `get_campaign_qr_zip` | Every live link of a campaign as QR codes in one ZIP (SVG, or PNG up to 1024 px), handed back as an embedded file; 3 a minute per workspace (`GET /v1/qr.zip`; 0.6.0) | secret |
 | `compare_analytics` | Two periods side by side (default: the one just before), totals and per channel / platform / link, with % change (0.3.0) | secret |
 | `get_top_links` | Top links by taps, app opens, installs or conversions, with each one's share (0.3.0) | secret |
 | `list_taps` | Recent taps, newest first, with where each was sent and the open/install it led to (default: last hour) (0.3.0) | secret (owner/admin) |

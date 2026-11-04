@@ -1,9 +1,9 @@
 name: MCP registry
 # List @straitlink/mcp on the official MCP registry (https://registry.modelcontextprotocol.io) as
 # in.straitlink/mcp. Run by hand (Actions -> MCP registry -> Run workflow) AFTER the npm version in
-# server.json is published. Namespace auth is DNS: a TXT record on straitlink.in holds the public
-# key; the private key lives only in the MCP_DNS_PRIVATE_KEY secret. Without that secret the job
-# validates server.json and stops (nothing is published).
+# server.json is published. Namespace auth is HTTP: https://straitlink.in/.well-known/mcp-registry-auth
+# (built by the site, lib/seo.mjs) holds the public key; the private key lives only in the
+# MCP_REGISTRY_PRIVATE_KEY secret. Without that secret the job validates server.json and stops.
 on:
   workflow_dispatch:
 permissions:
@@ -34,22 +34,22 @@ jobs:
             const v=ajv.compile(require("/tmp/server.schema.json"));
             if (!v(require("./server.json"))) { console.error(JSON.stringify(v.errors,null,1)); process.exit(1); }
             console.log("server.json valid")'
-      - name: Stop here until the DNS key exists
+      - name: Stop here until the registry key exists
         id: gate
         env:
-          KEY: ${{ secrets.MCP_DNS_PRIVATE_KEY }}
+          KEY: ${{ secrets.MCP_REGISTRY_PRIVATE_KEY }}
         run: |
-          if [ -z "$KEY" ]; then echo "::notice::MCP_DNS_PRIVATE_KEY not set: validated only, nothing published (see README, MCP registry listing)"; echo "go=0" >> "$GITHUB_OUTPUT"; else echo "go=1" >> "$GITHUB_OUTPUT"; fi
+          if [ -z "$KEY" ]; then echo "::notice::MCP_REGISTRY_PRIVATE_KEY not set: validated only, nothing published (see README, MCP registry listing)"; echo "go=0" >> "$GITHUB_OUTPUT"; else echo "go=1" >> "$GITHUB_OUTPUT"; fi
       - name: Install mcp-publisher v1.8.1 (checksum pinned)
         if: steps.gate.outputs.go == '1'
         run: |
           curl -fsSL -o /tmp/mp.tgz https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz
           echo "a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc  /tmp/mp.tgz" | sha256sum -c -
           tar -xzf /tmp/mp.tgz -C /tmp mcp-publisher
-      - name: Log in (DNS) and publish
+      - name: Log in (HTTP, straitlink.in/.well-known/mcp-registry-auth) and publish
         if: steps.gate.outputs.go == '1'
         env:
-          KEY: ${{ secrets.MCP_DNS_PRIVATE_KEY }}
+          KEY: ${{ secrets.MCP_REGISTRY_PRIVATE_KEY }}
         run: |
-          /tmp/mcp-publisher login dns --domain straitlink.in --private-key "$KEY"
+          /tmp/mcp-publisher login http --domain straitlink.in --private-key "$KEY"
           /tmp/mcp-publisher publish

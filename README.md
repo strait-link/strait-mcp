@@ -182,37 +182,27 @@ In Cursor or Claude Desktop use `"command": "node", "args": ["/absolute/path/to/
 
 Hilltop Shoes (`hilltop.strait.link`, `*.hilltop.example`) is a made-up shop used in examples.
 
-## MCP registry listing (drafted, not published)
+## MCP registry listing
 
-`server.json` and the `mcpName` field in `package.json` are drafts for the
-[official MCP registry](https://registry.modelcontextprotocol.io). The registry checks that `mcpName` in the published npm package matches `server.json` `name`
+`server.json` and the `mcpName` field in `package.json` list this server on the
+[official MCP registry](https://registry.modelcontextprotocol.io) as `in.straitlink/mcp`. The registry checks that `mcpName` in the published npm package matches `server.json` `name`
 ([package types](https://github.com/modelcontextprotocol/registry/blob/main/docs/modelcontextprotocol-io/package-types.mdx)).
 
-- **Namespace `in.straitlink/mcp` (recommended).** Reverse-DNS of `straitlink.in`, so the listing carries the
-  product's own domain. It needs DNS authentication: the Strait team adds a TXT record on the apex `straitlink.in`
-  (`v=MCPv1; k=ed25519; p=<public key>`) and runs `mcp-publisher login dns --domain straitlink.in --private-key …`
-  ([authentication](https://github.com/modelcontextprotocol/registry/blob/main/docs/modelcontextprotocol-io/authentication.mdx)).
-  Keep the private key out of the repo.
-- **Alternative `io.github.<owner>/strait-mcp`.** Uses GitHub OAuth (`mcp-publisher login github`) and needs no DNS
-  change, but the name shows a personal GitHub account rather than the product domain, and it requires the public
-  GitHub repo (strait-link/strait-mcp). To switch, change `name` in `server.json` and `mcpName` in `package.json`
-  together (a test checks they match).
+- **Namespace `in.straitlink/mcp`.** Reverse-DNS of `straitlink.in`, proven with HTTP authentication
+  ([authentication](https://github.com/modelcontextprotocol/registry/blob/main/docs/modelcontextprotocol-io/authentication.mdx)):
+  the site serves the Ed25519 public key at `https://straitlink.in/.well-known/mcp-registry-auth`
+  (`v=MCPv1; k=ed25519; p=<public key>`, written by the site's `lib/seo.mjs`), and the private key is the
+  `MCP_REGISTRY_PRIVATE_KEY` Actions secret of this repo. No DNS change and no personal login.
 - `remotes` lists the hosted server `https://strait.link/mcp` (Streamable HTTP, `Authorization: Bearer` secret key,
   live since 24 Oct 2026), and `repository` points at github.com/strait-link/strait-mcp. The OAuth Worker
   (`mcp.strait.link`) is not listed until it is deployed.
-- Order when the Strait team is ready: create the repo, publish `@straitlink/mcp` to npm (done: 0.1.0 on 15 Oct,
-  `mcpName` matches), add the TXT record, then run the **MCP registry** workflow (`.github/workflows/registry.yml`).
-  Without the `MCP_DNS_PRIVATE_KEY` secret it only validates `server.json` (schema, name, version, npm) and stops.
-
-### Founder steps (about 10 minutes, after the GitHub repo exists)
-
-1. Claude makes a key pair on the Mac (`openssl genpkey -algorithm ed25519`) and shows you only the **public** part.
-2. In the DNS settings for **straitlink.in**, add a **TXT** record on the root (`@`) with the value
-   `v=MCPv1; k=ed25519; p=<public key>`. Save. It can take up to an hour to appear.
-3. In GitHub, repo **strait-mcp → Settings → Secrets → Actions**, add `MCP_DNS_PRIVATE_KEY` with the private key
-   (Claude puts it there if you allow secret writes).
-4. Actions → **MCP registry** → Run workflow. When it's green, search "Strait" on
-   registry.modelcontextprotocol.io: that's how you know it worked.
+- **New version:** release it to npm first (release workflow), then run **Actions → MCP registry → Run workflow**.
+  It checks `server.json` against `package.json`, the npm package and the registry schema, then logs in and publishes.
+  Without the secret it only validates and stops.
+- **New key:** `openssl genpkey -algorithm Ed25519 -out key.pem` (OpenSSL 3, not macOS LibreSSL); the public line is
+  `v=MCPv1; k=ed25519; p=$(openssl pkey -in key.pem -pubout -outform DER | tail -c 32 | base64)` (put it in the
+  site's `lib/seo.mjs` and deploy the site); the secret is the hex private key,
+  `openssl pkey -in key.pem -noout -text | grep -A3 "priv:" | tail -n +2 | tr -d ' :\n'`. Delete `key.pem` after.
 
 ## Licence
 

@@ -6,15 +6,15 @@ description: Move an app from Firebase Dynamic Links or Branch to Strait - map l
 # Migrate to Strait from Firebase Dynamic Links or Branch
 
 - Guides: Firebase https://straitlink.in/docs/migrate-from-firebase/ , Branch https://straitlink.in/docs/migrate-from-branch/ ,
-  AppsFlyer OneLink https://straitlink.in/docs/migrate-from-appsflyer/ . Add `.md` for Markdown. The docs win over this file.
+  AppsFlyer OneLink https://straitlink.in/docs/migrate-from-appsflyer/ . Markdown: replace the last `/` with `.md`. The docs win over this file.
 - Never create links before the user answers yes to a plan. Secret key (`st_live_…`) only on servers, from an environment variable.
 
 ## 1. Find what used the old vendor
 
 ```bash
-grep -rn "firebasedynamiclinks.googleapis.com" .                                   # Firebase, backend
-grep -rn "dynamiclinks\|firebase_dynamic_links\|getDynamicLink\|dynamic-links\|handleUniversalLink" .   # Firebase, apps
-grep -rn "react-native-branch\|io.branch\|flutter_branch_sdk\|BranchEvent\|initSession" .   # Branch
+grep -rn --exclude-dir={node_modules,Pods,build,.dart_tool,.gradle,dist} "firebasedynamiclinks.googleapis.com" .   # Firebase, backend
+grep -rni --exclude-dir={node_modules,Pods,build,.dart_tool,.gradle,dist} "dynamiclinks\|dynamic-links\|dynamic_links\|getDynamicLink\|DynamicLinkComponents" .   # Firebase, apps
+grep -rn --exclude-dir={node_modules,Pods,build,.dart_tool,.gradle,dist} "react-native-branch\|io.branch\|flutter_branch_sdk\|BranchEvent\|initSession" .   # Branch
 ```
 
 Also list where people see old links: emails, push, website, QR codes, SMS templates.

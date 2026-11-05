@@ -10,8 +10,8 @@ const file = (s: string) => new URL(`../skills/${s}/SKILL.md`, import.meta.url);
 const real = new Set([...TOOLS.map((t) => t.name), ...PROMPTS.map((p) => p.name)]);
 // snake_case words in backticks that are not tools: link-event reasons, API fields, Branch keys, test-mode reasons.
 const NOT_TOOLS = new Set([
-  'not_found', 'no_match', 'password_protected', 'invalid_url', 'no_tap', 'other_device',
-  'utm_source', 'utm_campaign', 'pending_dns', 'deeplink_path', 'canonical_url', 'ios_url', 'android_url',
+  'not_found', 'no_match', 'no_tap', 'other_device',
+  'utm_source', 'pending_dns', 'deeplink_path', 'canonical_url', 'ios_url', 'android_url',
   'og_title', 'og_description', 'og_image_url', 'fallback_url', 'desktop_url', 'one_time_use',
 ]);
 const pages = new Set(docs.sections.map((s: { url: string }) => s.url.split('#')[0]));

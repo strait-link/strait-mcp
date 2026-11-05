@@ -4,7 +4,8 @@
 
 - `get_analytics`: `group` also takes `campaign`, `country`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term` and
   `utm_content`, the values the live OpenAPI spec lists for `GET /v1/analytics` (engine #103, ADR 0082). Country and UTM
-  rows cover taps since 5 Nov 2026; older taps come back with `key: null`. `ANALYTICS_GROUPS` is the one list.
+  rows cover taps since 5 Nov 2026; older taps come back with `key: null`. `compare_analytics` takes the same groups (not
+  `none`/`day`). `ANALYTICS_GROUPS` is the one list. Needs an npm release and a hosted Worker deploy to reach users.
 - Claude Code plugin 0.2.0: three more skills next to `strait-setup`. `strait-troubleshoot` (link opens the browser,
   deferred link missing after install, assetlinks.json / AASA failing, taps or events not showing) runs the real checks
   (`check_app_links`, `simulate_tap`, `trace_tap`, `list_taps`, `list_events`, `npx @straitlink/cli doctor`) and points
@@ -12,7 +13,7 @@
   Flutter, Android, iOS, Unity; `POST /v1/event` on the web, `sendEvent` in Node). `strait-migration` maps Firebase
   Dynamic Links and Branch fields, imports links (Dashboard → Import, `POST /v1/links/batch`, `batch_create_links`) and
   swaps the SDK calls. `test/skills.test.ts` fails if a skill names a tool or prompt that doesn't exist or links a
-  docs page that isn't in the docs index. Skills ship from GitHub with the plugin; nothing changes in the npm package.
+  docs page that isn't in the docs index. The skills ship from GitHub with the plugin, not in the npm package.
 
 ## 0.7.0 (5 Nov 2026)
 

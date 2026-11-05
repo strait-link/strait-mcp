@@ -3,7 +3,7 @@
  * the stdio server, the remote Worker and the tests all register the same list.
  */
 import { z } from 'zod';
-import { ANALYTICS_GROUPS, StraitApiError, type StraitClient, type NewLinkInput, type LinkPatchInput, type NewEventInput, type Domain } from './client.js';
+import { ANALYTICS_GROUPS, StraitApiError, type AnalyticsGroup, type StraitClient, type NewLinkInput, type LinkPatchInput, type NewEventInput, type Domain } from './client.js';
 import { parseCsv } from './csv.js';
 import { searchDocs } from './docs.js';
 
@@ -155,7 +155,7 @@ export function toMs(v: string | number | undefined, fallback: number): number {
 const iso = (ms: number) => new Date(ms).toISOString();
 
 type Metrics = { taps?: number; billableTaps?: number; appOpens?: number; installs?: number; conversions?: number; revenue?: Record<string, number> };
-type AnalyticsAnswer = { totals: Metrics; rows?: Array<Metrics & { key: string }> };
+type AnalyticsAnswer = { totals: Metrics; rows?: Array<Metrics & { key: string | null }> }; // null: no value (e.g. taps before 5 Nov 2026 for country/utm_*)
 const COUNTS = ['taps', 'billableTaps', 'appOpens', 'installs', 'conversions'] as const;
 
 /** Change from `before` to `now` for each count and each revenue currency. pct is null when before is 0. */
@@ -689,14 +689,14 @@ export const TOOLS: StraitTool[] = [
     description:
       'Read-only. Compares two periods: taps, app opens, installs, conversions and revenue now against before, with the change and the ' +
       'percent change (null when before was 0). By default "before" is the period of the same length just before. With group (channel, ' +
-      'platform or link) it compares each row too, biggest first. Use it for "how did this week do against last week" or "why did installs drop". ' +
+      'platform, link, campaign, country or a utm_* tag) it compares each row too, biggest first. Use it for "how did this week do against last week" or "why did installs drop". ' +
       'Days are UTC; each period at most 92 days.',
     inputSchema: {
       ...range,
       compareFrom: z.string().optional().describe('Start of the period to compare against; default: just before from'),
       compareTo: z.string().optional().describe('End of the period to compare against; default: from'),
       link: slug.optional().describe('Only this link (slug)'),
-      group: z.enum(['channel', 'platform', 'link']).optional().describe('Also compare row by row'),
+      group: z.enum(ANALYTICS_GROUPS.filter((g) => g !== 'none' && g !== 'day') as [AnalyticsGroup, ...AnalyticsGroup[]]).optional().describe('Also compare row by row'),
       limit: z.number().int().min(1).max(50).optional().describe('Rows to compare with group, default 10'),
     },
     annotations: { title: 'Compare two periods', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },

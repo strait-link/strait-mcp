@@ -49,7 +49,7 @@ outside the key's access.
 | `get_link` | Read one link by slug | secret |
 | `list_links` | List links, one page at a time. `status: "paused"` lists turned-off links (0.2.1) | secret |
 | `update_link` | Change destination, title, tags or expiry, or `isActive` on its own (false pauses, true turns a paused link back on; 0.2.1). **Asks for `confirm: true`**: without it you get a preview and nothing changes | secret |
-| `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform (`GET /v1/analytics`). iPhone installs come from beta install matching | secret |
+| `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform / campaign / country / UTM tag (`GET /v1/analytics`). iPhone installs come from beta install matching | secret |
 | `check_app_links` | Check a domain's `assetlinks.json` and `apple-app-site-association`, with a fix for each problem | none |
 | `simulate_tap` | Dry-run one tap from one device or app (nothing recorded or billed) | secret |
 | `trace_tap` | Walk a link through WhatsApp, Instagram, Facebook, Chrome, Safari, iPad, computer and preview bots; or read a Live Tap Trace from the website demo | secret (link) / none (demo token) |

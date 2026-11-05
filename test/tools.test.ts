@@ -138,6 +138,16 @@ describe('analytics, checks, simulation', () => {
     expect(calls[0]!.url.searchParams.get('group')).toBe('utm_medium');
   });
 
+  it('compare_analytics compares by campaign, country and UTM groups too; a null key (taps before 5 Nov) is its own row', async () => {
+    const group = byName('compare_analytics').inputSchema.group as z.ZodType;
+    for (const g of ['channel', 'platform', 'link', 'campaign', 'country', 'utm_source', 'utm_campaign']) expect(group.safeParse(g).success).toBe(true);
+    expect(group.safeParse('day').success).toBe(false);
+    const { client, calls } = mockClient(() => ({ body: { totals: { taps: 3 }, rows: [{ key: 'IN', taps: 2 }, { key: null, taps: 1 }] } }));
+    const r = parse(await runTool(byName('compare_analytics'), client, { from: '2026-11-01', to: '2026-11-08', group: 'country' }));
+    expect(calls[0]!.url.searchParams.get('group')).toBe('country');
+    expect(r.rows.map((x: { key: string | null }) => x.key)).toEqual(['IN', null]);
+  });
+
   it('check_app_links needs no key and drops the raw file bodies', async () => {
     const report = { domain: 'x.example', android: { status: 'ok', file: { url: 'u', body: '[big]' }, findings: [] }, ios: { status: 'error', file: { body: '{}' }, legacyFile: { body: 'x' }, findings: [{ id: 'ios.json' }] } };
     const { client, calls } = mockClient(() => ({ body: report }), {});

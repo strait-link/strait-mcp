@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 (5 Nov 2026)
+
+- New prompt `get_started` (six in all), optional `platform` (react-native, expo, flutter, android, ios, unity,
+  capacitor, web): checks the key (`get_workspace`), offers an existing link or creates the first one with
+  `create_link` only after the user says yes, finds the platform from the project files when none is given, reads
+  that SDK's docs page (`/docs/sdks/<platform>.md`, or `search_docs`) and pastes its install and setup code exactly,
+  lists the dashboard steps only the user can do, runs `check_app_links`, then verifies with test mode
+  (`checkDeferred()` from a debug build, `list_taps`). The publishable key goes in the app, never a secret key.
+
 ## 0.6.0 (4 Nov 2026)
 
 - `get_campaign_qr_zip` (new, read-only): every live link of a campaign as QR codes in one ZIP (`GET /v1/qr.zip`), SVG by

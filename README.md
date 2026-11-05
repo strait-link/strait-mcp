@@ -86,10 +86,11 @@ keeps its history.
 
 ## Prompts
 
-Clients that show MCP prompts (Claude Code: type `/`) offer five starters. All but `migrate_firebase_links` only read:
+Clients that show MCP prompts (Claude Code: type `/`) offer six starters. All but `get_started` and `migrate_firebase_links` only read, and those two create links only after you answer yes:
 
 | Prompt | What it does |
 |---|---|
+| `get_started` (platform, optional: `react-native`, `expo`, `flutter`, `android`, `ios`, `unity`, `capacitor`, `web`) | Zero to a working link: checks the key with `get_workspace`, creates your first link with `create_link` after you answer yes, finds your platform (or uses the one you give), pastes the exact install and setup code from that SDK's docs page, runs `check_app_links`, and walks you through a test mode check (`checkDeferred()` in a debug build, then `list_taps`) |
 | `weekly_review` | This week against last week (totals and channels), the top links by installs, and anything down more than 30 % |
 | `debug_link` (slug) | Why a link opens the browser: App Links / Universal Links files, a trace per channel and its recent taps, with the fix |
 | `setup_check` | Usage, custom domains still waiting for DNS, webhooks with failed deliveries, and the App Links files |

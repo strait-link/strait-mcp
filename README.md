@@ -49,7 +49,7 @@ outside the key's access.
 | `get_link` | Read one link by slug | secret |
 | `list_links` | List links, one page at a time. `status: "paused"` lists turned-off links (0.2.1) | secret |
 | `update_link` | Change destination, title, tags or expiry, or `isActive` on its own (false pauses, true turns a paused link back on; 0.2.1). **Asks for `confirm: true`**: without it you get a preview and nothing changes | secret |
-| `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform (`GET /v1/analytics`). iPhone installs come from beta install matching | secret |
+| `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform / campaign / country / UTM tag (`GET /v1/analytics`). iPhone installs come from beta install matching | secret |
 | `check_app_links` | Check a domain's `assetlinks.json` and `apple-app-site-association`, with a fix for each problem | none |
 | `simulate_tap` | Dry-run one tap from one device or app (nothing recorded or billed) | secret |
 | `trace_tap` | Walk a link through WhatsApp, Instagram, Facebook, Chrome, Safari, iPad, computer and preview bots; or read a Live Tap Trace from the website demo | secret (link) / none (demo token) |
@@ -117,7 +117,7 @@ Without a key, `check_app_links`, `search_docs` and demo `trace_tap` still work.
 
 ## Install
 
-### Claude Code plugin (hosted server + setup skill)
+### Claude Code plugin (hosted server + skills)
 
 ```text
 /plugin install strait --marketplace strait-link/strait-mcp
@@ -125,7 +125,8 @@ Without a key, `check_app_links`, `search_docs` and demo `trace_tap` still work.
 
 (On older Claude Code: `/plugin marketplace add strait-link/strait-mcp`, then `/plugin install strait@strait-link`.) It asks
 for a secret key when you enable it and keeps it in your system's credential store. It connects to the hosted server
-`https://strait.link/mcp` and adds the `strait-setup` skill, which sets Strait up in an app. Privacy:
+`https://strait.link/mcp` and adds four skills: `strait-setup` (sets Strait up in an app), `strait-troubleshoot`,
+`strait-events` (tracks an in-app event) and `strait-migration` (from Firebase Dynamic Links or Branch). Privacy:
 https://straitlink.in/legal/privacy/
 
 ### Claude Code
@@ -264,7 +265,7 @@ Roll back with `npx -y wrangler@4 rollback --env production`, or switch it off b
 in `env.production.vars` and deploying again (every route then answers 404). Revoking the secret key a user pasted
 cuts that connection off at the API.
 
-## Claude Code skill
+## Claude Code skills
 
 `skills/strait-setup/SKILL.md` teaches Claude Code how to add Strait to an app (React Native / Expo, Flutter,
 Android, iOS, Unity, Capacitor, web, and a Node server). Copy the folder into `~/.claude/skills/` or a project's
@@ -273,6 +274,10 @@ Android, iOS, Unity, Capacitor, web, and a Node server). Copy the folder into `~
 The site repo owns it (`site/lib/skill.mjs`, fed by `site.config.json`, so install lines and versions match the
 docs). Don't edit this copy by hand: run `npm run skill:sync` (needs `../site` or `SITE_DIR`). The site's tests fail
 when this copy drifts.
+
+`skills/strait-troubleshoot`, `skills/strait-events` and `skills/strait-migration` are edited here. They name only
+real MCP tools and prompts and link only real docs pages; `test/skills.test.ts` checks both against `src/tools.ts`,
+`src/prompts.ts` and `src/docs-index.json`.
 
 ## Develop
 

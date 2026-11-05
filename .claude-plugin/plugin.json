@@ -1,7 +1,7 @@
 {
   "name": "strait",
-  "version": "0.1.0",
-  "description": "Strait deep links in Claude Code: the hosted Strait MCP server (create, find, pause links, analytics, App Links checks, webhooks) and the strait-setup skill that adds Strait to an app.",
+  "version": "0.2.0",
+  "description": "Strait deep links in Claude Code: the hosted Strait MCP server (create, find, pause links, analytics, App Links checks, webhooks) and four skills: strait-setup (add Strait to an app), strait-troubleshoot, strait-events (track in-app events) and strait-migration (from Firebase Dynamic Links or Branch).",
   "author": {
     "name": "The Strait team",
     "email": "support@straitlink.in",

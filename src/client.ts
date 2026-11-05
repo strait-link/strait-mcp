@@ -68,7 +68,12 @@ export interface Link {
   [k: string]: unknown;
 }
 
-export type AnalyticsGroup = 'none' | 'day' | 'channel' | 'link' | 'platform';
+/** GET /v1/analytics `group` values, as in the OpenAPI spec (campaign, country and utm_* since engine #103, 5 Nov 2026). */
+export const ANALYTICS_GROUPS = [
+  'none', 'day', 'channel', 'link', 'platform',
+  'campaign', 'country', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+] as const;
+export type AnalyticsGroup = (typeof ANALYTICS_GROUPS)[number];
 
 export interface Domain {
   hostname: string;

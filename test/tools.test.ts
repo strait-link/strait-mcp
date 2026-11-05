@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { describe, expect, it } from 'vitest';
 import { StraitClient, isSecretKey } from '../src/client.js';
 import { searchDocs, tokens } from '../src/docs.js';
@@ -125,6 +126,26 @@ describe('analytics, checks, simulation', () => {
     const { client, calls } = mockClient(() => ({ body: { totals: {} } }));
     await runTool(byName('get_analytics'), client, { from: '2026-09-01', to: '2026-10-01', link: 'summer', group: 'channel' });
     expect(Object.fromEntries(calls[0]!.url.searchParams)).toEqual({ from: '2026-09-01', to: '2026-10-01', link: 'summer', group: 'channel' });
+  });
+
+  it('get_analytics groups by the engine\'s campaign, country and UTM groups too (OpenAPI getAnalytics, engine #103)', async () => {
+    const group = byName('get_analytics').inputSchema.group as z.ZodType;
+    const added = ['campaign', 'country', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+    for (const g of ['none', 'day', 'channel', 'link', 'platform', ...added]) expect(group.safeParse(g).success).toBe(true);
+    expect(group.safeParse('medium').success).toBe(false);
+    const { client, calls } = mockClient(() => ({ body: { totals: {} } }));
+    await runTool(byName('get_analytics'), client, { group: 'utm_medium' });
+    expect(calls[0]!.url.searchParams.get('group')).toBe('utm_medium');
+  });
+
+  it('compare_analytics compares by campaign, country and UTM groups too; a null key (taps before 5 Nov) is its own row', async () => {
+    const group = byName('compare_analytics').inputSchema.group as z.ZodType;
+    for (const g of ['channel', 'platform', 'link', 'campaign', 'country', 'utm_source', 'utm_campaign']) expect(group.safeParse(g).success).toBe(true);
+    expect(group.safeParse('day').success).toBe(false);
+    const { client, calls } = mockClient(() => ({ body: { totals: { taps: 3 }, rows: [{ key: 'IN', taps: 2 }, { key: null, taps: 1 }] } }));
+    const r = parse(await runTool(byName('compare_analytics'), client, { from: '2026-11-01', to: '2026-11-08', group: 'country' }));
+    expect(calls[0]!.url.searchParams.get('group')).toBe('country');
+    expect(r.rows.map((x: { key: string | null }) => x.key)).toEqual(['IN', null]);
   });
 
   it('check_app_links needs no key and drops the raw file bodies', async () => {

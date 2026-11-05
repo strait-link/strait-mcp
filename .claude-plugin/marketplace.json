@@ -9,7 +9,7 @@
     {
       "name": "strait",
       "source": "./",
-      "description": "The hosted Strait MCP server and the strait-setup skill for Claude Code."
+      "description": "The hosted Strait MCP server and the Strait skills for Claude Code: setup, troubleshooting, events and migration."
     }
   ]
 }

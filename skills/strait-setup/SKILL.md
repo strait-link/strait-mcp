@@ -54,9 +54,9 @@ store or website when it is not, and keep the destination through the install (d
    - Flutter: in `pubspec.yaml`, `strait_sdk: ^0.9.7` (pub.dev),
      then `flutter pub add app_links shared_preferences play_install_referrer flutter_timezone`
      → https://straitlink.in/docs/sdks/flutter/
-   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.8.4")` (JitPack: add `maven("https://jitpack.io")`) plus
+   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.9.0")` (JitPack: add `maven("https://jitpack.io")`) plus
      `com.android.installreferrer:installreferrer:2.2` → https://straitlink.in/docs/sdks/android/
-   - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.9.5` → https://straitlink.in/docs/sdks/ios/
+   - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.10.0` → https://straitlink.in/docs/sdks/ios/
    - Unity: Package Manager → Add package from git URL → `https://github.com/strait-link/strait-sdk-unity.git?path=src#v0.8.7` → https://straitlink.in/docs/sdks/unity/
    - Web (deferred links on a website): `npm install @straitlink/web@0.7.0` → https://straitlink.in/docs/sdks/web/
    - Capacitor / Ionic: `npm install @straitlink/capacitor@0.3.0 && npx cap sync` (Swift Package Manager on iOS; JitPack is added for you on Android)

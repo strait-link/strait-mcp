@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `strait-setup` skill: Android `v0.9.0` (JitPack) and iOS `0.10.0` (SwiftPM), released 5 Nov, regenerated with
+  `npm run skill:sync` from the site.
 - `strait-setup` skill: SDK versions match the live docs again (React Native 0.10.2, Flutter 0.9.7 from pub.dev, iOS 0.9.5,
   web 0.7.0, Capacitor 0.3.0, Node 0.8.0), regenerated with `npm run skill:sync` from the site.
 - `get_analytics`: `group` also takes `campaign`, `country`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term` and

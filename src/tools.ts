@@ -3,7 +3,7 @@
  * the stdio server, the remote Worker and the tests all register the same list.
  */
 import { z } from 'zod';
-import { StraitApiError, type StraitClient, type NewLinkInput, type LinkPatchInput, type NewEventInput, type Domain } from './client.js';
+import { ANALYTICS_GROUPS, StraitApiError, type StraitClient, type NewLinkInput, type LinkPatchInput, type NewEventInput, type Domain } from './client.js';
 import { parseCsv } from './csv.js';
 import { searchDocs } from './docs.js';
 
@@ -316,13 +316,14 @@ export const TOOLS: StraitTool[] = [
     name: 'get_analytics',
     description:
       'Taps, app opens, installs, conversions and revenue for the workspace (or one link) over a date range, optionally grouped by ' +
-      'day, channel (whatsapp, instagram, gmail, direct…), link or platform. Same definitions as the dashboard; days are UTC; ' +
-      'at most 92 days per call (default: the last 30 days).',
+      'day, channel (whatsapp, instagram, gmail, direct…), link, platform, campaign (the link\'s), country (2-letter) or the tap\'s ' +
+      'UTM tags (utm_source, utm_medium, utm_campaign, utm_term, utm_content). Country and UTM rows cover taps since 5 Nov 2026; ' +
+      'older taps have key null. Same definitions as the dashboard; days are UTC; at most 92 days per call (default: the last 30 days).',
     inputSchema: {
       from: z.string().optional().describe('Inclusive start: 2026-09-01, an ISO date-time or epoch ms'),
       to: z.string().optional().describe('Exclusive end, same formats; default now'),
       link: slug.optional().describe('Only this link (slug)'),
-      group: z.enum(['none', 'day', 'channel', 'link', 'platform']).optional(),
+      group: z.enum(ANALYTICS_GROUPS).optional(),
     },
     annotations: { title: 'Read analytics', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     needsKey: true,

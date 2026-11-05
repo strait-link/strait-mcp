@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { describe, expect, it } from 'vitest';
 import { StraitClient, isSecretKey } from '../src/client.js';
 import { searchDocs, tokens } from '../src/docs.js';
@@ -125,6 +126,16 @@ describe('analytics, checks, simulation', () => {
     const { client, calls } = mockClient(() => ({ body: { totals: {} } }));
     await runTool(byName('get_analytics'), client, { from: '2026-09-01', to: '2026-10-01', link: 'summer', group: 'channel' });
     expect(Object.fromEntries(calls[0]!.url.searchParams)).toEqual({ from: '2026-09-01', to: '2026-10-01', link: 'summer', group: 'channel' });
+  });
+
+  it('get_analytics groups by the engine\'s campaign, country and UTM groups too (OpenAPI getAnalytics, engine #103)', async () => {
+    const group = byName('get_analytics').inputSchema.group as z.ZodType;
+    const added = ['campaign', 'country', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+    for (const g of ['none', 'day', 'channel', 'link', 'platform', ...added]) expect(group.safeParse(g).success).toBe(true);
+    expect(group.safeParse('medium').success).toBe(false);
+    const { client, calls } = mockClient(() => ({ body: { totals: {} } }));
+    await runTool(byName('get_analytics'), client, { group: 'utm_medium' });
+    expect(calls[0]!.url.searchParams.get('group')).toBe('utm_medium');
   });
 
   it('check_app_links needs no key and drops the raw file bodies', async () => {

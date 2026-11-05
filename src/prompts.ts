@@ -21,6 +21,43 @@ const host = z
 const platform = z.enum(['android', 'iphone']).optional().describe('The phone it failed on');
 const app = z.enum(['browser', 'whatsapp', 'instagram', 'facebook']).optional().describe('Where it was tapped');
 
+/** SDK docs page per app platform (each page has a Markdown copy at the same path + .md). */
+const SDKS: Record<string, string> = {
+  'react-native': 'React Native',
+  expo: 'Expo',
+  flutter: 'Flutter',
+  android: 'Android (Kotlin)',
+  ios: 'iOS (Swift)',
+  unity: 'Unity',
+  capacitor: 'Capacitor / Ionic',
+  web: 'web',
+};
+const sdkPlatform = z
+  .enum(Object.keys(SDKS) as [string, ...string[]])
+  .optional()
+  .describe('Your app: react-native, expo, flutter, android, ios, unity, capacitor or web (left out: found from the project files)');
+
+function sdkStep(p?: string): string {
+  const page = (k: string) => `https://straitlink.in/docs/sdks/${k}.md`;
+  const pick =
+    p && SDKS[p]
+      ? `The app is ${SDKS[p]}: read ${page(p)} in full. `
+      : 'Find the platform from the project files: app.json or app.config.* with expo (expo), package.json with react-native (react-native), ' +
+        'capacitor.config.* (capacitor), pubspec.yaml (flutter), build.gradle or build.gradle.kts (android), *.xcodeproj or Package.swift (ios), ' +
+        'ProjectSettings/ (unity), else a website (web); ask me if it is unclear. Then read its page in full: ' +
+        `https://straitlink.in/docs/sdks/<platform>.md (for example ${page('react-native')}). `;
+  const name = p && SDKS[p] ? SDKS[p].replace(/ (\(.*\)|\/.*)$/, '') : '<platform>';
+  return (
+    pick +
+    `If you cannot open web pages, use search_docs for "${name} install" and "${name} create the client" instead. ` +
+    'Then paste the install command and the setup code exactly as the page shows them: same package names, same versions, same order; ' +
+    'never guess a package or a version. The app gets the publishable key from Dashboard → Get started and the endpoint ' +
+    "https://<link domain from step 1>; never put a secret key in the app (that includes the one I gave you). " +
+    'Give me the dashboard steps the page lists (package name, SHA-256 fingerprints, Team ID and bundle ID in Dashboard → Apps & stores) ' +
+    'as a short list, because only I can do them. '
+  );
+}
+
 /** simulate_tap preset for a phone + app; an app without its own preset on that phone falls back to the phone. */
 function presetFor(p?: string, a?: string): string {
   const phone = p === 'iphone' ? 'iphone' : 'android';
@@ -38,6 +75,30 @@ const DOCTOR_IDS =
   'debug, release and Play App Signing each have their own)';
 
 export const PROMPTS: StraitPrompt[] = [
+  {
+    name: 'get_started',
+    title: 'From zero to your first link and SDK setup',
+    description:
+      'Checks your key, creates your first link (after you say yes), adds the right SDK to your app with the exact install and setup code from the docs, and checks it with test mode.',
+    argsSchema: { platform: sdkPlatform },
+    text: ({ platform: p }) =>
+      'Take me from zero to a working Strait link in my app. Go one step at a time and tell me what you found after each step. ' +
+      '1) get_workspace to check the key: the workspace name, its link domain and what the key may do. ' +
+      'If it fails, stop and tell me to make a secret key in Dashboard → Settings → Secret keys and add it to this AI tool (https://straitlink.in/docs/mcp/). ' +
+      'If the key is read only, say that you cannot create links with it and that I can make the first link in Dashboard → Links instead. ' +
+      '2) list_links: if I already have a link, offer to use it. Otherwise propose one link: slug first-link and a longUrl I give you ' +
+      "(an https page on my app's website, for example the home page; the app receives its path). Show me the slug and longUrl and ask me to answer yes. " +
+      'Only after my yes, create_link, then give me its shortUrl. ' +
+      '3) Add the SDK. ' +
+      sdkStep(p) +
+      '4) check_app_links on the link domain: list each error finding with its fix (most are in Dashboard → Apps & stores). ' +
+      '5) Verify with Test mode (https://straitlink.in/docs/test-mode.md, or search_docs for "test mode run a test"): ' +
+      "add a debug-only button that calls the SDK's checkDeferred() as the page shows; I turn on Test mode in Dashboard → Get started (a 15-minute window), " +
+      "tap the shortUrl on my phone, install and open the debug build and press the button. onLink should fire with kind deferred, matched true and matchMethod test. " +
+      'Then list_taps for the slug over the last hour to confirm my tap arrived. If the reply says no tap was seen, I tap the link again and press the button again; ' +
+      'if another phone checked in first, I start a new test. ' +
+      '6) End with a checklist: key, first link, SDK installed, setup code, dashboard settings, App Links check, test mode match; ok or what is left, with the one next step for each.',
+  },
   {
     name: 'weekly_review',
     title: 'Weekly review',

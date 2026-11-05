@@ -15,17 +15,17 @@ async function connected() {
 }
 
 describe('prompts', () => {
-  it('lists five prompts; debug_link takes a slug', async () => {
+  it('lists six prompts, get_started first; debug_link takes a slug', async () => {
     const c = await connected();
     const { prompts } = await c.listPrompts();
-    expect(prompts.map((p) => p.name)).toEqual(['weekly_review', 'debug_link', 'setup_check', 'migrate_firebase_links', 'why_not_open']);
+    expect(prompts.map((p) => p.name)).toEqual(['get_started', 'weekly_review', 'debug_link', 'setup_check', 'migrate_firebase_links', 'why_not_open']);
     expect(prompts.find((p) => p.name === 'debug_link')!.arguments).toEqual([expect.objectContaining({ name: 'slug', required: true })]);
   });
 
   it('every tool a prompt names exists (doctor finding ids such as host.file_missing are not tools), and none passes confirm: true', () => {
     const names = new Set(TOOLS.map((t) => t.name));
     for (const p of PROMPTS) {
-      for (const args of [{ slug: 'summer' }, { slug: 'summer', platform: 'iphone', app: 'instagram' }, { old_domain: 'hilltop.page.link' }]) {
+      for (const args of [{ slug: 'summer' }, { slug: 'summer', platform: 'iphone', app: 'instagram' }, { old_domain: 'hilltop.page.link' }, { platform: 'flutter' }, { platform: 'expo' }]) {
         const text = p.text(args);
         for (const m of text.matchAll(/(?<![.\w])([a-z]+_[a-z_]+)\b/g)) expect(names.has(m[1]!), `${p.name}: ${m[1]}`).toBe(true);
         expect(text).not.toMatch(/confirm: true/);
@@ -33,16 +33,45 @@ describe('prompts', () => {
     }
   });
 
-  it('only migrate_firebase_links may create links, and only after the user says yes', () => {
+  it('only migrate_firebase_links and get_started may create links, and only after the user says yes', () => {
     const writes = /\b(batch_create_links|create_link|update_link|pause_link|resume_link|deactivate_link|add_domain|remove_domain|record_event|test_webhook|redeliver_webhook_delivery)\b/;
+    const allowed: Record<string, string> = { migrate_firebase_links: 'batch_create_links', get_started: 'create_link' };
     for (const p of PROMPTS) {
       const text = p.text({ slug: 'summer' });
-      if (p.name !== 'migrate_firebase_links') expect(text, p.name).not.toMatch(writes);
+      if (!allowed[p.name]) {
+        expect(text, p.name).not.toMatch(writes);
+        continue;
+      }
+      const tool = allowed[p.name]!;
+      const others = [...text.matchAll(new RegExp(writes, 'g'))].map((m) => m[1]).filter((t) => t !== tool);
+      expect(others, p.name).toEqual([]);
+      expect(text.indexOf('yes'), p.name).toBeGreaterThan(-1);
+      expect(text.indexOf('yes'), p.name).toBeLessThan(text.indexOf(tool));
     }
-    const m = PROMPTS.find((p) => p.name === 'migrate_firebase_links')!.text({});
-    expect(m).toMatch(/batch_create_links/);
-    expect(m.indexOf('yes')).toBeGreaterThan(-1);
-    expect(m.indexOf('yes')).toBeLessThan(m.indexOf('batch_create_links'));
+  });
+
+  it('get_started: key check first, the platform picks its SDK docs page, never the secret key in the app, verifies with test mode', async () => {
+    const c = await connected();
+    const { prompts } = await c.listPrompts();
+    expect(prompts.find((p) => p.name === 'get_started')!.arguments).toEqual([expect.objectContaining({ name: 'platform', required: false })]);
+    const get = async (a?: Record<string, string>) =>
+      ((await c.getPrompt({ name: 'get_started', arguments: a })).messages[0]!.content as { text: string }).text;
+    const bare = await get();
+    expect(bare.indexOf('get_workspace')).toBeGreaterThan(-1);
+    expect(bare.indexOf('get_workspace')).toBeLessThan(bare.indexOf('create_link'));
+    expect(bare).toMatch(/pubspec\.yaml/); // no platform: detect it from the project files
+    expect(bare).toMatch(/publishable key/);
+    expect(bare).toMatch(/never .*secret key/i);
+    expect(bare).toMatch(/Test mode/);
+    expect(bare).toMatch(/checkDeferred\(\)/);
+    expect(bare).toMatch(/list_taps/);
+    expect(bare).toMatch(/check_app_links/);
+    const flutter = await get({ platform: 'flutter' });
+    expect(flutter).toContain('https://straitlink.in/docs/sdks/flutter.md');
+    expect(flutter).not.toMatch(/pubspec\.yaml\)/);
+    expect(await get({ platform: 'expo' })).toContain('https://straitlink.in/docs/sdks/expo.md');
+    expect(await get({ platform: 'ios' })).toContain('https://straitlink.in/docs/sdks/ios.md');
+    await expect(c.getPrompt({ name: 'get_started', arguments: { platform: 'windows' } })).rejects.toThrow();
   });
 
   it('migrate_firebase_links: old_domain is optional; given, it is in the text; not a domain, refused', async () => {

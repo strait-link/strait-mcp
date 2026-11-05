@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `strait-setup` skill: SDK versions match the live docs again (React Native 0.10.2, Flutter 0.9.7 from pub.dev, iOS 0.9.5,
+  web 0.7.0, Capacitor 0.3.0, Node 0.8.0), regenerated with `npm run skill:sync` from the site.
 - `get_analytics`: `group` also takes `campaign`, `country`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term` and
   `utm_content`, the values the live OpenAPI spec lists for `GET /v1/analytics` (engine #103, ADR 0082). Country and UTM
   rows cover taps since 5 Nov 2026; older taps come back with `key: null`. `compare_analytics` takes the same groups (not

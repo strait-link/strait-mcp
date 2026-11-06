@@ -138,6 +138,17 @@ describe('analytics, checks, simulation', () => {
     expect(calls[0]!.url.searchParams.get('group')).toBe('utm_medium');
   });
 
+  it('get_analytics and compare_analytics group by app_version and sdk_version (engine ADR 0088, migration 0114)', async () => {
+    for (const name of ['get_analytics', 'compare_analytics']) {
+      const group = byName(name).inputSchema.group as z.ZodType;
+      for (const g of ['app_version', 'sdk_version']) expect(group.safeParse(g).success, `${name} ${g}`).toBe(true);
+    }
+    expect(byName('get_analytics').description).toMatch(/app_version/);
+    const { client, calls } = mockClient(() => ({ body: { totals: {} } }));
+    await runTool(byName('get_analytics'), client, { group: 'sdk_version' });
+    expect(calls[0]!.url.searchParams.get('group')).toBe('sdk_version');
+  });
+
   it('compare_analytics compares by campaign, country and UTM groups too; a null key (taps before 5 Nov) is its own row', async () => {
     const group = byName('compare_analytics').inputSchema.group as z.ZodType;
     for (const g of ['channel', 'platform', 'link', 'campaign', 'country', 'utm_source', 'utm_campaign']) expect(group.safeParse(g).success).toBe(true);

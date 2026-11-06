@@ -68,10 +68,12 @@ export interface Link {
   [k: string]: unknown;
 }
 
-/** GET /v1/analytics `group` values, as in the OpenAPI spec (campaign, country and utm_* since engine #103, 5 Nov 2026). */
+/** GET /v1/analytics `group` values, as in the OpenAPI spec (campaign, country and utm_* since engine #103, 5 Nov 2026;
+ *  app_version and sdk_version since engine migration 0114, ADR 0088, 6 Nov 2026). */
 export const ANALYTICS_GROUPS = [
   'none', 'day', 'channel', 'link', 'platform',
   'campaign', 'country', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+  'app_version', 'sdk_version',
 ] as const;
 export type AnalyticsGroup = (typeof ANALYTICS_GROUPS)[number];
 

@@ -319,7 +319,7 @@ export const TOOLS: StraitTool[] = [
       'day, channel (whatsapp, instagram, gmail, direct…), link, platform, campaign (the link\'s), country (2-letter) or the tap\'s ' +
       'UTM tags (utm_source, utm_medium, utm_campaign, utm_term, utm_content). Country and UTM rows cover taps since 5 Nov 2026; ' +
       'older taps have key null. app_version / sdk_version split app opens and installs by the app\'s and the Strait SDK\'s version ' +
-      'they reported (opens since 5 Nov 2026); taps, conversions and opens from an SDK that sends none are key null. Use it for ' +
+      'they reported (accepted since 5 Nov 2026 from SDKs that send it); taps, conversions and opens that sent none are key null. Use it for ' +
       '"which app version broke?". Same definitions as the dashboard; days are UTC; at most 92 days per call (default: the last 30 days).',
     inputSchema: {
       from: z.string().optional().describe('Inclusive start: 2026-09-01, an ISO date-time or epoch ms'),

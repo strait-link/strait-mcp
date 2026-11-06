@@ -3,8 +3,9 @@
 ## Unreleased
 
 - `get_analytics` and `compare_analytics`: `group` also takes `app_version` and `sdk_version` (engine migration 0114,
-  ADR 0088): app opens and installs by the app's and the Strait SDK's version they reported, opens since 5 Nov 2026.
-  Taps, conversions and opens from an SDK that sends no version come back with `key: null`. Needs an npm release and a
+  ADR 0088): app opens and installs by the app's and the Strait SDK's version they reported (accepted since 5 Nov 2026
+  from SDKs that send them; no released SDK does yet). Taps, conversions and opens that sent no version come back with
+  `key: null`. Needs an npm release and a
   hosted Worker deploy to reach users.
 - `strait-setup` skill: Android `v0.9.0` (JitPack) and iOS `0.10.0` (SwiftPM), released 5 Nov, regenerated with
   `npm run skill:sync` from the site.

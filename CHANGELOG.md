@@ -1,16 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.8.0 (7 Nov 2026)
 
+- README (the npm page): only what users need. Build, test, registry and the unreleased OAuth Worker's deploy
+  steps moved to `docs/MAINTAINERS.md` (repo only).
 - `get_analytics` and `compare_analytics`: `group` also takes `app_version` and `sdk_version` (engine migration 0114,
-  ADR 0088): app opens and installs by the app's and the Strait SDK's version they reported (accepted since 5 Nov 2026
-  from SDKs that send them; no released SDK does yet). Taps, conversions and opens that sent no version come back with
+  ADR 0088): app opens and installs by the app's and the Strait SDK's version they reported (sent by the SDKs
+  released 7 Nov 2026: Android 0.10.0, iOS 0.11.0, React Native 0.11.0, Flutter 0.10.0; web sends the SDK version only). Taps, conversions and opens that sent no version come back with
   `key: null`. Needs an npm release and a
   hosted Worker deploy to reach users.
-- `strait-setup` skill: Android `v0.9.0` (JitPack) and iOS `0.10.0` (SwiftPM), released 5 Nov, regenerated with
-  `npm run skill:sync` from the site.
-- `strait-setup` skill: SDK versions match the live docs again (React Native 0.10.2, Flutter 0.9.7 from pub.dev, iOS 0.9.5,
-  web 0.7.0, Capacitor 0.3.0, Node 0.8.0), regenerated with `npm run skill:sync` from the site.
+- `strait-setup` skill and `search_docs` index: the 7 Nov SDK versions (Android v0.10.0, iOS 0.11.0, Flutter 0.10.1,
+  Unity 0.9.0, web 0.8.0, Node 0.8.1; React Native 0.10.2 and Capacitor 0.3.0 until their next npm release), regenerated
+  from the live site (a111067) with `npm run skill:sync` and `npm run docs-index`.
 - `get_analytics`: `group` also takes `campaign`, `country`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term` and
   `utm_content`, the values the live OpenAPI spec lists for `GET /v1/analytics` (engine #103, ADR 0082). Country and UTM
   rows cover taps since 5 Nov 2026; older taps come back with `key: null`. `compare_analytics` takes the same groups (not

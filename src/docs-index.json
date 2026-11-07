@@ -1,7 +1,7 @@
 {
  "source": "https://straitlink.in",
  "builtFrom": "site/content/docs",
- "siteCommit": "9e447fb",
+ "siteCommit": "a111067",
  "sections": [
   {
    "page": "What is Strait?",
@@ -134,7 +134,7 @@
    "group": "Get started",
    "section": "5. Add the SDK",
    "url": "https://straitlink.in/docs/quick-start/iphone/#5-add-the-sdk",
-   "markdown": "**Do this:** in Xcode, **File → Add Package Dependencies…**, paste `https://github.com/strait-link/strait-sdk-swift` and pick version 0.10.0 or later. Then create the client once and hand it every link. For a SwiftUI app:\n\n```swift title=\"ShopApp.swift\"\nimport SwiftUI\nimport StraitSDK\n\nlet links = StraitLinks(StraitLinksConfig(\n    publishableKey: \"st_pub_live_…\",          // Dashboard → Get started\n    endpoint: \"https://hilltop.strait.link\"        // your link address\n))\n\n@main struct ShopApp: App {\n    init() {\n        links.onLink { event in print(\"Strait link:\", event.matched, event.path ?? \"none\") }\n        links.start()\n    }\n    var body: some Scene {\n        WindowGroup {\n            ContentView()\n                .onOpenURL { links.handle(url: $0) }\n                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { links.handle(userActivity: $0) }\n        }\n    }\n}\n```\n\nUIKit with a scene delegate: the three calls are on the [iOS (Swift)](https://straitlink.in/docs/sdks/ios/#handle-deep-links) page.\n\n**You should see:** the app builds, installs on your iPhone and starts as before."
+   "markdown": "**Do this:** in Xcode, **File → Add Package Dependencies…**, paste `https://github.com/strait-link/strait-sdk-swift` and pick version 0.11.0 or later. Then create the client once and hand it every link. For a SwiftUI app:\n\n```swift title=\"ShopApp.swift\"\nimport SwiftUI\nimport StraitSDK\n\nlet links = StraitLinks(StraitLinksConfig(\n    publishableKey: \"st_pub_live_…\",          // Dashboard → Get started\n    endpoint: \"https://hilltop.strait.link\"        // your link address\n))\n\n@main struct ShopApp: App {\n    init() {\n        links.onLink { event in print(\"Strait link:\", event.matched, event.path ?? \"none\") }\n        links.start()\n    }\n    var body: some Scene {\n        WindowGroup {\n            ContentView()\n                .onOpenURL { links.handle(url: $0) }\n                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { links.handle(userActivity: $0) }\n        }\n    }\n}\n```\n\nUIKit with a scene delegate: the three calls are on the [iOS (Swift)](https://straitlink.in/docs/sdks/ios/#handle-deep-links) page.\n\n**You should see:** the app builds, installs on your iPhone and starts as before."
   },
   {
    "page": "Quickstart for iPhone: open your Swift app from a link",
@@ -344,7 +344,7 @@
    "group": "Get started",
    "section": "3. Flutter",
    "url": "https://straitlink.in/docs/migrate-from-firebase/sdk/#3-flutter",
-   "markdown": "**Do this:** swap the packages, add `strait_sdk` to `pubspec.yaml`, then swap the red lines for the green ones.\n\n```bash\nflutter pub remove firebase_dynamic_links\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.9.7\n```\n\n`links.dart` is on [Install & set up](https://straitlink.in/docs/sdks/flutter/).\n\n```diff title=\"main.dart\"\n- final initial = await FirebaseDynamicLinks.instance.getInitialLink();\n- if (initial != null) route(initial.link);\n- FirebaseDynamicLinks.instance.onLink.listen((data) => route(data.link));\n+ await startLinks();   // links.dart: StraitLinks(...) + links.start(...)\n+ links.onLink.listen((e) { if (e.matched && e.path != null) routePath(e.path!, e.params ?? {}); });\n```\n\n**You should see:** the Flutter console logs `Strait link: direct app_link true /product/42` when you tap `https://hilltop.strait.link/summer`."
+   "markdown": "**Do this:** swap the packages, add `strait_sdk` to `pubspec.yaml`, then swap the red lines for the green ones.\n\n```bash\nflutter pub remove firebase_dynamic_links\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.1\n```\n\n`links.dart` is on [Install & set up](https://straitlink.in/docs/sdks/flutter/).\n\n```diff title=\"main.dart\"\n- final initial = await FirebaseDynamicLinks.instance.getInitialLink();\n- if (initial != null) route(initial.link);\n- FirebaseDynamicLinks.instance.onLink.listen((data) => route(data.link));\n+ await startLinks();   // links.dart: StraitLinks(...) + links.start(...)\n+ links.onLink.listen((e) { if (e.matched && e.path != null) routePath(e.path!, e.params ?? {}); });\n```\n\n**You should see:** the Flutter console logs `Strait link: direct app_link true /product/42` when you tap `https://hilltop.strait.link/summer`."
   },
   {
    "page": "Migrate from Firebase: swap the SDK",
@@ -785,7 +785,7 @@
    "group": "Recipes",
    "section": "2. Add the package and the Play Install Referrer",
    "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#2-add-the-package-and-the-play-install-referrer",
-   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The package reads it once you pass `play_install_referrer` in. Add the package from pub.dev:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.9.7\n```\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\nCreate `lib/links.dart` exactly as in [Install & set up, step 2](https://straitlink.in/docs/sdks/flutter/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add the intent filters and `flutter_deeplinking_enabled` from [step 3](https://straitlink.in/docs/sdks/flutter/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** `flutter pub get` finishes, and the app starts as before after a full `flutter run` (not a hot restart: the plugins are native)."
+   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The package reads it once you pass `play_install_referrer` in. Add the package from pub.dev:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.1\n```\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\nCreate `lib/links.dart` exactly as in [Install & set up, step 2](https://straitlink.in/docs/sdks/flutter/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add the intent filters and `flutter_deeplinking_enabled` from [step 3](https://straitlink.in/docs/sdks/flutter/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** `flutter pub get` finishes, and the app starts as before after a full `flutter run` (not a hot restart: the plugins are native)."
   },
   {
    "page": "Deferred deep links in Flutter, end to end",
@@ -1184,7 +1184,7 @@
    "group": "Platforms",
    "section": "What's tested",
    "url": "https://straitlink.in/docs/sdks/#whats-tested",
-   "markdown": "The iOS (Swift) SDK is at version 0.10.0, the Unity SDK at 0.8.7, the React Native SDK at 0.10.2, the Flutter SDK at 0.9.7, the Android SDK at 0.9.0, the Node SDK at 0.8.0 and the web SDK at 0.7.0. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS**: Universal Links are tested on a real iPhone; install matching after an App Store install is opt-in and proven on iPhone simulators so far.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
+   "markdown": "The iOS (Swift) SDK is at version 0.11.0, the Unity SDK at 0.9.0, the React Native SDK at 0.10.2, the Flutter SDK at 0.10.1, the Android SDK at 0.10.0, the Node SDK at 0.8.1 and the web SDK at 0.8.0. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS**: Universal Links are tested on a real iPhone; install matching after an App Store install is opt-in and proven on iPhone simulators so far.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
   },
   {
    "page": "React Native deep linking",
@@ -1604,7 +1604,7 @@
    "group": "Platforms",
    "section": "1. Install the package",
    "url": "https://straitlink.in/docs/sdks/flutter/#1-install-the-package",
-   "markdown": "Add it from pub.dev:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.9.7\n```\n\nThen the helper packages:\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n[`app_links`](https://pub.dev/packages/app_links) delivers links, [`shared_preferences`](https://pub.dev/packages/shared_preferences) stores the once-per-install flag and unsent reports, [`play_install_referrer`](https://pub.dev/packages/play_install_referrer) gives Android installs an exact match, and [`flutter_timezone`](https://pub.dev/packages/flutter_timezone) provides the IANA time zone the iPhone match needs.\n\n**You should see:** `flutter pub get` finishes without errors."
+   "markdown": "Add it from pub.dev:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.1\n```\n\nThen the helper packages:\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n[`app_links`](https://pub.dev/packages/app_links) delivers links, [`shared_preferences`](https://pub.dev/packages/shared_preferences) stores the once-per-install flag and unsent reports, [`play_install_referrer`](https://pub.dev/packages/play_install_referrer) gives Android installs an exact match, and [`flutter_timezone`](https://pub.dev/packages/flutter_timezone) provides the IANA time zone the iPhone match needs.\n\n**You should see:** `flutter pub get` finishes without errors."
   },
   {
    "page": "Flutter deep linking",
@@ -1751,7 +1751,7 @@
    "group": "Platforms",
    "section": "2. Record a purchase",
    "url": "https://straitlink.in/docs/sdks/flutter/events/#2-record-a-purchase",
-   "markdown": "```dart\nawait links.trackEvent('purchase', value: 49.99, currency: 'USD');\n```\n\n`trackEvent` returns `true` when the event was accepted. Use any event name; `value`, `currency`, `linkId` and `clickId` are optional.\n\n**You should see:** the purchase and its revenue at the bottom of the funnel in **Analytics**."
+   "markdown": "```dart\nawait links.trackEvent('purchase', value: 49.99, currency: 'USD');\n```\n\n`trackEvent` returns `true` when the event was accepted. Use any event name; `value`, `currency`, `linkId`, `clickId` and `eventId` are optional. Pass your order id as `eventId` (`eventId: order.id`): Strait counts each one once, so a retry never counts twice; left out, the SDK makes one. An event that can't be sent (offline, server busy) is kept and sent later, for up to 7 days.\n\n**You should see:** the purchase and its revenue at the bottom of the funnel in **Analytics**."
   },
   {
    "page": "Events and revenue in Flutter",
@@ -1765,7 +1765,7 @@
    "group": "Platforms",
    "section": "Common errors",
    "url": "https://straitlink.in/docs/sdks/flutter/events/#common-errors",
-   "markdown": "- **The purchase shows as direct.** The last link open was more than 7 days ago, or the app was opened without a link since.\n- **`trackEvent` returns `false`.** The phone was offline or the key is wrong. Events aren't queued, so retry from your code if it matters.\n- **Revenue is counted twice.** The same purchase is also sent from your server. Send it from one place."
+   "markdown": "- **The purchase shows as direct.** The last link open was more than 7 days ago, or the app was opened without a link since.\n- **`trackEvent` returns `false`.** The phone was offline, the server was busy, or the key is wrong. When offline or busy, the SDK keeps the event and sends it later, for up to 7 days. Pass `eventId: order.id` so a retry from your own code never counts twice.\n- **Revenue is counted twice.** The same purchase is also sent from your server. Send it from one place."
   },
   {
    "page": "Events and revenue in Flutter",
@@ -1828,14 +1828,14 @@
    "group": "Platforms",
    "section": "StraitLinks(...)",
    "url": "https://straitlink.in/docs/sdks/flutter/reference/#straitlinks",
-   "markdown": "| Parameter | Type | Notes |\n|---|---|---|\n| `publishableKey` | `String` | **Required.** `st_pub_live_…` |\n| `endpoint` | `String` | **Required.** Your link domain, `https://<handle>.strait.link` |\n| `platform` | `String` | **Required.** `'ios'`, `'android'` or `'other'` |\n| `deviceFields` | `DeviceFields Function()` | **Required.** Screen width, pixel ratio, language, IANA time zone (see Install & set up) |\n| `storage` | `KeyValueStore` | Persists the once-per-install flag and unsent reports. Defaults to memory only |\n| `installReferrer` | `Future<String?> Function()` | Android: the Play Install Referrer string |\n| `linkHosts` | `List<String>` | Extra hosts that serve your links |\n| `clipboardBoost` | `bool` | **Deprecated, ignored.** Paste handoff is switched on in the dashboard and read from the server on first launch. See [How iPhone install matching works](https://straitlink.in/docs/iphone-install-matching/) |\n| `clipboard` | `StraitClipboard` | `hasProbableWebUrl()` and `readText()`, used only when your workspace has paste handoff on |"
+   "markdown": "| Parameter | Type | Notes |\n|---|---|---|\n| `publishableKey` | `String` | **Required.** `st_pub_live_…` |\n| `endpoint` | `String` | **Required.** Your link domain, `https://<handle>.strait.link` |\n| `platform` | `String` | **Required.** `'ios'`, `'android'` or `'other'` |\n| `deviceFields` | `DeviceFields Function()` | **Required.** Screen width, pixel ratio, language, IANA time zone (see Install & set up) |\n| `storage` | `KeyValueStore` | Persists the once-per-install flag and unsent reports. Defaults to memory only |\n| `installReferrer` | `Future<String?> Function()` | Android: the Play Install Referrer string |\n| `installTime` | `Future<int?> Function()` | The app's install time, epoch ms: `() async => (await PackageInfo.fromPlatform()).installTime?.millisecondsSinceEpoch` (`package_info_plus` 8.1+). A reinstall from a link runs the deferred check again, even after a backup restores the app's storage. An app update doesn't |\n| `appVersion` | `String` | Your app's version, sent with each open and install report (with the SDK's own version) so support can see which build opened a link: `(await PackageInfo.fromPlatform()).version` |\n| `linkHosts` | `List<String>` | Extra hosts that serve your links |\n| `clipboardBoost` | `bool` | **Deprecated, ignored.** Paste handoff is switched on in the dashboard and read from the server on first launch. See [How iPhone install matching works](https://straitlink.in/docs/iphone-install-matching/) |\n| `clipboard` | `StraitClipboard` | `hasProbableWebUrl()` and `readText()`, used only when your workspace has paste handoff on |"
   },
   {
    "page": "Flutter SDK reference",
    "group": "Platforms",
    "section": "Methods and streams",
    "url": "https://straitlink.in/docs/sdks/flutter/reference/#methods-and-streams",
-   "markdown": "| Member | What it does |\n|---|---|\n| `start({initialUrl, urls, lifecycle})` | Handles the launch link, listens to later ones and the lifecycle, runs the deferred check once |\n| `onLink` | `Stream<LinkEvent>`. Replays past events to late listeners |\n| `onLinkStart` | `Stream<LinkStart>`: a link arrived and is being resolved |\n| `handleUrl(url)` | Hands the SDK a URL yourself |\n| `trackEvent(name, {value, currency, linkId, clickId})` | Records an event; `true` when accepted |\n| `checkDeferred()` | Re-runs the deferred check (debugging). Never records an install |\n| `claimHandoff(text)` | Claims a clipboard-boost link your app got itself |\n| `pendingOpenReports()` / `flushOpenReports()` | Count, or send now, the open reports saved while offline |\n| `stop()` / `dispose()` | Stop listening; `dispose` also closes the streams |"
+   "markdown": "| Member | What it does |\n|---|---|\n| `start({initialUrl, urls, lifecycle})` | Handles the launch link, listens to later ones and the lifecycle, runs the deferred check once |\n| `onLink` | `Stream<LinkEvent>`. Replays past events to late listeners |\n| `onLinkStart` | `Stream<LinkStart>`: a link arrived and is being resolved |\n| `handleUrl(url)` | Hands the SDK a URL yourself |\n| `trackEvent(name, {value, currency, linkId, clickId, eventId})` | Records an event; `true` when accepted. `eventId` is your order id, counted once; left out, the SDK makes one. An event it can't send (offline, server busy) is kept and sent later |\n| `checkDeferred()` | Re-runs the deferred check (debugging). Never records an install |\n| `claimHandoff(text)` | Claims a clipboard-boost link your app got itself |\n| `pendingOpenReports()` / `flushOpenReports()` | Count, or send now, the open reports and events saved while offline or while the server was busy |\n| `setEnabled(enabled)` / `isEnabled()` | Opt-out switch for consent flows (see [below](#user-consent-opt-out)). Kept in your `storage` across launches; default on |\n| `stop()` / `dispose()` | Stop listening; `dispose` also closes the streams |"
   },
   {
    "page": "Flutter SDK reference",
@@ -1843,6 +1843,13 @@
    "section": "The link event",
    "url": "https://straitlink.in/docs/sdks/flutter/reference/#the-link-event",
    "markdown": "| Field | Meaning |\n|---|---|\n| `kind` | `LinkKind.direct` (a link opened the app) or `LinkKind.deferred` (tapped before install) |\n| `route` | `app_link`, `custom_scheme`, `install_referrer`, `fingerprint` or `clipboard` (`route.value`) |\n| `appState` | `closed`, `background` or `foreground` |\n| `matched`, `reason` | When `matched` is false: `not_found`, `expired`, `password_protected`, `no_match`, `network`, `invalid_url` |\n| `rawUrl` | The URL the OS handed the app |\n| `url`, `path`, `params` | The destination to navigate to |\n| `linkId` | The id of the Strait link |\n| `id` | This open's id (not the link's), shared with its `onLinkStart` signal |\n| `ms`, `at` | Resolve time in milliseconds, and arrival time (epoch milliseconds) |"
+  },
+  {
+   "page": "Flutter SDK reference",
+   "group": "Platforms",
+   "section": "User consent (opt-out)",
+   "url": "https://straitlink.in/docs/sdks/flutter/reference/#user-consent-opt-out",
+   "markdown": "If your app asks for consent first (for example under India's DPDP Act or a GDPR consent flow in the EU), call `await links.setEnabled(false)` until the person agrees: Strait then sends no open reports or events, does no install matching, and deletes reports waiting on the device. The choice is kept across launches in your `storage`; `setEnabled(true)` turns it back on and `isEnabled()` reads it. A Strait short link still opens the right screen: it is looked up without recording a tap, an open or a tap id. The legacy `resolveDeferredLink` honours the same switch when you pass it the same `storage`. Whether you need consent, and for what, is a question for your own legal advice."
   },
   {
    "page": "Flutter SDK reference",
@@ -1863,7 +1870,7 @@
    "group": "Platforms",
    "section": "1. Add the dependencies",
    "url": "https://straitlink.in/docs/sdks/android/#1-add-the-dependencies",
-   "markdown": "The SDK is served by JitPack, built from its public GitHub repo:\n\n```kotlin title=\"settings.gradle.kts\"\ndependencyResolutionManagement {\n    repositories {\n        google()\n        mavenCentral()\n        maven(\"https://jitpack.io\")\n    }\n}\n```\n\n```kotlin title=\"app/build.gradle.kts\"\ndependencies {\n    implementation(\"com.github.strait-link:strait-sdk-android:v0.9.0\") // Strait SDK\n    implementation(\"com.android.installreferrer:installreferrer:2.2\")\n    implementation(\"androidx.lifecycle:lifecycle-process:2.8.7\")\n}\n```\n\n**You should see:** Gradle sync finishes, and `import dev.strait.sdk.StraitClient` resolves."
+   "markdown": "The SDK is served by JitPack, built from its public GitHub repo:\n\n```kotlin title=\"settings.gradle.kts\"\ndependencyResolutionManagement {\n    repositories {\n        google()\n        mavenCentral()\n        maven(\"https://jitpack.io\")\n    }\n}\n```\n\n```kotlin title=\"app/build.gradle.kts\"\ndependencies {\n    implementation(\"com.github.strait-link:strait-sdk-android:v0.10.0\") // Strait SDK\n    implementation(\"com.android.installreferrer:installreferrer:2.2\")\n    implementation(\"androidx.lifecycle:lifecycle-process:2.8.7\")\n}\n```\n\n**You should see:** Gradle sync finishes, and `import dev.strait.sdk.StraitClient` resolves."
   },
   {
    "page": "Android deep linking (Kotlin)",
@@ -2080,14 +2087,14 @@
    "group": "Platforms",
    "section": "StraitConfig",
    "url": "https://straitlink.in/docs/sdks/android/reference/#straitconfig",
-   "markdown": "| Parameter | Type | Notes |\n|---|---|---|\n| `publishableKey` | `String` | **Required.** `st_pub_live_…`. Never the secret key |\n| `endpoint` | `String` | **Required.** Your link domain, `https://<handle>.strait.link` |\n| `device` | `() -> DeviceFields` | **Required.** Screen width (`portraitScreenWidth`), pixel ratio, language, time zone |\n| `storage` | `KeyValueStore` | Persists the once-per-install flag and unsent reports. Defaults to memory only |\n| `installReferrer` | `() -> String?` | Blocking read of the Play Install Referrer. Called off the main thread |\n| `installTime` | `() -> Long?` | `firstInstallTime` from `PackageManager`. A reinstall from a link runs the deferred check again, even after Auto Backup restores the app's prefs. An app update doesn't |\n| `executor` | `Executor` | Where network work and listeners run. Pass a background executor |\n| `linkHosts` | `List<String>` | Extra hosts that serve your links |\n| `transport` | `HttpTransport` | Defaults to `HttpURLConnection` |"
+   "markdown": "| Parameter | Type | Notes |\n|---|---|---|\n| `publishableKey` | `String` | **Required.** `st_pub_live_…`. Never the secret key |\n| `endpoint` | `String` | **Required.** Your link domain, `https://<handle>.strait.link` |\n| `device` | `() -> DeviceFields` | **Required.** Screen width (`portraitScreenWidth`), pixel ratio, language, time zone |\n| `storage` | `KeyValueStore` | Persists the once-per-install flag and unsent reports. Defaults to memory only |\n| `installReferrer` | `() -> String?` | Blocking read of the Play Install Referrer. Called off the main thread |\n| `appVersion` | `() -> String?` | Your app's `versionName` (`{ packageManager.getPackageInfo(packageName, 0).versionName }`), sent with each open and install report (with the SDK's own version) so support can see which build opened a link |\n| `installTime` | `() -> Long?` | `firstInstallTime` from `PackageManager`. A reinstall from a link runs the deferred check again, even after Auto Backup restores the app's prefs. An app update doesn't |\n| `executor` | `Executor` | Where network work and listeners run. Pass a background executor |\n| `linkHosts` | `List<String>` | Extra hosts that serve your links |\n| `transport` | `HttpTransport` | Defaults to `HttpURLConnection` |"
   },
   {
    "page": "Android SDK reference",
    "group": "Platforms",
    "section": "StraitClient",
    "url": "https://straitlink.in/docs/sdks/android/reference/#straitclient",
-   "markdown": "| Method | What it does |\n|---|---|\n| `start(initialUrl)` | Handles the launch URL (or null) and runs the deferred check once per install |\n| `handleUrl(url)` | A link arrived while the app was running (`onNewIntent`) |\n| `onLink { e -> }` / `onLinkStart { s -> }` | Link events (replayed to late subscribers) and the \"resolving\" signal. Both return an unsubscribe function |\n| `onAppState(state)` | `ACTIVE`, `INACTIVE` or `BACKGROUND`, for app-state labels and retries |\n| `trackEvent(name, value, currency, linkId, clickId, eventId)` | Blocking. `true` when accepted. `eventId` is your order id, counted once; left out, the SDK makes one. An event it can't send (offline, server busy) is kept and sent later |\n| `checkDeferred()` | Re-runs the deferred check (debugging). Never records an install |\n| `pendingOpenReports()` / `flushOpenReports()` | Count, or send now, the open reports and events saved while offline or while the server was busy |\n| `stop()` | Stops listening |"
+   "markdown": "| Method | What it does |\n|---|---|\n| `start(initialUrl)` | Handles the launch URL (or null) and runs the deferred check once per install |\n| `handleUrl(url)` | A link arrived while the app was running (`onNewIntent`) |\n| `onLink { e -> }` / `onLinkStart { s -> }` | Link events (replayed to late subscribers) and the \"resolving\" signal. Both return an unsubscribe function |\n| `onAppState(state)` | `ACTIVE`, `INACTIVE` or `BACKGROUND`, for app-state labels and retries |\n| `trackEvent(name, value, currency, linkId, clickId, eventId)` | Blocking. `true` when accepted. `eventId` is your order id, counted once; left out, the SDK makes one. An event it can't send (offline, server busy) is kept and sent later |\n| `checkDeferred()` | Re-runs the deferred check (debugging). Never records an install |\n| `pendingOpenReports()` / `flushOpenReports()` | Count, or send now, the open reports and events saved while offline or while the server was busy |\n| `setEnabled(enabled)` / `isEnabled()` | Opt-out switch for consent flows (see [below](#user-consent-opt-out)). Kept across launches; default on |\n| `stop()` | Stops listening |"
   },
   {
    "page": "Android SDK reference",
@@ -2102,6 +2109,13 @@
    "section": "Custom HTTP",
    "url": "https://straitlink.in/docs/sdks/android/reference/#custom-http",
    "markdown": "To use OkHttp, implement `HttpTransport`: throw on network failure and return every HTTP status as an `HttpResponse`."
+  },
+  {
+   "page": "Android SDK reference",
+   "group": "Platforms",
+   "section": "User consent (opt-out)",
+   "url": "https://straitlink.in/docs/sdks/android/reference/#user-consent-opt-out",
+   "markdown": "If your app asks for consent first (for example under India's DPDP Act or a GDPR consent flow in the EU), call `links.setEnabled(false)` until the person agrees: Strait then sends no open reports or events, does no install matching, and deletes reports waiting on the device. The choice is kept across launches; `setEnabled(true)` turns it back on and `isEnabled()` reads it. A Strait short link still opens the right screen: it is looked up without recording a tap, an open or a tap id. Whether you need consent, and for what, is a question for your own legal advice."
   },
   {
    "page": "Android SDK reference",
@@ -2122,7 +2136,7 @@
    "group": "Platforms",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/ios/#install",
-   "markdown": "With Swift Package Manager, in Xcode: **File → Add Package Dependencies…**, paste `https://github.com/strait-link/strait-sdk-swift` and pick version 0.10.0 or later. Or in `Package.swift`:\n\n```swift title=\"Package.swift\"\n.package(url: \"https://github.com/strait-link/strait-sdk-swift\", from: \"0.10.0\")\n// target dependency: .product(name: \"StraitSDK\", package: \"strait-sdk-swift\")\n```\n\nThen in Xcode: **Signing & Capabilities → Associated Domains → `applinks:hilltop.strait.link`**, and add your custom scheme under **Info → URL Types**. Make sure your Apple Team ID and bundle ID are saved in Dashboard → Apps & stores, so your link domain serves a matching `apple-app-site-association` file."
+   "markdown": "With Swift Package Manager, in Xcode: **File → Add Package Dependencies…**, paste `https://github.com/strait-link/strait-sdk-swift` and pick version 0.11.0 or later. Or in `Package.swift`:\n\n```swift title=\"Package.swift\"\n.package(url: \"https://github.com/strait-link/strait-sdk-swift\", from: \"0.11.0\")\n// target dependency: .product(name: \"StraitSDK\", package: \"strait-sdk-swift\")\n```\n\nThen in Xcode: **Signing & Capabilities → Associated Domains → `applinks:hilltop.strait.link`**, and add your custom scheme under **Info → URL Types**. Make sure your Apple Team ID and bundle ID are saved in Dashboard → Apps & stores, so your link domain serves a matching `apple-app-site-association` file."
   },
   {
    "page": "iOS (Swift)",
@@ -2150,7 +2164,14 @@
    "group": "Platforms",
    "section": "Events",
    "url": "https://straitlink.in/docs/sdks/ios/#events",
-   "markdown": "```swift\nlinks.trackEvent(\"purchase\", value: 49.99, currency: \"USD\") { ok in }   // carries the tap id of the last link open for you\nlinks.checkDeferred { event in }        // re-run the deferred check (debugging)\nlinks.pendingOpenReports { count in }   // saved reports and events waiting to be sent\nlinks.flushOpenReports { }              // send them now\n```\n\nThe event carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, an open from a verified short link (Universal Link), or an install match. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId:`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\nPass your order id as `eventId:` (`eventId: order.id`): Strait counts each one once, so a retry never counts twice; left out, the SDK makes one. An event that can't be sent (offline, server busy) is kept and sent later, for up to 7 days.\n\nThe once-per-install flag and pending open reports live in `UserDefaults.standard` by default; pass any `StraitStorage` to change that. Callbacks run on the main queue."
+   "markdown": "```swift\nlinks.trackEvent(\"purchase\", value: 49.99, currency: \"USD\") { ok in }   // carries the tap id of the last link open for you\nlinks.checkDeferred { event in }        // re-run the deferred check (debugging)\nlinks.pendingOpenReports { count in }   // saved reports and events waiting to be sent\nlinks.flushOpenReports { }              // send them now\n```\n\nThe event carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, an open from a verified short link (Universal Link), or an install match. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId:`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\nPass your order id as `eventId:` (`eventId: order.id`): Strait counts each one once, so a retry never counts twice; left out, the SDK makes one. An event that can't be sent (offline, server busy) is kept and sent later, for up to 7 days.\n\nThe once-per-install flag and pending open reports live in `UserDefaults.standard` by default; pass any `StraitStorage` to change that. Callbacks run on the main queue.\n\nEach open and install report carries your app's version (`CFBundleShortVersionString`; override with `StraitLinksConfig.appVersion`) and the SDK's version, so support can see which build opened a link. Reinstalls need no code: the SDK keeps its own install marker, excluded from backups."
+  },
+  {
+   "page": "iOS (Swift)",
+   "group": "Platforms",
+   "section": "User consent (opt-out)",
+   "url": "https://straitlink.in/docs/sdks/ios/#user-consent-opt-out",
+   "markdown": "If your app asks for consent first (for example under India's DPDP Act or a GDPR consent flow in the EU), call `links.setEnabled(false)` until the person agrees: Strait then sends no open reports or events, does no install matching, and deletes reports waiting on the device. The choice is kept across launches; `setEnabled(true)` turns it back on and `isEnabled()` reads it. A Strait short link still opens the right screen: it is looked up without recording a tap, an open or a tap id. Whether you need consent, and for what, is a question for your own legal advice."
   },
   {
    "page": "iOS (Swift)",
@@ -2171,14 +2192,14 @@
    "group": "Platforms",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/unity/#install",
-   "markdown": "Requires Unity 2021.2+ with **Api Compatibility Level = .NET Standard 2.1**. In Unity: **Window → Package Manager → + → Add package from git URL…** and paste:\n\n```text\nhttps://github.com/strait-link/strait-sdk-unity.git?path=src#v0.8.7\n```\n\nThe package lives in the repo's `src/` folder, so keep the `?path=src` part. An OpenUPM listing is coming soon. Without Package Manager, copy the SDK's `src/*.cs` into your project (for example `Assets/Strait/`), or build the project and drop the DLL into `Assets/Plugins/`. Add `com.android.installreferrer:installreferrer:2.2` to your Android Gradle dependencies (custom `mainTemplate.gradle` or EDM4U). Then, in Package Manager, select **Strait SDK → Samples → Quick start → Import**. It adds `StraitDevice.cs` and `StraitDevice.mm`, which the code below uses for `StraitDevice.Collect` and `StraitDevice.Class`. Copy `PlayReferrer` from the [SDK README](https://github.com/strait-link/strait-sdk-unity#readme), with `using System.Threading.Tasks;` and `using UnityEngine;` at the top of its file. The sample also has `StraitBootstrap.cs`, a ready-made version of `LinksBehaviour` below. Use one or the other: both define `PlayerPrefsStore`, so having both won't compile."
+   "markdown": "Requires Unity 2021.2+ with **Api Compatibility Level = .NET Standard 2.1**. In Unity: **Window → Package Manager → + → Add package from git URL…** and paste:\n\n```text\nhttps://github.com/strait-link/strait-sdk-unity.git?path=src#v0.9.0\n```\n\nThe package lives in the repo's `src/` folder, so keep the `?path=src` part. An OpenUPM listing is coming soon. Without Package Manager, copy the SDK's `src/*.cs` into your project (for example `Assets/Strait/`), or build the project and drop the DLL into `Assets/Plugins/`. Add `com.android.installreferrer:installreferrer:2.2` to your Android Gradle dependencies (custom `mainTemplate.gradle` or EDM4U). Then, in Package Manager, select **Strait SDK → Samples → Quick start → Import**. It adds `StraitDevice.cs` and `StraitDevice.mm`, which the code below uses for `StraitDevice.Collect` and `StraitDevice.Class`. Copy `PlayReferrer` from the [SDK README](https://github.com/strait-link/strait-sdk-unity#readme), with `using System.Threading.Tasks;` and `using UnityEngine;` at the top of its file. The sample also has `StraitBootstrap.cs`, a ready-made version of `LinksBehaviour` below. Use one or the other: both define `PlayerPrefsStore`, so having both won't compile."
   },
   {
    "page": "Unity",
    "group": "Platforms",
    "section": "Create the client",
    "url": "https://straitlink.in/docs/sdks/unity/#create-the-client",
-   "markdown": "Create one client in a MonoBehaviour that lives for the whole game:\n\n```csharp title=\"LinksBehaviour.cs\"\nusing System.Threading.Tasks;\nusing Strait;\nusing UnityEngine;\n\npublic class LinksBehaviour : MonoBehaviour\n{\n    public static StraitClient Client { get; private set; }\n\n    async void Start()\n    {\n        DontDestroyOnLoad(gameObject);\n        Client = new StraitClient(new StraitConfig\n        {\n            PublishableKey = \"st_pub_live_…\",               // Dashboard → Get started\n            Endpoint = \"https://hilltop.strait.link\",            // your workspace's link domain\n            Storage = new PlayerPrefsStore(),\n            Platform = Application.platform == RuntimePlatform.Android ? \"android\"\n                     : Application.platform == RuntimePlatform.IPhonePlayer ? \"ios\" : \"other\",\n            DeviceFields = StraitDevice.Collect,\n            DeviceClass = StraitDevice.Class,                 // phone or tablet (new in 0.8.6)\n            InstallReferrer = Application.platform == RuntimePlatform.Android ? PlayReferrer.Get : null,\n            // Transport = new UnityWebRequestTransport(),   // required on WebGL\n        });\n\n        Client.OnLinkStart += s => ShowSpinner();       // a link can take 1–6 s to resolve\n        Client.OnLink += e =>                           // past events are replayed to you\n        {\n            HideSpinner();\n            if (e.Matched) Route(e.Path, e.Params);\n            else Debug.Log($\"Link not matched ({e.Reason})\");\n        };\n\n        Application.deepLinkActivated += url => _ = Client.HandleUrl(url);   // while running\n        await Client.Start(Application.absoluteURL);                         // launch link + deferred check\n    }\n\n    // Coming back to the front also sends open reports saved while offline.\n    void OnApplicationPause(bool paused) => Client?.OnAppState(paused ? AppLifecycle.Background : AppLifecycle.Active);\n    void OnApplicationFocus(bool focused) => Client?.OnAppState(focused ? AppLifecycle.Active : AppLifecycle.Inactive);\n    void OnDestroy() => Client?.Stop();\n\n    void ShowSpinner() { }\n    void HideSpinner() { }\n    void Route(string path, System.Collections.Generic.IReadOnlyDictionary<string, string> query) { }\n}\n```"
+   "markdown": "Create one client in a MonoBehaviour that lives for the whole game:\n\n```csharp title=\"LinksBehaviour.cs\"\nusing System.Threading.Tasks;\nusing Strait;\nusing UnityEngine;\n\npublic class LinksBehaviour : MonoBehaviour\n{\n    public static StraitClient Client { get; private set; }\n\n    async void Start()\n    {\n        DontDestroyOnLoad(gameObject);\n        Client = new StraitClient(new StraitConfig\n        {\n            PublishableKey = \"st_pub_live_…\",               // Dashboard → Get started\n            Endpoint = \"https://hilltop.strait.link\",            // your workspace's link domain\n            Storage = new PlayerPrefsStore(),\n            Platform = Application.platform == RuntimePlatform.Android ? \"android\"\n                     : Application.platform == RuntimePlatform.IPhonePlayer ? \"ios\" : \"other\",\n            DeviceFields = StraitDevice.Collect,\n            DeviceClass = StraitDevice.Class,                 // phone or tablet (new in 0.8.6)\n            InstallReferrer = Application.platform == RuntimePlatform.Android ? PlayReferrer.Get : null,\n            InstallTime = StraitDevice.InstallTime,           // a reinstall from a link counts again (new in 0.9.0)\n            // Transport = new UnityWebRequestTransport(),   // required on WebGL\n        });\n\n        Client.OnLinkStart += s => ShowSpinner();       // a link can take 1–6 s to resolve\n        Client.OnLink += e =>                           // past events are replayed to you\n        {\n            HideSpinner();\n            if (e.Matched) Route(e.Path, e.Params);\n            else Debug.Log($\"Link not matched ({e.Reason})\");\n        };\n\n        Application.deepLinkActivated += url => _ = Client.HandleUrl(url);   // while running\n        await Client.Start(Application.absoluteURL);                         // launch link + deferred check\n    }\n\n    // Coming back to the front also sends open reports saved while offline.\n    void OnApplicationPause(bool paused) => Client?.OnAppState(paused ? AppLifecycle.Background : AppLifecycle.Active);\n    void OnApplicationFocus(bool focused) => Client?.OnAppState(focused ? AppLifecycle.Active : AppLifecycle.Inactive);\n    void OnDestroy() => Client?.Stop();\n\n    void ShowSpinner() { }\n    void HideSpinner() { }\n    void Route(string path, System.Collections.Generic.IReadOnlyDictionary<string, string> query) { }\n}\n```"
   },
   {
    "page": "Unity",
@@ -2206,14 +2227,21 @@
    "group": "Platforms",
    "section": "Device fields",
    "url": "https://straitlink.in/docs/sdks/unity/#device-fields",
-   "markdown": "The iPhone match compares what the browser saw at tap time with what the game reports, so the values must be the browser's: CSS screen width (portrait, rounded like Chrome) via `StraitCore.PortraitScreenWidth(w, h)` (the shorter side, so a game first opened in landscape still matches), device pixel ratio, locale and IANA time zone. Don't use `Screen.width`, which follows Unity's render scaling. The SDK README has full `StraitDevice.Collect` (Android via `AndroidJavaObject`, iOS via a tiny `.mm` plugin), `PlayReferrer.Get` and `UnityWebRequestTransport` implementations."
+   "markdown": "The iPhone match compares what the browser saw at tap time with what the game reports, so the values must be the browser's: CSS screen width (portrait, rounded like Chrome) via `StraitCore.PortraitScreenWidth(w, h)` (the shorter side, so a game first opened in landscape still matches), device pixel ratio, locale and IANA time zone. Don't use `Screen.width`, which follows Unity's render scaling. The SDK README has full `StraitDevice.Collect` (Android via `AndroidJavaObject`, iOS via a tiny `.mm` plugin), `StraitDevice.InstallTime` (Android `firstInstallTime`; on iOS a marker file excluded from backups), `PlayReferrer.Get` and `UnityWebRequestTransport` implementations."
   },
   {
    "page": "Unity",
    "group": "Platforms",
    "section": "Events",
    "url": "https://straitlink.in/docs/sdks/unity/#events",
-   "markdown": "```csharp\nawait LinksBehaviour.Client.TrackEvent(\"purchase\", value: 4.99, currency: \"USD\");   // carries the last link's tap id for you\n```\n\n`TrackEvent` carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, a Google Play install, an open from a verified short link, or an iPhone install match. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId:`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\n`LinkEvent` has the same fields and values as the other SDKs: `Id, Kind, Route, AppState, Matched, Reason, RawUrl, Url, Path, Params, LinkId, Ms, At`. Call `Start` and `HandleUrl` from the main thread; events fire on Unity's main thread."
+   "markdown": "```csharp\nawait LinksBehaviour.Client.TrackEvent(\"purchase\", value: 4.99, currency: \"USD\");   // carries the last link's tap id for you\n```\n\n`TrackEvent` carries the tap id of the most recent link open, as long as that open was in the last 7 days. The tap id comes from a browser hand-off to `yourapp://…?strait_click=…`, a Google Play install, an open from a verified short link, or an iPhone install match. When our server matches an open or an install, it sends the tap id back with its answer. That lets Analytics put the revenue on the exact tap's channel and A/B variant. Each newer open replaces the remembered tap with its own, so an older tap never takes credit for a newer open; if an open comes with no tap id, the remembered one is forgotten and the event carries none. To name the tap yourself, pass `clickId:`, which overrides the remembered one. The server keeps it only if it's a tap of your workspace; otherwise it drops the id and still records the event.\n\n`LinkEvent` has the same fields and values as the other SDKs: `Id, Kind, Route, AppState, Matched, Reason, RawUrl, Url, Path, Params, LinkId, Ms, At`. Call `Start` and `HandleUrl` from the main thread; events fire on Unity's main thread.\n\nPass your order id as `eventId:` (`eventId: order.Id`): Strait counts each one once, so a retry never counts twice; left out, the SDK makes one. An event that can't be sent (offline, server busy) is kept and sent later, for up to 7 days."
+  },
+  {
+   "page": "Unity",
+   "group": "Platforms",
+   "section": "User consent (opt-out)",
+   "url": "https://straitlink.in/docs/sdks/unity/#user-consent-opt-out",
+   "markdown": "If your game asks for consent first (for example under India's DPDP Act or a GDPR consent flow in the EU), call `await Client.SetEnabled(false)` until the person agrees: Strait then sends no open reports or events, does no install matching, and deletes reports waiting on the device. The choice is kept across launches in your `Storage` (use `PlayerPrefsStore`); `SetEnabled(true)` turns it back on and `IsEnabled()` reads it. Call it before `Start` on a first launch so the deferred check waits for the answer. Whether you need consent, and for what, is a question for your own legal advice."
   },
   {
    "page": "Unity",
@@ -2234,7 +2262,7 @@
    "group": "Platforms",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/web/#install",
-   "markdown": "Install it from npm, pinned to a version:\n\n```bash\nnpm install @straitlink/web@0.7.0\n```"
+   "markdown": "Install it from npm, pinned to a version:\n\n```bash\nnpm install @straitlink/web@0.8.0\n```"
   },
   {
    "page": "Web",
@@ -2276,7 +2304,14 @@
    "group": "Platforms",
    "section": "Events",
    "url": "https://straitlink.in/docs/sdks/web/#events",
-   "markdown": "From a website, send events with your publishable key. When `resolveDeferredLink` matched, its result also has `clickId`, the tap this visit came from; send it with the event so the revenue lands on that tap. The web SDK doesn't remember it for you, so keep it if you send events later.\n\n```ts\nawait fetch('https://strait.link/v1/event', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    publishableKey: 'st_pub_live_…',\n    event: 'purchase',\n    value: 49.99,\n    currency: 'USD',\n    clickId: result.clickId,     // the matched tap, if any\n  }),\n});\n```"
+   "markdown": "Send a conversion (signup, purchase) from your website with `trackEvent`, the same call as the app SDKs. It attaches the tap this visit came from (remembered for 7 days from `reportWebOpen` or a matched `resolveDeferredLink`), so the revenue lands on that tap; pass `clickId` to choose it yourself.\n\n```ts\nimport { trackEvent } from '@straitlink/web';\n\nconst strait = { publishableKey: 'st_pub_live_…', endpoint: 'https://hilltop.strait.link' };\nconst ok = await trackEvent(strait, 'purchase', { value: 49.99, currency: 'USD' });\n```\n\nAdd `eventId` (your order id, `eventId: order.id`) and a repeat counts once. It resolves `true` when accepted and never throws; input the server would refuse is not sent (`false` and a console warning). Events sent from a web page can be faked by anyone with your publishable key, so send revenue you rely on from your server. Without the SDK, `POST https://strait.link/v1/event` with `publishableKey`, `event`, `value`, `currency` and `clickId: result.clickId` does the same."
+  },
+  {
+   "page": "Web",
+   "group": "Platforms",
+   "section": "User consent (opt-out)",
+   "url": "https://straitlink.in/docs/sdks/web/#user-consent-opt-out",
+   "markdown": "If your site asks for consent first (for example under India's DPDP Act or a GDPR consent flow in the EU), call `setEnabled(false)` until the visitor agrees: `resolveDeferredLink`, `reportWebOpen` and `trackEvent` then send nothing, and the choice is kept in `localStorage` across visits. `setEnabled(true)` turns it back on and `isEnabled()` reads it. Whether you need consent, and for what, is a question for your own legal advice."
   },
   {
    "page": "Web",
@@ -2290,7 +2325,7 @@
    "group": "Platforms",
    "section": "API",
    "url": "https://straitlink.in/docs/sdks/web/#api",
-   "markdown": "| Export | Purpose |\n|---|---|\n| `resolveDeferredLink(config, opts?)` | The one call you need on launch |\n| `reportWebOpen(config, opts?)` | On page load: counts a visit from a tap (`strait_click` in the URL) as an open of that tap |\n| `banner(options)` / `Strait.banner(options)` | The [smart app banner](https://straitlink.in/docs/smart-banner/) for mobile web |\n| `computeSignature(inputs)` | The shared match signature (advanced / testing) |\n| `h32(s)` | The shared hash (advanced / testing) |"
+   "markdown": "| Export | Purpose |\n|---|---|\n| `resolveDeferredLink(config, opts?)` | The one call you need on launch |\n| `reportWebOpen(config, opts?)` | On page load: counts a visit from a tap (`strait_click` in the URL) as an open of that tap |\n| `trackEvent(config, name, extra?)` | Conversion or revenue event (`value`, `currency`, `linkId`, `clickId`, `eventId`), on the tap this visit came from; `true` when accepted |\n| `setEnabled(enabled)` / `isEnabled()` | Opt-out switch for consent flows: off = nothing sent; kept in `localStorage` |\n| `banner(options)` / `Strait.banner(options)` | The [smart app banner](https://straitlink.in/docs/smart-banner/) for mobile web |\n| `computeSignature(inputs)` | The shared match signature (advanced / testing) |\n| `h32(s)` | The shared hash (advanced / testing) |"
   },
   {
    "page": "Web",
@@ -2318,7 +2353,7 @@
    "group": "Platforms",
    "section": "2. Install the web SDK",
    "url": "https://straitlink.in/docs/smart-banner/#2-install-the-web-sdk",
-   "markdown": "Install it from npm. The banner arrived in version 0.6.0; install 0.7.0 or later for the `@straitlink/web` package name.\n\n```bash\nnpm install @straitlink/web@0.7.0\n```\n\n**You should see:** `@straitlink/web` in your `package.json`."
+   "markdown": "Install it from npm. The banner arrived in version 0.6.0; install 0.8.0 or later for the `@straitlink/web` package name.\n\n```bash\nnpm install @straitlink/web@0.8.0\n```\n\n**You should see:** `@straitlink/web` in your `package.json`."
   },
   {
    "page": "Smart app banner for mobile web",
@@ -2976,7 +3011,7 @@
    "group": "Server & API",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/node/#install",
-   "markdown": "Install it from npm, pinned to a version:\n\n```bash\nnpm install @straitlink/node@0.8.0\n```"
+   "markdown": "Install it from npm, pinned to a version:\n\n```bash\nnpm install @straitlink/node@0.8.1\n```"
   },
   {
    "page": "Node (server)",

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `strait-setup` skill and `search_docs` index: React Native 0.11.0 and Capacitor 0.4.0 (on npm since 7 Nov), regenerated from the live site.
 - iPhone wording: the README banner and the server instructions say "iPhone links: live · install matching: opt-in" (was "iPhone is in beta"), the same words as the website and every SDK; `get_analytics` says iPhone installs come from opt-in install matching (labelled Estimated).
 
 ## 0.8.0 (7 Nov 2026)

@@ -26,10 +26,10 @@ It is a local stdio server with 32 tools. Eleven of them write (`create_link`, `
 `trace_tap` work without a key; every other tool needs your secret key. Other deep-link vendors also ship MCP servers
 that can create links, so this README makes no "first" or "only" claim; it describes what this server does today.
 
-**iPhone is in beta.** iPhone install matching (deferred deep linking on iOS) is in beta; Android uses the Play
-Install Referrer. On iPhone the workspace chooses the method in Dashboard → Settings → iPhone installs (device
-matching, paste handoff, both or neither), and the SDK reads that choice at runtime. Device matching is off for new
-workspaces. The tools report iPhone results the same way, but treat iPhone install attribution as beta.
+**iPhone links: live · install matching: opt-in.** iPhone links (Universal Links) are live. iPhone install matching (deferred deep linking on iOS) is
+opt-in: off until your workspace chooses a method in Dashboard → Settings → iPhone installs (device matching, paste
+handoff, both or neither), which the SDK reads at runtime. Device matching is off for new workspaces, and iPhone
+matches are labelled Estimated until measured. Android uses the Play Install Referrer.
 
 > **Hosted server.** The same tools are served at `https://strait.link/mcp` (Streamable HTTP, since 24 Oct 2026):
 > `claude mcp add --transport http strait https://strait.link/mcp --header "Authorization: Bearer st_live_your_key"`.
@@ -49,7 +49,7 @@ outside the key's access.
 | `get_link` | Read one link by slug | secret |
 | `list_links` | List links, one page at a time. `status: "paused"` lists turned-off links (0.2.1) | secret |
 | `update_link` | Change destination, title, tags or expiry, or `isActive` on its own (false pauses, true turns a paused link back on; 0.2.1). **Asks for `confirm: true`**: without it you get a preview and nothing changes | secret |
-| `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform / campaign / country / UTM tag (`GET /v1/analytics`). iPhone installs come from beta install matching | secret |
+| `get_analytics` | Taps, app opens, installs, conversions and revenue, by day / channel / link / platform / campaign / country / UTM tag (`GET /v1/analytics`). iPhone installs come from opt-in install matching (labelled Estimated) | secret |
 | `check_app_links` | Check a domain's `assetlinks.json` and `apple-app-site-association`, with a fix for each problem | none |
 | `simulate_tap` | Dry-run one tap from one device or app (nothing recorded or billed) | secret |
 | `trace_tap` | Walk a link through WhatsApp, Instagram, Facebook, Chrome, Safari, iPad, computer and preview bots; or read a Live Tap Trace from the website demo | secret (link) / none (demo token) |

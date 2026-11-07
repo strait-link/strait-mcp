@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- iPhone wording: the README banner and the server instructions say "iPhone links: live · install matching: opt-in" (was "iPhone is in beta"), the same words as the website and every SDK; `get_analytics` says iPhone installs come from opt-in install matching (labelled Estimated).
+
 ## 0.8.0 (7 Nov 2026)
 
 - README (the npm page): only what users need. Build, test, registry and the unreleased OAuth Worker's deploy

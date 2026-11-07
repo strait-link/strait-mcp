@@ -49,7 +49,7 @@ store or website when it is not, and keep the destination through the install (d
    - Expo: `scheme`, `android.intentFilters` (with `autoVerify`) and `ios.associatedDomains` in `app.json`, then a
      **development build** (`npx expo run:android` or EAS). Expo Go cannot test this.
 4. **Install the SDK** (versions are pinned here and on each docs page):
-   - React Native / Expo: `npm install @straitlink/react-native@0.10.2 @react-native-async-storage/async-storage react-native-play-install-referrer`
+   - React Native / Expo: `npm install @straitlink/react-native@0.11.0 @react-native-async-storage/async-storage react-native-play-install-referrer`
      → https://straitlink.in/docs/sdks/react-native/ (Expo: https://straitlink.in/docs/sdks/expo/)
    - Flutter: in `pubspec.yaml`, `strait_sdk: ^0.10.1` (pub.dev),
      then `flutter pub add app_links shared_preferences play_install_referrer flutter_timezone`
@@ -59,7 +59,7 @@ store or website when it is not, and keep the destination through the install (d
    - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.11.0` → https://straitlink.in/docs/sdks/ios/
    - Unity: Package Manager → Add package from git URL → `https://github.com/strait-link/strait-sdk-unity.git?path=src#v0.9.0` → https://straitlink.in/docs/sdks/unity/
    - Web (deferred links on a website): `npm install @straitlink/web@0.8.0` → https://straitlink.in/docs/sdks/web/
-   - Capacitor / Ionic: `npm install @straitlink/capacitor@0.3.0 && npx cap sync` (Swift Package Manager on iOS; JitPack is added for you on Android)
+   - Capacitor / Ionic: `npm install @straitlink/capacitor@0.4.0 && npx cap sync` (Swift Package Manager on iOS; JitPack is added for you on Android)
      → https://straitlink.in/docs/sdks/capacitor/
    - Server (creates links, sends events; secret key from an environment variable): `npm install @straitlink/node@0.8.1`
      → https://straitlink.in/docs/sdks/node/

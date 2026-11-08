@@ -1,7 +1,7 @@
 {
  "source": "https://straitlink.in",
  "builtFrom": "site/content/docs",
- "siteCommit": "5d6955d",
+ "siteCommit": "bc7a386",
  "sections": [
   {
    "page": "What is Strait?",
@@ -134,7 +134,7 @@
    "group": "Get started",
    "section": "5. Add the SDK",
    "url": "https://straitlink.in/docs/quick-start/iphone/#5-add-the-sdk",
-   "markdown": "**Do this:** in Xcode, **File → Add Package Dependencies…**, paste `https://github.com/strait-link/strait-sdk-swift` and pick version 0.11.0 or later. Then create the client once and hand it every link. For a SwiftUI app:\n\n```swift title=\"ShopApp.swift\"\nimport SwiftUI\nimport StraitSDK\n\nlet links = StraitLinks(StraitLinksConfig(\n    publishableKey: \"st_pub_live_…\",          // Dashboard → Get started\n    endpoint: \"https://hilltop.strait.link\"        // your link address\n))\n\n@main struct ShopApp: App {\n    init() {\n        links.onLink { event in print(\"Strait link:\", event.matched, event.path ?? \"none\") }\n        links.start()\n    }\n    var body: some Scene {\n        WindowGroup {\n            ContentView()\n                .onOpenURL { links.handle(url: $0) }\n                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { links.handle(userActivity: $0) }\n        }\n    }\n}\n```\n\nUIKit with a scene delegate: the three calls are on the [iOS (Swift)](https://straitlink.in/docs/sdks/ios/#handle-deep-links) page.\n\n**You should see:** the app builds, installs on your iPhone and starts as before."
+   "markdown": "**Do this:** in Xcode, **File → Add Package Dependencies…**, paste `https://github.com/strait-link/strait-sdk-swift` and pick version 0.11.1 or later. Then create the client once and hand it every link. For a SwiftUI app:\n\n```swift title=\"ShopApp.swift\"\nimport SwiftUI\nimport StraitSDK\n\nlet links = StraitLinks(StraitLinksConfig(\n    publishableKey: \"st_pub_live_…\",          // Dashboard → Get started\n    endpoint: \"https://hilltop.strait.link\"        // your link address\n))\n\n@main struct ShopApp: App {\n    init() {\n        links.onLink { event in print(\"Strait link:\", event.matched, event.path ?? \"none\") }\n        links.start()\n    }\n    var body: some Scene {\n        WindowGroup {\n            ContentView()\n                .onOpenURL { links.handle(url: $0) }\n                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { links.handle(userActivity: $0) }\n        }\n    }\n}\n```\n\nUIKit with a scene delegate: the three calls are on the [iOS (Swift)](https://straitlink.in/docs/sdks/ios/#handle-deep-links) page.\n\n**You should see:** the app builds, installs on your iPhone and starts as before."
   },
   {
    "page": "Quickstart for iPhone: open your Swift app from a link",
@@ -344,7 +344,7 @@
    "group": "Get started",
    "section": "3. Flutter",
    "url": "https://straitlink.in/docs/migrate-from-firebase/sdk/#3-flutter",
-   "markdown": "**Do this:** swap the packages, add `strait_sdk` to `pubspec.yaml`, then swap the red lines for the green ones.\n\n```bash\nflutter pub remove firebase_dynamic_links\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.1\n```\n\n`links.dart` is on [Install & set up](https://straitlink.in/docs/sdks/flutter/).\n\n```diff title=\"main.dart\"\n- final initial = await FirebaseDynamicLinks.instance.getInitialLink();\n- if (initial != null) route(initial.link);\n- FirebaseDynamicLinks.instance.onLink.listen((data) => route(data.link));\n+ await startLinks();   // links.dart: StraitLinks(...) + links.start(...)\n+ links.onLink.listen((e) { if (e.matched && e.path != null) routePath(e.path!, e.params ?? {}); });\n```\n\n**You should see:** the Flutter console logs `Strait link: direct app_link true /product/42` when you tap `https://hilltop.strait.link/summer`."
+   "markdown": "**Do this:** swap the packages, add `strait_sdk` to `pubspec.yaml`, then swap the red lines for the green ones.\n\n```bash\nflutter pub remove firebase_dynamic_links\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.2\n```\n\n`links.dart` is on [Install & set up](https://straitlink.in/docs/sdks/flutter/).\n\n```diff title=\"main.dart\"\n- final initial = await FirebaseDynamicLinks.instance.getInitialLink();\n- if (initial != null) route(initial.link);\n- FirebaseDynamicLinks.instance.onLink.listen((data) => route(data.link));\n+ await startLinks();   // links.dart: StraitLinks(...) + links.start(...)\n+ links.onLink.listen((e) { if (e.matched && e.path != null) routePath(e.path!, e.params ?? {}); });\n```\n\n**You should see:** the Flutter console logs `Strait link: direct app_link true /product/42` when you tap `https://hilltop.strait.link/summer`."
   },
   {
    "page": "Migrate from Firebase: swap the SDK",
@@ -785,7 +785,7 @@
    "group": "Recipes",
    "section": "2. Add the package and the Play Install Referrer",
    "url": "https://straitlink.in/docs/recipes/flutter-deferred-deep-links/#2-add-the-package-and-the-play-install-referrer",
-   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The package reads it once you pass `play_install_referrer` in. Add the package from pub.dev:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.1\n```\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\nCreate `lib/links.dart` exactly as in [Install & set up, step 2](https://straitlink.in/docs/sdks/flutter/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add the intent filters and `flutter_deeplinking_enabled` from [step 3](https://straitlink.in/docs/sdks/flutter/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** `flutter pub get` finishes, and the app starts as before after a full `flutter run` (not a hot restart: the plugins are native)."
+   "markdown": "On Android, the link travels through the install inside the Google Play Install Referrer. The package reads it once you pass `play_install_referrer` in. Add the package from pub.dev:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.2\n```\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\nCreate `lib/links.dart` exactly as in [Install & set up, step 2](https://straitlink.in/docs/sdks/flutter/#2-create-the-client-once): its `installReferrer` line is what carries the link through Google Play. Add the intent filters and `flutter_deeplinking_enabled` from [step 3](https://straitlink.in/docs/sdks/flutter/#3-let-the-phone-hand-links-to-your-app).\n\n**You should see:** `flutter pub get` finishes, and the app starts as before after a full `flutter run` (not a hot restart: the plugins are native)."
   },
   {
    "page": "Deferred deep links in Flutter, end to end",
@@ -1184,7 +1184,7 @@
    "group": "Platforms",
    "section": "What's tested",
    "url": "https://straitlink.in/docs/sdks/#whats-tested",
-   "markdown": "The iOS (Swift) SDK is at version 0.11.0, the Unity SDK at 0.9.0, the React Native SDK at 0.11.0, the Flutter SDK at 0.10.1, the Android SDK at 0.10.0, the Node SDK at 0.8.1 and the web SDK at 0.8.0. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS**: Universal Links are tested on a real iPhone; install matching after an App Store install is opt-in and proven on iPhone simulators so far.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
+   "markdown": "The iOS (Swift) SDK is at version 0.11.1, the Unity SDK at 0.9.1, the React Native SDK at 0.11.0, the Flutter SDK at 0.10.2, the Android SDK at 0.10.1, the Node SDK at 0.8.2 and the web SDK at 0.8.1. Each one's core is checked against the same shared test files: the same link events, app-state labels and offline retry. Two limits today:\n\n- **iOS**: Universal Links are tested on a real iPhone; install matching after an App Store install is opt-in and proven on iPhone simulators so far.\n- **Unity**: the C# library is tested, but the Unity glue in the guide (MonoBehaviour, PlayerPrefs, the iOS plugin) hasn't been run in the Unity editor or on a device yet.\n\nEvery SDK version and what changed in it: [Changelog](https://straitlink.in/changelog/). Not using an SDK? Everything they do is in the [REST API](https://straitlink.in/docs/api/)."
   },
   {
    "page": "React Native deep linking",
@@ -1541,7 +1541,7 @@
    "group": "Platforms",
    "section": "1. Install the plugin",
    "url": "https://straitlink.in/docs/sdks/capacitor/#1-install-the-plugin",
-   "markdown": "```bash\nnpm install @straitlink/capacitor@0.4.0\nnpx cap sync\n```\n\nOn Android, the plugin adds JitPack to your Gradle repositories for the Strait Android SDK only (a content filter allows nothing else from it). On iOS it needs Swift Package Manager, the default for new Capacitor 8 apps; CocoaPods projects aren't supported yet.\n\n**You should see:** `npx cap sync` lists `@straitlink/capacitor` under \"Found … Capacitor plugins\" for android and ios."
+   "markdown": "```bash\nnpm install @straitlink/capacitor@0.4.1\nnpx cap sync\n```\n\nOn Android, the plugin adds JitPack to your Gradle repositories for the Strait Android SDK only (a content filter allows nothing else from it). On iOS it needs Swift Package Manager, the default for new Capacitor 8 apps; CocoaPods projects aren't supported yet.\n\n**You should see:** `npx cap sync` lists `@straitlink/capacitor` under \"Found … Capacitor plugins\" for android and ios."
   },
   {
    "page": "Capacitor / Ionic deep linking",
@@ -1618,7 +1618,7 @@
    "group": "Platforms",
    "section": "1. Install the package",
    "url": "https://straitlink.in/docs/sdks/flutter/#1-install-the-package",
-   "markdown": "Add it from pub.dev:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.1\n```\n\nThen the helper packages:\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n[`app_links`](https://pub.dev/packages/app_links) delivers links, [`shared_preferences`](https://pub.dev/packages/shared_preferences) stores the once-per-install flag and unsent reports, [`play_install_referrer`](https://pub.dev/packages/play_install_referrer) gives Android installs an exact match, and [`flutter_timezone`](https://pub.dev/packages/flutter_timezone) provides the IANA time zone the iPhone match needs.\n\n**You should see:** `flutter pub get` finishes without errors."
+   "markdown": "Add it from pub.dev:\n\n```yaml title=\"pubspec.yaml\"\ndependencies:\n  strait_sdk: ^0.10.2\n```\n\nThen the helper packages:\n\n```bash\nflutter pub add app_links shared_preferences play_install_referrer flutter_timezone\n```\n\n[`app_links`](https://pub.dev/packages/app_links) delivers links, [`shared_preferences`](https://pub.dev/packages/shared_preferences) stores the once-per-install flag and unsent reports, [`play_install_referrer`](https://pub.dev/packages/play_install_referrer) gives Android installs an exact match, and [`flutter_timezone`](https://pub.dev/packages/flutter_timezone) provides the IANA time zone the iPhone match needs.\n\n**You should see:** `flutter pub get` finishes without errors."
   },
   {
    "page": "Flutter deep linking",
@@ -1884,7 +1884,7 @@
    "group": "Platforms",
    "section": "1. Add the dependencies",
    "url": "https://straitlink.in/docs/sdks/android/#1-add-the-dependencies",
-   "markdown": "The SDK is served by JitPack, built from its public GitHub repo:\n\n```kotlin title=\"settings.gradle.kts\"\ndependencyResolutionManagement {\n    repositories {\n        google()\n        mavenCentral()\n        maven(\"https://jitpack.io\")\n    }\n}\n```\n\n```kotlin title=\"app/build.gradle.kts\"\ndependencies {\n    implementation(\"com.github.strait-link:strait-sdk-android:v0.10.0\") // Strait SDK\n    implementation(\"com.android.installreferrer:installreferrer:2.2\")\n    implementation(\"androidx.lifecycle:lifecycle-process:2.8.7\")\n}\n```\n\n**You should see:** Gradle sync finishes, and `import dev.strait.sdk.StraitClient` resolves."
+   "markdown": "The SDK is served by JitPack, built from its public GitHub repo:\n\n```kotlin title=\"settings.gradle.kts\"\ndependencyResolutionManagement {\n    repositories {\n        google()\n        mavenCentral()\n        maven(\"https://jitpack.io\")\n    }\n}\n```\n\n```kotlin title=\"app/build.gradle.kts\"\ndependencies {\n    implementation(\"com.github.strait-link:strait-sdk-android:v0.10.1\") // Strait SDK\n    implementation(\"com.android.installreferrer:installreferrer:2.2\")\n    implementation(\"androidx.lifecycle:lifecycle-process:2.8.7\")\n}\n```\n\n**You should see:** Gradle sync finishes, and `import dev.strait.sdk.StraitClient` resolves."
   },
   {
    "page": "Android deep linking (Kotlin)",
@@ -2150,7 +2150,7 @@
    "group": "Platforms",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/ios/#install",
-   "markdown": "With Swift Package Manager, in Xcode: **File → Add Package Dependencies…**, paste `https://github.com/strait-link/strait-sdk-swift` and pick version 0.11.0 or later. Or in `Package.swift`:\n\n```swift title=\"Package.swift\"\n.package(url: \"https://github.com/strait-link/strait-sdk-swift\", from: \"0.11.0\")\n// target dependency: .product(name: \"StraitSDK\", package: \"strait-sdk-swift\")\n```\n\nThen in Xcode: **Signing & Capabilities → Associated Domains → `applinks:hilltop.strait.link`**, and add your custom scheme under **Info → URL Types**. Make sure your Apple Team ID and bundle ID are saved in Dashboard → Apps & stores, so your link domain serves a matching `apple-app-site-association` file."
+   "markdown": "With Swift Package Manager, in Xcode: **File → Add Package Dependencies…**, paste `https://github.com/strait-link/strait-sdk-swift` and pick version 0.11.1 or later. Or in `Package.swift`:\n\n```swift title=\"Package.swift\"\n.package(url: \"https://github.com/strait-link/strait-sdk-swift\", from: \"0.11.1\")\n// target dependency: .product(name: \"StraitSDK\", package: \"strait-sdk-swift\")\n```\n\nThen in Xcode: **Signing & Capabilities → Associated Domains → `applinks:hilltop.strait.link`**, and add your custom scheme under **Info → URL Types**. Make sure your Apple Team ID and bundle ID are saved in Dashboard → Apps & stores, so your link domain serves a matching `apple-app-site-association` file."
   },
   {
    "page": "iOS (Swift)",
@@ -2206,7 +2206,7 @@
    "group": "Platforms",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/unity/#install",
-   "markdown": "Requires Unity 2021.2+ with **Api Compatibility Level = .NET Standard 2.1**. In Unity: **Window → Package Manager → + → Add package from git URL…** and paste:\n\n```text\nhttps://github.com/strait-link/strait-sdk-unity.git?path=src#v0.9.0\n```\n\nThe package lives in the repo's `src/` folder, so keep the `?path=src` part. An OpenUPM listing is coming soon. Without Package Manager, copy the SDK's `src/*.cs` into your project (for example `Assets/Strait/`), or build the project and drop the DLL into `Assets/Plugins/`. Add `com.android.installreferrer:installreferrer:2.2` to your Android Gradle dependencies (custom `mainTemplate.gradle` or EDM4U). Then, in Package Manager, select **Strait SDK → Samples → Quick start → Import**. It adds `StraitDevice.cs` and `StraitDevice.mm`, which the code below uses for `StraitDevice.Collect` and `StraitDevice.Class`. Copy `PlayReferrer` from the [SDK README](https://github.com/strait-link/strait-sdk-unity#readme), with `using System.Threading.Tasks;` and `using UnityEngine;` at the top of its file. The sample also has `StraitBootstrap.cs`, a ready-made version of `LinksBehaviour` below. Use one or the other: both define `PlayerPrefsStore`, so having both won't compile."
+   "markdown": "Requires Unity 2021.2+ with **Api Compatibility Level = .NET Standard 2.1**. In Unity: **Window → Package Manager → + → Add package from git URL…** and paste:\n\n```text\nhttps://github.com/strait-link/strait-sdk-unity.git?path=src#v0.9.1\n```\n\nThe package lives in the repo's `src/` folder, so keep the `?path=src` part. An OpenUPM listing is coming soon. Without Package Manager, copy the SDK's `src/*.cs` into your project (for example `Assets/Strait/`), or build the project and drop the DLL into `Assets/Plugins/`. Add `com.android.installreferrer:installreferrer:2.2` to your Android Gradle dependencies (custom `mainTemplate.gradle` or EDM4U). Then, in Package Manager, select **Strait SDK → Samples → Quick start → Import**. It adds `StraitDevice.cs` and `StraitDevice.mm`, which the code below uses for `StraitDevice.Collect` and `StraitDevice.Class`. Copy `PlayReferrer` from the [SDK README](https://github.com/strait-link/strait-sdk-unity#readme), with `using System.Threading.Tasks;` and `using UnityEngine;` at the top of its file. The sample also has `StraitBootstrap.cs`, a ready-made version of `LinksBehaviour` below. Use one or the other: both define `PlayerPrefsStore`, so having both won't compile."
   },
   {
    "page": "Unity",
@@ -2276,7 +2276,7 @@
    "group": "Platforms",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/web/#install",
-   "markdown": "Install it from npm, pinned to a version:\n\n```bash\nnpm install @straitlink/web@0.8.0\n```"
+   "markdown": "Install it from npm, pinned to a version:\n\n```bash\nnpm install @straitlink/web@0.8.1\n```"
   },
   {
    "page": "Web",
@@ -2367,7 +2367,7 @@
    "group": "Platforms",
    "section": "2. Install the web SDK",
    "url": "https://straitlink.in/docs/smart-banner/#2-install-the-web-sdk",
-   "markdown": "Install it from npm. The banner arrived in version 0.6.0; install 0.8.0 or later for the `@straitlink/web` package name.\n\n```bash\nnpm install @straitlink/web@0.8.0\n```\n\n**You should see:** `@straitlink/web` in your `package.json`."
+   "markdown": "Install it from npm. The banner arrived in version 0.6.0; install 0.8.1 or later for the `@straitlink/web` package name.\n\n```bash\nnpm install @straitlink/web@0.8.1\n```\n\n**You should see:** `@straitlink/web` in your `package.json`."
   },
   {
    "page": "Smart app banner for mobile web",
@@ -3025,7 +3025,7 @@
    "group": "Server & API",
    "section": "Install",
    "url": "https://straitlink.in/docs/sdks/node/#install",
-   "markdown": "Install it from npm, pinned to a version:\n\n```bash\nnpm install @straitlink/node@0.8.1\n```"
+   "markdown": "Install it from npm, pinned to a version:\n\n```bash\nnpm install @straitlink/node@0.8.2\n```"
   },
   {
    "page": "Node (server)",
@@ -3536,7 +3536,7 @@
    "group": "AI tools & CLI",
    "section": null,
    "url": "https://straitlink.in/docs/mcp/",
-   "markdown": "MCP (Model Context Protocol) is the standard way AI tools such as Claude and Cursor plug into other services. Strait gives you the same 32 tools two ways:\n\n- **Hosted:** `https://strait.link/mcp`. Nothing to install: your tool sends your secret key in an `Authorization` header. Works in Claude Code, Cursor, VS Code and any client that can send a header.\n- **Local:** `@straitlink/mcp` on npm (version 0.8.0 since 7 November 2026). Your tool starts it on your computer. Use it for Claude Desktop and Codex.\n\nSign-in with OAuth (no key to copy) is not available yet, so the Claude web connector, which needs OAuth, can't use the hosted server today."
+   "markdown": "MCP (Model Context Protocol) is the standard way AI tools such as Claude and Cursor plug into other services. Strait gives you the same 32 tools two ways:\n\n- **Hosted:** `https://strait.link/mcp`. Nothing to install: your tool sends your secret key in an `Authorization` header. Works in Claude Code, Cursor, VS Code and any client that can send a header.\n- **Local:** `@straitlink/mcp` on npm (version 0.8.1 since 8 November 2026). Your tool starts it on your computer. Use it for Claude Desktop and Codex.\n\nSign-in with OAuth (no key to copy) is not available yet, so the Claude web connector, which needs OAuth, can't use the hosted server today."
   },
   {
    "page": "Use Strait from Claude, Cursor or Codex (MCP)",

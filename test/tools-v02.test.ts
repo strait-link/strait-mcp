@@ -64,6 +64,12 @@ describe('get_usage and get_referrals', () => {
     expect(r).toEqual(usage);
   });
 
+  it('get_usage says the plan month is the IST calendar month, like GET /v1/usage', () => {
+    const d = byName('get_usage').description;
+    expect(d).toContain('calendar month\'s usage (IST, India Standard Time, UTC+05:30)');
+    expect(d).not.toContain('(UTC)');
+  });
+
   it('get_referrals passes from and to', async () => {
     const { client, calls } = mockClient(() => ({ body: { preview: true, rows: [] } }));
     await runTool(byName('get_referrals'), client, { from: '2026-10-01', to: '2026-11-01' });

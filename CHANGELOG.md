@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.2 (9 Nov 2026)
+
+- `get_usage`: the plan month is the IST calendar month (India Standard Time, UTC+05:30), not UTC, matching `GET /v1/usage` since engine #128 (9 Nov 2026). Text only; the tool still returns the engine's answer unchanged.
+
 ## 0.8.1 (8 Nov 2026)
 
 - `strait-setup` skill and `search_docs` index regenerated from the site (8 Nov): Android 0.10.1, iOS 0.11.1, Flutter 0.10.2, Unity 0.9.1, Capacitor 0.4.1, web 0.8.1, Node 0.8.2, the setup-checker "Apps & stores" step.

@@ -412,7 +412,7 @@ export const TOOLS: StraitTool[] = [
   tool({
     name: 'get_usage',
     description:
-      "Read-only. This calendar month's usage (UTC) against the workspace's plan: billed taps used and included, new links " +
+      "Read-only. This calendar month's usage (IST, India Standard Time, UTC+05:30) against the workspace's plan: billed taps used and included, new links " +
       'created and included (null = no limit), level (ok, warn from 80 % of included taps, over from 100 %) and new_links_paused. ' +
       'Going over never stops a redirect; new_links_paused means create_link answers 402 until an upgrade or the month ends.',
     inputSchema: {},

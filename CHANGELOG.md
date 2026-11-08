@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.8.1 (8 Nov 2026)
 
+- `strait-setup` skill and `search_docs` index regenerated from the site (8 Nov): Android 0.10.1, iOS 0.11.1, Flutter 0.10.2, Unity 0.9.1, Capacitor 0.4.1, web 0.8.1, Node 0.8.2, the setup-checker "Apps & stores" step.
 - `strait-setup` skill and `search_docs` index: React Native 0.11.0 and Capacitor 0.4.0 (on npm since 7 Nov), regenerated from the live site.
 - iPhone wording: the README banner and the server instructions say "iPhone links: live · install matching: opt-in" (was "iPhone is in beta"), the same words as the website and every SDK; `get_analytics` says iPhone installs come from opt-in install matching (labelled Estimated).
 

@@ -14,11 +14,11 @@ const byName = (n: string) => {
 const parse = (r: { content: Array<{ text?: string }> }) => JSON.parse(r.content[0]!.text!);
 
 describe('tool list', () => {
-  it('has the ten council tools, the six 0.2 tools, the fourteen 0.3 tools get_workspace (0.5) and get_campaign_qr_zip (0.6), each with a description and annotations', () => {
+  it('has the ten council tools, the six 0.2 tools, the fourteen 0.3 tools get_workspace (0.5), get_campaign_qr_zip (0.6) and the app setup tools (0.9), each with a description and annotations', () => {
     expect(TOOLS.map((t) => t.name)).toEqual([
       'create_link', 'batch_create_links', 'get_link', 'list_links', 'update_link',
       'get_analytics', 'check_app_links', 'simulate_tap', 'trace_tap',
-      'get_workspace', 'get_usage', 'get_referrals', 'list_webhook_deliveries', 'test_webhook', 'redeliver_webhook_delivery', 'deactivate_link',
+      'get_workspace', 'get_usage', 'get_app_setup', 'verify_app_setup', 'get_referrals', 'list_webhook_deliveries', 'test_webhook', 'redeliver_webhook_delivery', 'deactivate_link',
       'pause_link', 'resume_link', 'search_links', 'get_link_qr', 'get_campaign_qr_zip',
       'compare_analytics', 'get_top_links', 'list_taps', 'list_events', 'record_event',
       'list_domains', 'add_domain', 'remove_domain', 'list_webhooks', 'check_link',

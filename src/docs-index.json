@@ -1,7 +1,7 @@
 {
  "source": "https://straitlink.in",
  "builtFrom": "site/content/docs",
- "siteCommit": "296e3c3",
+ "siteCommit": "4384d7d",
  "sections": [
   {
    "page": "What is Strait?",
@@ -3536,7 +3536,7 @@
    "group": "AI tools & CLI",
    "section": null,
    "url": "https://straitlink.in/docs/mcp/",
-   "markdown": "MCP (Model Context Protocol) is the standard way AI tools such as Claude and Cursor plug into other services. Strait gives you the same 32 tools two ways:\n\n- **Hosted:** `https://strait.link/mcp`. Nothing to install: your tool sends your secret key in an `Authorization` header. Works in Claude Code, Cursor, VS Code and any client that can send a header.\n- **Local:** `@straitlink/mcp` on npm (version 0.8.1 since 8 November 2026). Your tool starts it on your computer. Use it for Claude Desktop and Codex.\n\nSign-in with OAuth (no key to copy) is not available yet, so the Claude web connector, which needs OAuth, can't use the hosted server today."
+   "markdown": "MCP (Model Context Protocol) is the standard way AI tools such as Claude and Cursor plug into other services. Strait gives you the same 34 tools two ways:\n\n- **Hosted:** `https://strait.link/mcp`. Nothing to install: your tool sends your secret key in an `Authorization` header. Works in Claude Code, Cursor, VS Code and any client that can send a header.\n- **Local:** `@straitlink/mcp` on npm (version 0.8.1 since 8 November 2026). Your tool starts it on your computer. Use it for Claude Desktop and Codex.\n\nSign-in with OAuth (no key to copy) is not available yet, so the Claude web connector, which needs OAuth, can't use the hosted server today."
   },
   {
    "page": "Use Strait from Claude, Cursor or Codex (MCP)",
@@ -3550,7 +3550,7 @@
    "group": "AI tools & CLI",
    "section": "2. Add Strait to your AI tool",
    "url": "https://straitlink.in/docs/mcp/#2-add-strait-to-your-ai-tool",
-   "markdown": "**Do this:** pick your tool and paste its block. Put your key where it says `st_live_…your_key`.\n\n**Claude Code** (plugin, hosted): in Claude Code, run `/plugin install strait --marketplace strait-link/strait-mcp`. It asks for the key when you enable it, keeps it in your system's credential store, and also adds the `strait-setup` skill that sets Strait up in an app. Or, without the plugin, in a terminal run:\n\n```bash\nclaude mcp add --transport http strait https://strait.link/mcp --header \"Authorization: Bearer st_live_…your_key\"\n```\n\n**Cursor** (hosted): put this in `~/.cursor/mcp.json` (every project) or `.cursor/mcp.json` (one project; don't commit that file with a key in it):\n\n```json title=\"~/.cursor/mcp.json\"\n{\n  \"mcpServers\": {\n    \"strait\": {\n      \"url\": \"https://strait.link/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer st_live_…your_key\" }\n    }\n  }\n}\n```\n\n**Claude Desktop** (local): open **Settings → Developer → Edit config**, add this inside the file, then quit and reopen Claude Desktop.\n\n```json title=\"claude_desktop_config.json\"\n{\n  \"mcpServers\": {\n    \"strait\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@straitlink/mcp\"],\n      \"env\": { \"STRAIT_SECRET_KEY\": \"st_live_…your_key\" }\n    }\n  }\n}\n```\n\n**Codex** (local): add this to `~/.codex/config.toml`:\n\n```toml title=\"~/.codex/config.toml\"\n[mcp_servers.strait]\ncommand = \"npx\"\nargs = [\"-y\", \"@straitlink/mcp\"]\nenv = { STRAIT_SECRET_KEY = \"st_live_…your_key\" }\n```\n\nThe local server also works in Claude Code and Cursor: `claude mcp add strait --env STRAIT_SECRET_KEY=st_live_…your_key -- npx -y @straitlink/mcp`.\n\n**You should see:** a server called `strait` marked connected, with 32 tools under it. In Claude Code, type `/mcp`; in Cursor, open **Settings → MCP**."
+   "markdown": "**Do this:** pick your tool and paste its block. Put your key where it says `st_live_…your_key`.\n\n**Claude Code** (plugin, hosted): in Claude Code, run `/plugin install strait --marketplace strait-link/strait-mcp`. It asks for the key when you enable it, keeps it in your system's credential store, and also adds the `strait-setup` skill that sets Strait up in an app. Or, without the plugin, in a terminal run:\n\n```bash\nclaude mcp add --transport http strait https://strait.link/mcp --header \"Authorization: Bearer st_live_…your_key\"\n```\n\n**Cursor** (hosted): put this in `~/.cursor/mcp.json` (every project) or `.cursor/mcp.json` (one project; don't commit that file with a key in it):\n\n```json title=\"~/.cursor/mcp.json\"\n{\n  \"mcpServers\": {\n    \"strait\": {\n      \"url\": \"https://strait.link/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer st_live_…your_key\" }\n    }\n  }\n}\n```\n\n**Claude Desktop** (local): open **Settings → Developer → Edit config**, add this inside the file, then quit and reopen Claude Desktop.\n\n```json title=\"claude_desktop_config.json\"\n{\n  \"mcpServers\": {\n    \"strait\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@straitlink/mcp\"],\n      \"env\": { \"STRAIT_SECRET_KEY\": \"st_live_…your_key\" }\n    }\n  }\n}\n```\n\n**Codex** (local): add this to `~/.codex/config.toml`:\n\n```toml title=\"~/.codex/config.toml\"\n[mcp_servers.strait]\ncommand = \"npx\"\nargs = [\"-y\", \"@straitlink/mcp\"]\nenv = { STRAIT_SECRET_KEY = \"st_live_…your_key\" }\n```\n\nThe local server also works in Claude Code and Cursor: `claude mcp add strait --env STRAIT_SECRET_KEY=st_live_…your_key -- npx -y @straitlink/mcp`.\n\n**You should see:** a server called `strait` marked connected, with 34 tools under it. In Claude Code, type `/mcp`; in Cursor, open **Settings → MCP**."
   },
   {
    "page": "Use Strait from Claude, Cursor or Codex (MCP)",
@@ -3576,9 +3576,9 @@
   {
    "page": "Use Strait from Claude, Cursor or Codex (MCP)",
    "group": "AI tools & CLI",
-   "section": "What the 32 tools do",
-   "url": "https://straitlink.in/docs/mcp/#what-the-32-tools-do",
-   "markdown": "Eleven tools write; twenty-one only read. Every write that changes something live shows a preview first and acts only after you confirm. There is no delete tool: a paused link keeps its history.\n\n| Group | Tools |\n|---|---|\n| [Links and QR codes](https://straitlink.in/docs/mcp/links/) | create, batch create, get, list, search, update, pause, resume, deactivate, QR code, a campaign's QR codes as a ZIP |\n| [Analytics, taps and events](https://straitlink.in/docs/mcp/analytics/) | analytics, compare two periods, top links, recent taps, recent events, record an event, usage, referrals |\n| [Setup checks and custom domains](https://straitlink.in/docs/mcp/setup/) | your workspace and key, App Links check, any-link check, simulate a tap, trace a link, custom domains, docs search |\n| [Webhooks](https://straitlink.in/docs/mcp/webhooks/) | list webhooks, deliveries, send a test, redeliver |\n\nThings to ask: \"How did this week do against last week, by channel?\", \"Did my test tap just now open the app?\", \"Is links.example.com set up yet?\", \"My webhook stopped firing: show its last deliveries and send it a test.\""
+   "section": "What the 34 tools do",
+   "url": "https://straitlink.in/docs/mcp/#what-the-34-tools-do",
+   "markdown": "Eleven tools write; twenty-three only read. Every write that changes something live shows a preview first and acts only after you confirm. There is no delete tool: a paused link keeps its history.\n\n| Group | Tools |\n|---|---|\n| [Links and QR codes](https://straitlink.in/docs/mcp/links/) | create, batch create, get, list, search, update, pause, resume, deactivate, QR code, a campaign's QR codes as a ZIP |\n| [Analytics, taps and events](https://straitlink.in/docs/mcp/analytics/) | analytics, compare two periods, top links, recent taps, recent events, record an event, usage, referrals |\n| [Setup checks and custom domains](https://straitlink.in/docs/mcp/setup/) | your workspace and key, your app setup and its full check, App Links check, any-link check, simulate a tap, trace a link, custom domains, docs search |\n| [Webhooks](https://straitlink.in/docs/mcp/webhooks/) | list webhooks, deliveries, send a test, redeliver |\n\nThings to ask: \"How did this week do against last week, by channel?\", \"Did my test tap just now open the app?\", \"Is links.example.com set up yet?\", \"My webhook stopped firing: show its last deliveries and send it a test.\""
   },
   {
    "page": "Use Strait from Claude, Cursor or Codex (MCP)",
@@ -3648,7 +3648,7 @@
    "group": "AI tools & CLI",
    "section": "Checks",
    "url": "https://straitlink.in/docs/mcp/setup/#checks",
-   "markdown": "| Tool | What it does | Key needed |\n|---|---|---|\n| `check_app_links` | Checks a domain's `assetlinks.json` (Android) and `apple-app-site-association` (iPhone) files, with a fix for each problem | No |\n| `check_link` | Checks any deep link, from any vendor (Firebase `page.link`, Branch `app.link`, Strait): where it goes on each platform and what to fix | No |\n| `simulate_tap` | A dry run of one tap from one device or app (Android, iPhone, Instagram, WhatsApp, a preview bot…): what Strait would do and why. Nothing is recorded or billed | Secret |\n| `trace_tap` | Walks a link through nine common channels in one call, one row each; or reads a Live Tap Trace from the website demo with its token | Secret (link) / none (demo token) |\n| `get_workspace` | Who your key is: the workspace, its link domain, custom domains, plan, and what the key may do (full, links only or read only) | No |\n| `search_docs` | Searches these docs, offline | No |\n\nThe checks without a key share a small per-network budget (a few checks a minute), the same as the free checkers on this site."
+   "markdown": "| Tool | What it does | Key needed |\n|---|---|---|\n| `check_app_links` | Checks a domain's `assetlinks.json` (Android) and `apple-app-site-association` (iPhone) files, with a fix for each problem | No |\n| `check_link` | Checks any deep link, from any vendor (Firebase `page.link`, Branch `app.link`, Strait): where it goes on each platform and what to fix | No |\n| `simulate_tap` | A dry run of one tap from one device or app (Android, iPhone, Instagram, WhatsApp, a preview bot…): what Strait would do and why. Nothing is recorded or billed | Secret |\n| `trace_tap` | Walks a link through nine common channels in one call, one row each; or reads a Live Tap Trace from the website demo with its token | Secret (link) / none (demo token) |\n| `get_workspace` | Who your key is: the workspace, its link domain, custom domains, plan, and what the key may do (full, links only or read only) | Secret |\n| `get_app_setup` | The app details Strait has: Android package and signing fingerprints, iPhone Team ID and bundle ID, each link domain's two files and whether they're served, and the SDK version your app last sent per platform (`GET /v1/app`) | Secret (read or full) |\n| `verify_app_setup` | Every setup check as pass, warn, fail, unknown or skip, each with a fix (`GET /v1/app/verify`, the same checks as Dashboard → Setup → Integration health). Your AI agent fixes what isn't passing and runs it again until `ok` is true | Secret (read or full) |\n| `search_docs` | Searches these docs, offline | No |\n\nThe checks without a key share a small per-network budget (a few checks a minute), the same as the free checkers on this site."
   },
   {
    "page": "MCP tools: setup checks and custom domains",
@@ -3662,7 +3662,7 @@
    "group": "AI tools & CLI",
    "section": "Things to ask",
    "url": "https://straitlink.in/docs/mcp/setup/#things-to-ask",
-   "markdown": "- \"My links open the browser on iPhone. Check my link domain and shop.example.com.\"\n- \"What happens when someone taps `summer` inside Instagram on Android?\"\n- \"Check https://example.page.link/abc before we move it to Strait.\"\n- \"Add links.example.com as a custom domain and tell me which DNS records to create.\""
+   "markdown": "- \"Check my Strait setup and fix whatever isn't passing.\"\n- \"My links open the browser on iPhone. Check my link domain and shop.example.com.\"\n- \"What happens when someone taps `summer` inside Instagram on Android?\"\n- \"Check https://example.page.link/abc before we move it to Strait.\"\n- \"Add links.example.com as a custom domain and tell me which DNS records to create.\""
   },
   {
    "page": "MCP tools: webhooks",
@@ -3690,7 +3690,7 @@
    "group": "AI tools & CLI",
    "section": null,
    "url": "https://straitlink.in/docs/cli/",
-   "markdown": "`strait init` is a command-line tool, `@straitlink/cli` on npm (0.3.4, published 9 November 2026). It looks at your app's files, writes one setup file with your key and link address filled in, and prints the rest of the setup as a checklist. The one file you already have that it may edit is a Flutter or Android app's `AndroidManifest.xml`: it adds the internet permission when it's missing, because without it a release build can't reach Strait. It never overwrites an earlier setup file unless you pass `--force`.\n\nFour steps. Each one says what to do and what you should see."
+   "markdown": "`strait init` is a command-line tool, `@straitlink/cli` on npm (0.3.6, published 9 November 2026). It looks at your app's files, writes one setup file with your key and link address filled in, and prints the rest of the setup as a checklist. The one file you already have that it may edit is a Flutter or Android app's `AndroidManifest.xml`: it adds the internet permission when it's missing, because without it a release build can't reach Strait. It never overwrites an earlier setup file unless you pass `--force`.\n\nFour steps. Each one says what to do and what you should see."
   },
   {
    "page": "strait init: set up deep links from the terminal",
@@ -3733,6 +3733,13 @@
    "section": "Check your setup: strait doctor",
    "url": "https://straitlink.in/docs/cli/#check-your-setup-strait-doctor",
    "markdown": "`strait doctor` runs the same checks as `doctor()` in the Strait SDKs, with the same messages, from your terminal. It reads the two verification files on your link address and tells you whether your app is listed.\n\n**Do this:** put in your link address and your app's package (Android) and bundle ID (iPhone):\n\n```bash\nnpx @straitlink/cli doctor --host hilltop.strait.link --android com.hilltop.shop --ios com.hilltop.shop\n```\n\n**You should see:** `ok  app.listed` under Android and under iPhone, and `All checks passed.` If a line says `error`, the `Fix:` under it says what to change in **Apps & stores**. Add `--cert` with your signing certificate's SHA-256 to check it too (debug, release and Play App Signing each have their own). `--json` prints the result for CI. The exit code is `1` when a check fails."
+  },
+  {
+   "page": "strait init: set up deep links from the terminal",
+   "group": "AI tools & CLI",
+   "section": "Check your whole setup: strait app verify",
+   "url": "https://straitlink.in/docs/cli/#check-your-whole-setup-strait-app-verify",
+   "markdown": "With a secret key, `app verify` runs the dashboard's **Integration health** checks:\n\n```bash\nSTRAIT_SECRET_KEY=st_live_… npx @straitlink/cli app verify\n```\n\n**You should see:** a line per check, `Fix: …` under each problem. Exit `0`: no fail, no unknown."
   },
   {
    "page": "strait init: set up deep links from the terminal",

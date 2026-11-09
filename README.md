@@ -20,9 +20,9 @@ get their QR codes, read and compare analytics, see recent taps and conversion e
 look after webhooks (list, deliveries, test, redeliver), check App Links / Universal Links files or any vendor's link,
 see where taps on a link go and search the Strait docs.
 
-It is a local stdio server with 32 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
+It is a local stdio server with 34 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
 `pause_link`, `resume_link`, `deactivate_link`, `record_event`, `add_domain`, `remove_domain`, `test_webhook`,
-`redeliver_webhook_delivery`); the other twenty-one only read. `check_app_links`, `check_link`, `search_docs` and demo
+`redeliver_webhook_delivery`); the other twenty-three only read. `check_app_links`, `check_link`, `search_docs` and demo
 `trace_tap` work without a key; every other tool needs your secret key. Other deep-link vendors also ship MCP servers
 that can create links, so this README makes no "first" or "only" claim; it describes what this server does today.
 
@@ -55,6 +55,8 @@ outside the key's access.
 | `trace_tap` | Walk a link through WhatsApp, Instagram, Facebook, Chrome, Safari, iPad, computer and preview bots; or read a Live Tap Trace from the website demo | secret (link) / none (demo token) |
 | `get_workspace` | Who the key is: workspace, link domain, custom domains, plan, the key's access (full / links / read) and the saved QR styles (`qrStyles`, 0.6.0) (`GET /v1/workspace`; 0.5.0, needs engine with that route) | secret |
 | `get_usage` | This month's taps and new links against the plan, `level` (ok / warn / over) and `new_links_paused` (`GET /v1/usage`) | secret |
+| `get_app_setup` | The app setup Strait has: Android package, signing fingerprints and scheme; iPhone Team ID, bundle ID and App ID; each link domain's `assetlinks.json` / `apple-app-site-association` and whether it's served; the SDK version last sent per platform (`GET /v1/app`; 0.9.0) | secret (read or full) |
+| `verify_app_setup` | Every setup check as pass / warn / fail / unknown / skip with a fix (app details, both files on each link domain fetched live, SDK connected and current, link opens, webhooks); `ok` only when nothing failed or is unknown. The agent fixes and runs it again; 6 a minute (`GET /v1/app/verify`; 0.9.0) | secret (read or full) |
 | `get_referrals` | Referral report: taps and referred installs per code (`GET /v1/referrals`, a preview: says "not switched on yet" until it is) | secret |
 | `list_webhook_deliveries` | A webhook's deliveries (status, attempts, last HTTP status, next retry; no payloads). Without `webhookId`: the workspace's webhooks (id, receiver site, events) | secret |
 | `test_webhook` | Send one `ping` to a webhook now and see the receiver's status and time (not stored, not retried) | secret |

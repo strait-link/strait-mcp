@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.0 (10 Nov 2026)
+
+- New read tools `get_app_setup` (`GET /v1/app`) and `verify_app_setup` (`GET /v1/app/verify`, engine ADR 0108): the app
+  details Strait has, and every setup check as pass / warn / fail / unknown / skip with a plain-words fix, the same checks
+  as Dashboard → Setup → Integration health. An AI agent fixes what isn't passing and calls `verify_app_setup` again until
+  `ok` is true. Secret key with read or full access (read-only keys see both); nothing secret in either answer. The server
+  instructions point at them. ADR 0003.
+- `search_docs` index and `strait-setup` skill regenerated from the live site: Android 0.10.4, iOS 0.11.4, Flutter 0.10.6,
+  React Native 0.11.3, Unity 0.9.4, Capacitor 0.4.4, web 0.8.4, CLI 0.3.6 (`strait app verify`), and the two new tools.
+
 ## 0.8.3 (9 Nov 2026)
 
 - `search_docs` index and skills: websites are no longer told to call `resolveDeferredLink`. Web SDK 0.8.3 deprecated it (it sends nothing and always answers `matched: false`; removed in 0.9.0): deferred links resolve inside the app, through the app SDKs. The web docs now point at `reportWebOpen` (count a visit from a tap) and `trackEvent`. `strait-events`: the web row uses the SDK's `trackEvent`. `strait-setup` skill and the index regenerated from the site (web 0.8.3, CLI 0.3.3, iOS 0.11.3, Android 0.10.2, Capacitor 0.4.3). `test/skills.test.ts` fails if either tells a website to call it again.

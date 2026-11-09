@@ -12,16 +12,18 @@ Find the cause with checks, then give the one fix. Read before you change anythi
 - MCP tools (Strait plugin connected): `verify_app_setup` and `get_app_setup` (read or full secret key), `get_workspace`
   (link domain), `get_link`, `check_app_links`, `simulate_tap`, `trace_tap`, `list_taps`, `list_events`, `search_docs`.
   Starter prompts: `why_not_open`, `debug_link`, `setup_check`.
-- No MCP? `STRAIT_SECRET_KEY=st_live_… npx @straitlink/cli app verify` runs the same checks; for one domain,
+- No MCP? The user runs `STRAIT_SECRET_KEY=st_live_… npx @straitlink/cli app verify` (same checks; never ask for the key
+  in chat or put it in app code); for one domain,
   `npx @straitlink/cli doctor --host <handle>.strait.link --android <package> --ios <bundle ID>` (add `--cert <SHA-256>`):
   https://straitlink.in/docs/cli/
 - Ask the user for the slug, the phone (Android / iPhone), where they tapped (WhatsApp, Gmail, browser) and what happened.
 
 ## 0. Start here: `verify_app_setup`
 
-It checks the whole setup now; each check is pass / warn / fail / unknown / skip with a `fix`. Work through every check
-that is not pass or skip, most likely cause first (a fail before a warn), then run it again until `ok` is true.
-At most 6 runs a minute. A 403 `key_scope` means a links-only key: use a read or full key, or go to the sections below.
+It checks the whole setup now; each check is pass / warn / fail / unknown / skip, with a `fix` when not passing. Work
+through every check that is not pass or skip, most likely cause first (a fail before a warn), then run it again until `ok`
+is true. At most 6 runs a minute; a check still unknown after two tries a minute apart: tell the user and go on.
+A 403 `key_scope` means a links-only key: use a read or full key, or go to the sections below.
 
 - `android_app` / `ios_app` fail: package name, SHA-256 fingerprints, Team ID or bundle ID missing in Dashboard →
   Apps & stores. `get_app_setup` shows what Strait has; compare with the app's applicationId, signing keys (debug,
@@ -30,11 +32,11 @@ At most 6 runs a minute. A 403 `key_scope` means a links-only key: use a read or
   warn "still has older app details": wait 10 minutes and run it again.
 - `sdk_connected` fail: the app never reported, so the SDK isn't installed or `start()` isn't called at launch with the
   publishable key (strait-setup skill). warn: nothing in 24 hours; open the current build on a phone.
-- `sdk_current.<platform>.<version>` warn: update to the version in its fix and ship a build (it names the fixes missed).
-- `link_opens` warn: its detail says why opens missed their screen (expired, paused or deleted link, or the app doesn't
-  pass the URL it was opened with to the SDK: section 1 and the platform's docs page).
+- `sdk_current.<platform>.<version|unversioned>` warn: update as its fix says and ship a new build (web: deploy the site).
+- `link_opens` warn: its detail says why opens missed their screen: expired, paused or deleted link; no internet on the
+  phone (nothing to fix); or the app doesn't pass the URL it was opened with to the SDK (the platform's docs page).
 - `webhooks` fail or warn: `list_webhooks`, `list_webhook_deliveries`, then `test_webhook` after a yes.
-- `unknown`: Strait couldn't check just now; run it again in a minute.
+- Any check unknown: Strait couldn't check just now; run it again in a minute.
 
 All pass but one link still misbehaves? The checks are workspace-wide: continue with the section for the symptom.
 

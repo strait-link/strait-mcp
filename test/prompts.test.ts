@@ -76,6 +76,7 @@ describe('prompts', () => {
     expect(bare).toMatch(/checkDeferred\(\)/);
     expect(bare).toMatch(/list_taps/);
     expect(bare).toMatch(/check_app_links/);
+    expect(bare.indexOf('verify_app_setup')).toBeGreaterThan(bare.indexOf('checkDeferred()')); // after the test-mode run
     const flutter = await get({ platform: 'flutter' });
     expect(flutter).toContain('https://straitlink.in/docs/sdks/flutter.md');
     expect(flutter).not.toMatch(/pubspec\.yaml\)/);

@@ -103,7 +103,7 @@ export const PROMPTS: StraitPrompt[] = [
       'Then list_taps for the slug over the last hour to confirm my tap arrived. If the reply says no tap was seen, I tap the link again and press the button again; ' +
       'if another phone checked in first, I start a new test. ' +
       '6) Run verify_app_setup if the key may (read or full) and fix what is not pass or skip with me. ' +
-      'End with a checklist: key, first link, SDK installed, setup code, dashboard settings, App Links check, test mode match; ok or what is left, with the one next step for each.',
+      'End with a checklist: key, first link, SDK installed, setup code, dashboard settings, App Links check, test mode match, setup checks; ok or what is left, with the one next step for each.',
   },
   {
     name: 'weekly_review',

@@ -427,7 +427,7 @@ export const TOOLS: StraitTool[] = [
       'and scheme; iPhone Team ID, bundle ID and App ID; each link domain with its assetlinks.json and apple-app-site-association ' +
       'URL and whether the scheduled check found it served (null = not checked yet); per platform (android, ios, web) the newest ' +
       "app open and the Strait SDK version it sent. Compare it with the app's own files (applicationId, signing key, bundle ID, " +
-      'associated domains) before editing code. App details are changed by a person in Dashboard → Setup → Your apps (setupUrl). ' +
+      'associated domains) before editing code. App details are changed by a person in Dashboard → Apps & stores (also Setup › Your apps, setupUrl). ' +
       'Then run verify_app_setup. Needs a read or full secret key.',
     inputSchema: {},
     annotations: { title: 'Read the app setup', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
@@ -983,7 +983,7 @@ export const SERVER_INSTRUCTIONS = [
   'To check that a test tap or a purchase arrived: list_taps (last hour by default) and list_events (last 7 days).',
   'When a webhook seems to have stopped: list_webhooks to find it, list_webhook_deliveries, then test_webhook, then redeliver_webhook_delivery for failed deliveries.',
   'Custom link domains: list_domains shows each domain\'s status and the DNS records still to add.',
-  'Setting up an app: get_app_setup shows the app details Strait has; after each change run verify_app_setup and work through every check that is not pass or skip until ok is true.',
-  'When something does not work (a link opens the browser instead of the app, a deferred link or an event is missing), start with verify_app_setup, then run check_app_links on the link domain and the app domain, then trace_tap on the link. check_link checks any vendor\'s link (Firebase page.link, Branch) before a migration.',
+  'Setting up an app: get_app_setup shows the app details Strait has; after each change run verify_app_setup and work through every check that is not pass or skip until ok is true (a check still unknown after two tries: tell the user and go on).',
+  'When something does not work, start with verify_app_setup. When a link opens the browser instead of the app, then run check_app_links on the link domain and the app domain, then trace_tap on the link; for a missing deferred link or event, list_taps and list_events. check_link checks any vendor\'s link (Firebase page.link, Branch) before a migration.',
   'iPhone links: live · install matching: opt-in. Universal Links are live; install matching (deferred deep linking on iOS) is off until the workspace turns it on, and its matches are labelled Estimated. Android uses the Play Install Referrer. On iPhone the workspace picks the method (device matching, paste handoff, both or neither) in Dashboard → Settings → iPhone installs, read by the SDK at runtime; device matching is off for new workspaces. Use search_docs before answering setup questions.',
 ].join('\n');

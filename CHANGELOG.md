@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.2 (10 Nov 2026)
+
+- `search_docs` reads the live docs: it downloads `straitlink.in/llms-full.txt` and `llms-recipes.txt` (the files the site
+  publishes for AI tools) on first use, keeps them for an hour, then refreshes them in the background. So it quotes the
+  SDK versions the site shows today, not the ones from the day this version was published. If the site is slow (3 s),
+  down, redirects or sends something that isn't the docs, it uses the copy bundled with this version and tries again in
+  5 minutes. The download never includes your query. Answers say which copy they used (`docs: "live"` or `"bundled"`).
+  `STRAIT_DOCS_OFFLINE=1` turns the download off. ADR 0004.
+- Bundled copy rebuilt from the live site (`492a10c`): Android 0.10.5, iOS 0.11.5, Flutter 0.10.7, React Native 0.11.4, Unity 0.9.5,
+  Capacitor 0.4.5, web 0.8.5.
+
 ## Claude Code plugin 0.2.2 (10 Nov 2026, no npm release)
 
 - `strait-setup` skill (synced from the site, `npm run skill:sync`): the Verify step starts with `verify_app_setup` (MCP 0.9.0 or later),

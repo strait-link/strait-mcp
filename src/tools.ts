@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { ANALYTICS_GROUPS, StraitApiError, type AnalyticsGroup, type StraitClient, type NewLinkInput, type LinkPatchInput, type NewEventInput, type Domain } from './client.js';
 import { parseCsv } from './csv.js';
-import { searchDocs } from './docs.js';
+import { docsSections, searchDocs } from './docs.js';
 
 export interface ToolAnnotations {
   title: string;
@@ -950,7 +950,8 @@ export const TOOLS: StraitTool[] = [
     description:
       'Search the Strait documentation (SDK setup for React Native / Expo, Flutter, Android, iOS, Unity, web and Node; App Links and ' +
       'Universal Links; deferred deep linking; analytics; REST API; webhooks; migrating from Firebase Dynamic Links or Branch; ' +
-      'troubleshooting). Returns the closest-matching sections as Markdown with their URLs. Works offline.',
+      'troubleshooting). Returns the closest-matching sections as Markdown with their URLs. Reads the live docs on straitlink.in ' +
+      '(refreshed hourly, so SDK versions are current); offline it uses the copy bundled with this server (docs: "bundled").',
     inputSchema: {
       query: z.string().min(2).max(300),
       limit: z.number().int().min(1).max(10).optional().describe('Sections to return, default 4'),
@@ -958,9 +959,11 @@ export const TOOLS: StraitTool[] = [
     annotations: { title: 'Search the docs', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     needsKey: false,
     run: async (_c, a) => {
-      const hits = searchDocs(a.query, a.limit ?? 4);
+      const { sections, from } = await docsSections();
+      const hits = searchDocs(a.query, a.limit ?? 4, sections);
       return {
         query: a.query,
+        docs: from,
         results: hits.map((h) => ({
           page: h.page,
           section: h.section,

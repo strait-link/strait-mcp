@@ -77,7 +77,7 @@ outside the key's access.
 | `remove_domain` | Remove a custom link domain. **Asks for `confirm: true`** (0.3.0) | secret |
 | `list_webhooks` | The workspace's webhooks: id, receiver site (host only), events, on/off (0.3.0) | secret |
 | `check_link` | Check any vendor's deep link (Firebase page.link, Branch, Strait): where it goes and what to fix (0.3.0) | none |
-| `search_docs` | Search the Strait docs offline (bundled index) | none |
+| `search_docs` | Search the live Strait docs (refreshed hourly; bundled copy offline) | none |
 
 Every tool carries MCP annotations (`readOnlyHint`, `destructiveHint`, …) and the descriptions of the 0.2 and 0.3
 tools start with "Read-only." or "Write.". `update_link`, `pause_link`, `deactivate_link` and `remove_domain` are
@@ -116,6 +116,7 @@ Without a key, `check_app_links`, `search_docs` and demo `trace_tap` still work.
 |---|---|
 | `STRAIT_SECRET_KEY` | Your secret key (`st_live_…`) |
 | `STRAIT_API_URL` | Engine URL. Default `https://strait.link`. Use `http://localhost:3000` for a local engine |
+| `STRAIT_DOCS_OFFLINE` | `1`: `search_docs` uses only the docs bundled with this version. By default it reads the live docs (`straitlink.in/llms-full.txt` and `llms-recipes.txt`, a plain download that never includes your query) once an hour and uses the bundled copy when the site can't be reached |
 
 ## Install
 

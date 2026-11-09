@@ -11,7 +11,7 @@ store or website when it is not, and keep the destination through the install (d
 - Docs: https://straitlink.in/docs/ . Every docs page has a Markdown copy: add `.md` to its path (for example
   https://straitlink.in/docs/quick-start.md). Index for agents: https://straitlink.in/llms.txt . All docs in one file: https://straitlink.in/llms-full.txt .
 - If the docs disagree with this file, the docs win. Read the platform's docs page before you write code.
-- If the Strait MCP server is connected, prefer its tools: `search_docs`, `check_app_links`, `create_link`, `trace_tap`.
+- If the Strait MCP server is connected, prefer its tools: `verify_app_setup`, `search_docs`, `check_app_links`, `create_link`, `trace_tap`.
 
 ## Rules (never break these)
 
@@ -73,6 +73,19 @@ store or website when it is not, and keep the destination through the install (d
    API returns (slugs are unique per workspace). For many links use `POST /v1/links/batch` (up to 500 per call).
 
 ## Verify (run these, don't assume)
+
+Start with the one setup check. It runs every check the dashboard's Integration health runs (app details, the
+app files on each domain, SDK reporting, SDK version, link opens, webhooks), each as pass, warn, fail, unknown or
+skip, with a `fix` when not passing:
+
+- MCP connected (MCP 0.9.0 or later, or the hosted one): run `verify_app_setup`. It uses the secret key (read or
+  full) in the MCP config; if none is set, tell the user to add it there.
+- No MCP (CLI 0.3.6 or later): ask the user to run `STRAIT_SECRET_KEY=st_live_… npx @straitlink/cli app verify` and
+  paste the output (exit 0 means `ok`). Never ask for the key in chat or put it in app code.
+
+Apply each check's `fix` that isn't pass or skip, then run it again until `ok` is true (no fail, no unknown).
+`sdk_connected` and `link_opens` need the app opened on a phone: do the device steps below, then run it again.
+At most 6 runs a minute; if a check stays unknown after two runs a minute apart, tell the user and move on.
 
 ```sh
 # 1. The domain serves the verification files with your app in them

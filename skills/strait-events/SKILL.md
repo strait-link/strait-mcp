@@ -26,7 +26,7 @@ Link opens and installs are reported by the SDK by itself. Only conversions (pur
 | Android (Kotlin) | `links.trackEvent("purchase", value = 49.99, currency = "USD")` **blocks**: call it off the main thread (a coroutine on `Dispatchers.IO` or `Thread { … }.start()`) | https://straitlink.in/docs/sdks/android/events/ |
 | iOS (Swift) | `links.trackEvent("purchase", value: 49.99, currency: "USD") { ok in }` | https://straitlink.in/docs/sdks/ios/ |
 | Unity | `await LinksBehaviour.Client.TrackEvent("purchase", value: 4.99, currency: "USD")` | https://straitlink.in/docs/sdks/unity/ |
-| Web | `POST https://strait.link/v1/event` with `publishableKey`, `event`, `value`, `currency` and `clickId` from the `resolveDeferredLink` result (the web SDK doesn't remember it; keep it) | https://straitlink.in/docs/sdks/web/ |
+| Web | `await trackEvent(strait, 'purchase', { value: 49.99, currency: 'USD' })` from `@straitlink/web` resolves `true` when accepted; call `reportWebOpen(strait)` on page load first, and the event carries the tap it saw (kept 7 days) | https://straitlink.in/docs/sdks/web/ |
 | Node server | `await links.sendEvent({ event: 'purchase', value: 49.99, currency: 'USD', clickId })` with the secret key from an environment variable; `clickId` from an `app.opened` or `install.matched` webhook | https://straitlink.in/docs/sdks/node/ |
 
 ## Rules

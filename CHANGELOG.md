@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.3 (9 Nov 2026)
+
+- `search_docs` index and skills: websites are no longer told to call `resolveDeferredLink`. Web SDK 0.8.3 deprecated it (it sends nothing and always answers `matched: false`; removed in 0.9.0): deferred links resolve inside the app, through the app SDKs. The web docs now point at `reportWebOpen` (count a visit from a tap) and `trackEvent`. `strait-events`: the web row uses the SDK's `trackEvent`. `strait-setup` skill and the index regenerated from the site (web 0.8.3, CLI 0.3.3, iOS 0.11.3, Android 0.10.2, Capacitor 0.4.3). `test/skills.test.ts` fails if either tells a website to call it again.
+
 ## 0.8.2 (9 Nov 2026)
 
 - `get_usage`: the plan month is the IST calendar month (India Standard Time, UTC+05:30), not UTC, matching `GET /v1/usage` since engine #128 (9 Nov 2026). Text only; the tool still returns the engine's answer unchanged.

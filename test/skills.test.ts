@@ -37,3 +37,22 @@ describe.each(SKILLS)('skill %s', (name) => {
     expect(text).not.toMatch(/st_live_[0-9a-f]/);
   });
 });
+
+// Web SDK 0.8.3 (ADR 0003 there): deferred links resolve in the app; resolveDeferredLink is deprecated on the web
+// (no request, always matched: false). Neither search_docs nor a skill may tell a website to call it.
+describe('web: no resolveDeferredLink advice for websites', () => {
+  const web = docs.sections.filter((s: { url: string }) => /\/docs\/sdks\/web\//.test(s.url));
+  const all = ['strait-setup', ...SKILLS].map((s) => readFileSync(file(s), 'utf8'));
+
+  it('the web SDK docs in search_docs say it is deprecated and show no call to it', () => {
+    expect(web.length).toBeGreaterThan(0);
+    for (const s of web as { markdown: string }[]) expect(s.markdown).not.toMatch(/import \{ resolveDeferredLink \}|await resolveDeferredLink\(/);
+    expect(web.some((s: { markdown: string }) => /`resolveDeferredLink` is \*\*deprecated\*\*[^]*not available on the web/.test(s.markdown))).toBe(true);
+  });
+
+  it('every skill line that names resolveDeferredLink says not to use it on the web', () => {
+    for (const text of all) {
+      for (const line of text.split('\n').filter((l) => l.includes('resolveDeferredLink'))) expect(line).toMatch(/deprecated|never add/i);
+    }
+  });
+});

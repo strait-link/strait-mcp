@@ -438,8 +438,8 @@ export const TOOLS: StraitTool[] = [
     name: 'verify_app_setup',
     description:
       'Read-only. Checks the whole integration now (GET /v1/app/verify) and returns each check as pass / warn / fail / unknown / skip ' +
-      'with a plain-words fix: android_app, ios_app, app_file.<android|ios>.<host> (the files fetched live), sdk_connected (an app ' +
-      'open in the last 24 hours), sdk_current, link_opens and webhooks. ok is true only when nothing failed and nothing is unknown. ' +
+      'with a plain-words fix: android_app, ios_app, app_file.<android|ios>.<host> (the files fetched live), sdk_connected (the app ' +
+      'has reported and something arrived in the last 24 hours), sdk_current[.<platform>.<version>], link_opens and webhooks. ok is true only when nothing failed and nothing is unknown. ' +
       'Work through every check that is not pass and not skip: apply its fix, then call this again. Run it after any change to the ' +
       "app IDs, the signing key, the SDK or the app's link handling. A warn on app_file saying the file still has older app details " +
       'means wait 10 minutes and check again; unknown means it could not check just now (try again in a minute). At most 6 calls a ' +
@@ -983,7 +983,7 @@ export const SERVER_INSTRUCTIONS = [
   'To check that a test tap or a purchase arrived: list_taps (last hour by default) and list_events (last 7 days).',
   'When a webhook seems to have stopped: list_webhooks to find it, list_webhook_deliveries, then test_webhook, then redeliver_webhook_delivery for failed deliveries.',
   'Custom link domains: list_domains shows each domain\'s status and the DNS records still to add.',
-  'Setting up an app: get_app_setup shows the app details Strait has; after each change run verify_app_setup and work through every check that is not pass until ok is true.',
+  'Setting up an app: get_app_setup shows the app details Strait has; after each change run verify_app_setup and work through every check that is not pass or skip until ok is true.',
   'When a link opens the browser instead of the app, run check_app_links on the link domain and the app domain, then trace_tap on the link. check_link checks any vendor\'s link (Firebase page.link, Branch) before a migration.',
   'iPhone links: live · install matching: opt-in. Universal Links are live; install matching (deferred deep linking on iOS) is off until the workspace turns it on, and its matches are labelled Estimated. Android uses the Play Install Referrer. On iPhone the workspace picks the method (device matching, paste handoff, both or neither) in Dashboard → Settings → iPhone installs, read by the SDK at runtime; device matching is off for new workspaces. Use search_docs before answering setup questions.',
 ].join('\n');

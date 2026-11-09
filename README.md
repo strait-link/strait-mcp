@@ -20,9 +20,9 @@ get their QR codes, read and compare analytics, see recent taps and conversion e
 look after webhooks (list, deliveries, test, redeliver), check App Links / Universal Links files or any vendor's link,
 see where taps on a link go and search the Strait docs.
 
-It is a local stdio server with 32 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
+It is a local stdio server with 34 tools. Eleven of them write (`create_link`, `batch_create_links`, `update_link`,
 `pause_link`, `resume_link`, `deactivate_link`, `record_event`, `add_domain`, `remove_domain`, `test_webhook`,
-`redeliver_webhook_delivery`); the other twenty-one only read. `check_app_links`, `check_link`, `search_docs` and demo
+`redeliver_webhook_delivery`); the other twenty-three only read. `check_app_links`, `check_link`, `search_docs` and demo
 `trace_tap` work without a key; every other tool needs your secret key. Other deep-link vendors also ship MCP servers
 that can create links, so this README makes no "first" or "only" claim; it describes what this server does today.
 

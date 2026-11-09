@@ -92,11 +92,13 @@ describe('app setup tools (engine ADR 0108)', () => {
   });
 
   it('API refusals come back as tool errors with the engine message (links-only key 403, rate limit 429)', async () => {
-    for (const [status, error, re] of [
-      [403, 'this key may only manage links', /verifyAppSetup: this key may only manage links \(HTTP 403\)/],
-      [429, 'rate limited: at most 6 verify calls a minute per workspace', /HTTP 429/],
+    // The engine's real refusal for a links-only key (redirect-engine src/core/key-scope.ts scopeRefusal).
+    const LINKS_ONLY = { error: 'key_scope', message: 'This secret key is limited to links (/v1/links, /v1/qr.zip and /v1/simulate). Use a key with full access for this endpoint.' };
+    for (const [status, body, re] of [
+      [403, LINKS_ONLY, /verifyAppSetup: key_scope \(HTTP 403\)[\s\S]*Use a key with full access/],
+      [429, { error: 'rate limited: at most 6 verify calls a minute per workspace' }, /verifyAppSetup: rate limited: at most 6 verify calls a minute per workspace \(HTTP 429\)/],
     ] as const) {
-      const { client } = mockClient(() => ({ status, body: { error } }));
+      const { client } = mockClient(() => ({ status, body }));
       const r = await runTool(byName('verify_app_setup'), client, {});
       expect(r.isError).toBe(true);
       expect(r.content[0]!.text).toMatch(re);

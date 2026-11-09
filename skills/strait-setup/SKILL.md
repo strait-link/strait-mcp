@@ -54,19 +54,20 @@ store or website when it is not, and keep the destination through the install (d
    - Flutter: in `pubspec.yaml`, `strait_sdk: ^0.10.2` (pub.dev),
      then `flutter pub add app_links shared_preferences play_install_referrer flutter_timezone`
      → https://straitlink.in/docs/sdks/flutter/
-   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.10.1")` (JitPack: add `maven("https://jitpack.io")`) plus
+   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.10.2")` (JitPack: add `maven("https://jitpack.io")`) plus
      `com.android.installreferrer:installreferrer:2.2` → https://straitlink.in/docs/sdks/android/
-   - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.11.1` → https://straitlink.in/docs/sdks/ios/
+   - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.11.3` → https://straitlink.in/docs/sdks/ios/
    - Unity: Package Manager → Add package from git URL → `https://github.com/strait-link/strait-sdk-unity.git?path=src#v0.9.1` → https://straitlink.in/docs/sdks/unity/
-   - Web (deferred links on a website): `npm install @straitlink/web@0.8.1` → https://straitlink.in/docs/sdks/web/
-   - Capacitor / Ionic: `npm install @straitlink/capacitor@0.4.1 && npx cap sync` (Swift Package Manager on iOS; JitPack is added for you on Android)
+   - Web (count tap visits and sales on a website; deferred links resolve in the app, not on the web): `npm install @straitlink/web@0.8.3` → https://straitlink.in/docs/sdks/web/
+   - Capacitor / Ionic: `npm install @straitlink/capacitor@0.4.3 && npx cap sync` (Swift Package Manager on iOS; JitPack is added for you on Android)
      → https://straitlink.in/docs/sdks/capacitor/
    - Server (creates links, sends events; secret key from an environment variable): `npm install @straitlink/node@0.8.2`
      → https://straitlink.in/docs/sdks/node/
 5. **Wire it** exactly as the platform's docs page shows: create the client once with `publishableKey` and
    `endpoint: 'https://<handle>.strait.link'` (plus storage and the install referrer where the page says so), call
    `start()` once at launch, and subscribe to `onLink`. In Expo Router also add `app/+native-intent.tsx` as the
-   docs show. On the web, call `resolveDeferredLink` once on startup; it never throws and runs once per browser.
+   docs show. On the web, call `reportWebOpen` on page load and `trackEvent` for conversions; never add
+   `resolveDeferredLink` (deprecated, not available on the web: it sends nothing and always answers `matched: false`).
 6. **Make a test link**: Dashboard → Links, or the MCP `create_link` tool, or `POST /v1/links` from a server with the
    secret key. The destination must be `https://`; the app receives its path and query. Share the `shortUrl` the
    API returns (slugs are unique per workspace). For many links use `POST /v1/links/batch` (up to 500 per call).

@@ -74,6 +74,11 @@ const DOCTOR_IDS =
   "app.missing (this package / bundle ID is not listed), cert.missing (this build's signing certificate fingerprint is not listed; " +
   'debug, release and Play App Signing each have their own)';
 
+/** First troubleshooting step: the engine's own setup checks (GET /v1/app/verify), each with its fix. */
+const VERIFY_FIRST =
+  'verify_app_setup to check the whole setup: list every check that is not pass or skip, most likely cause first, with its fix. ' +
+  'If it answers 403 (a links-only key), say a read or full key can run it and go on. ';
+
 export const PROMPTS: StraitPrompt[] = [
   {
     name: 'get_started',
@@ -97,7 +102,8 @@ export const PROMPTS: StraitPrompt[] = [
       "tap the shortUrl on my phone, install and open the debug build and press the button. onLink should fire with kind deferred, matched true and matchMethod test. " +
       'Then list_taps for the slug over the last hour to confirm my tap arrived. If the reply says no tap was seen, I tap the link again and press the button again; ' +
       'if another phone checked in first, I start a new test. ' +
-      '6) End with a checklist: key, first link, SDK installed, setup code, dashboard settings, App Links check, test mode match; ok or what is left, with the one next step for each.',
+      '6) Run verify_app_setup if the key may (read or full) and fix what is not pass or skip with me. ' +
+      'End with a checklist: key, first link, SDK installed, setup code, dashboard settings, App Links check, test mode match; ok or what is left, with the one next step for each.',
   },
   {
     name: 'weekly_review',
@@ -112,20 +118,22 @@ export const PROMPTS: StraitPrompt[] = [
   {
     name: 'debug_link',
     title: 'Why does this link open the browser?',
-    description: 'Checks the App Links / Universal Links files, traces the link through each channel and reads its recent taps.',
+    description: 'Runs the setup checks, checks the App Links / Universal Links files, traces the link through each channel and reads its recent taps.',
     argsSchema: { slug },
     text: ({ slug: s }) =>
       `My Strait link "${s}" does not open my app where I expect. Find out why. ` +
-      `1) get_link for "${s}" to read its shortUrl and destination. 2) check_app_links on the shortUrl's host and on the destination's host. ` +
-      `3) trace_tap for "${s}". 4) list_taps for "${s}" (last 24 hours) to see what real taps did. ` +
+      '1) ' + VERIFY_FIRST +
+      `2) get_link for "${s}" to read its shortUrl and destination. 3) check_app_links on the shortUrl's host and on the destination's host. ` +
+      `4) trace_tap for "${s}". 5) list_taps for "${s}" (last 24 hours) to see what real taps did. ` +
       'Then tell me, channel by channel, where taps go and why, and the exact fix for every error finding. Do not change anything.',
   },
   {
     name: 'setup_check',
     title: 'Is my workspace set up?',
-    description: "This month's usage, custom domains still waiting for DNS, webhooks that are failing, and the App Links files.",
+    description: "Every app setup check with its fix, this month's usage, custom domains still waiting for DNS, failing webhooks and the App Links files.",
     text: () =>
-      'Check my Strait setup and list what needs attention. Use get_usage, list_domains (any domain not live: which DNS records are missing), ' +
+      'Check my Strait setup and list what needs attention. Start with ' + VERIFY_FIRST +
+      'Then use get_usage, list_domains (any domain not live: which DNS records are missing), ' +
       'list_webhooks then list_webhook_deliveries for each one that is on (any failed deliveries in the last days), ' +
       'and check_app_links on my link domain (the host of any link from list_links). ' +
       'Answer as a short checklist: ok or needs attention, with the one next step for each. Do not change anything.',
@@ -152,23 +160,24 @@ export const PROMPTS: StraitPrompt[] = [
   {
     name: 'why_not_open',
     title: "Why didn't my link open the app?",
-    description: 'For a link that opened the store, browser or nothing: checks the link, the App Links / Universal Links files, the tap path and recent taps, and reads a pasted doctor() report.',
+    description: 'For a link that opened the store, browser or nothing: runs the setup checks, checks the link, the App Links / Universal Links files, the tap path and recent taps, and reads a pasted doctor() report.',
     argsSchema: { slug, platform, app },
     text: ({ slug: s, platform: p, app: a }) => {
       const where = p ? ` on ${p === 'iphone' ? 'an iPhone' : 'Android'}${a ? ` from ${a === 'browser' ? 'the browser' : a[0]!.toUpperCase() + a.slice(1)}` : ''}` : '';
       const tap = p
-        ? `3) simulate_tap for "${s}" with ua "${presetFor(p, a)}" to see what Strait does on that phone and app. `
-        : `3) trace_tap for "${s}" to see what Strait does on each phone and app. `;
+        ? `4) simulate_tap for "${s}" with ua "${presetFor(p, a)}" to see what Strait does on that phone and app. `
+        : `4) trace_tap for "${s}" to see what Strait does on each phone and app. `;
       return (
         `My Strait link "${s}" did not open my app${where}. Find out why. ` +
-        `1) get_link for "${s}": is it active, not expired, and does longUrl sit on my app's domain? ` +
-        "2) check_app_links on the host of its shortUrl (and on longUrl's host if that is a different domain); list every error finding with its fix. " +
+        '1) ' + VERIFY_FIRST +
+        `2) get_link for "${s}": is it active, not expired, and does longUrl sit on my app's domain? ` +
+        "3) check_app_links on the host of its shortUrl (and on longUrl's host if that is a different domain); list every error finding with its fix. " +
         tap +
-        `4) list_taps for "${s}" over the last 24 hours: did my tap arrive, where was it sent, and did an app open follow? ` +
+        `5) list_taps for "${s}" over the last 24 hours: did my tap arrive, where was it sent, and did an app open follow? ` +
         'No tap at all means it never reached Strait (wrong link, or the app intercepted it). ' +
-        '5) Ask me to run the SDK doctor() in a debug build and paste its findings. Read them by id: ' +
+        '6) Ask me to run the SDK doctor() in a debug build and paste its findings. Read them by id: ' +
         DOCTOR_IDS +
-        '. 6) If it is still unclear, search_docs for "links open the browser instead of the app". ' +
+        '. 7) If it is still unclear, search_docs for "links open the browser instead of the app". ' +
         'Then tell me the most likely cause first and the exact fix for it, then the others. Do not change anything.'
       );
     },

@@ -984,6 +984,6 @@ export const SERVER_INSTRUCTIONS = [
   'When a webhook seems to have stopped: list_webhooks to find it, list_webhook_deliveries, then test_webhook, then redeliver_webhook_delivery for failed deliveries.',
   'Custom link domains: list_domains shows each domain\'s status and the DNS records still to add.',
   'Setting up an app: get_app_setup shows the app details Strait has; after each change run verify_app_setup and work through every check that is not pass or skip until ok is true.',
-  'When a link opens the browser instead of the app, run check_app_links on the link domain and the app domain, then trace_tap on the link. check_link checks any vendor\'s link (Firebase page.link, Branch) before a migration.',
+  'When something does not work (a link opens the browser instead of the app, a deferred link or an event is missing), start with verify_app_setup, then run check_app_links on the link domain and the app domain, then trace_tap on the link. check_link checks any vendor\'s link (Firebase page.link, Branch) before a migration.',
   'iPhone links: live · install matching: opt-in. Universal Links are live; install matching (deferred deep linking on iOS) is off until the workspace turns it on, and its matches are labelled Estimated. Android uses the Play Install Referrer. On iPhone the workspace picks the method (device matching, paste handoff, both or neither) in Dashboard → Settings → iPhone installs, read by the SDK at runtime; device matching is off for new workspaces. Use search_docs before answering setup questions.',
 ].join('\n');

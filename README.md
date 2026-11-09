@@ -94,10 +94,10 @@ Clients that show MCP prompts (Claude Code: type `/`) offer six starters. All bu
 |---|---|
 | `get_started` (platform, optional: `react-native`, `expo`, `flutter`, `android`, `ios`, `unity`, `capacitor`, `web`) | Zero to a working link: checks the key with `get_workspace`, creates your first link with `create_link` after you answer yes, finds your platform (or uses the one you give), pastes the exact install and setup code from that SDK's docs page, runs `check_app_links`, and walks you through a test mode check (`checkDeferred()` in a debug build, then `list_taps`) |
 | `weekly_review` | This week against last week (totals and channels), the top links by installs, and anything down more than 30 % |
-| `debug_link` (slug) | Why a link opens the browser: App Links / Universal Links files, a trace per channel and its recent taps, with the fix |
-| `setup_check` | Usage, custom domains still waiting for DNS, webhooks with failed deliveries, and the App Links files |
+| `debug_link` (slug) | Why a link opens the browser: the setup checks (`verify_app_setup`) first, then the App Links / Universal Links files, a trace per channel and its recent taps, with the fix |
+| `setup_check` | Every setup check with its fix (`verify_app_setup`), usage, custom domains still waiting for DNS, webhooks with failed deliveries, and the App Links files |
 | `migrate_firebase_links` (old_domain, optional) | Maps your Firebase Dynamic Links (long links, export rows or short links checked with `check_link`) to Strait fields, shows the plan, and runs `batch_create_links` only after you answer yes. Re-running is safe: existing slugs come back as a per-item 409 |
-| `why_not_open` (slug; platform `android` / `iphone` and app `browser` / `whatsapp` / `instagram` / `facebook`, optional) | Why a link opened the store, browser or nothing: the link, the App Links / Universal Links files, the tap on that phone and app, its recent taps, and a pasted SDK `doctor()` report read by finding id (`key.secret`, `host.file_missing`, `app.missing`, `cert.missing`…) |
+| `why_not_open` (slug; platform `android` / `iphone` and app `browser` / `whatsapp` / `instagram` / `facebook`, optional) | Why a link opened the store, browser or nothing: the setup checks (`verify_app_setup`) first, the link, the App Links / Universal Links files, the tap on that phone and app, its recent taps, and a pasted SDK `doctor()` report read by finding id (`key.secret`, `host.file_missing`, `app.missing`, `cert.missing`…) |
 
 ## Keys
 

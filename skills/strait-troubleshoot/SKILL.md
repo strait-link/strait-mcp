@@ -1,6 +1,6 @@
 ---
 name: strait-troubleshoot
-description: Diagnose and fix Strait deep-link problems with the Strait MCP tools, the strait CLI and the troubleshooting docs. Use when a Strait link opens the browser or store instead of the app, a deferred link is missing after install, assetlinks.json or apple-app-site-association (AASA) checks fail, matched is false, or taps, opens or events don't show in Analytics.
+description: Diagnose and fix Strait deep-link problems with the Strait MCP tools, the strait CLI and the troubleshooting docs. Use when a Strait link opens the browser or store instead of the app, a deferred link is missing after install, assetlinks.json or apple-app-site-association (AASA) checks fail, matched is false, or taps, opens or events don't show in Analytics, or `verify_app_setup` (`strait app verify`) reports a check that is not pass.
 ---
 
 # Troubleshoot Strait links
@@ -9,11 +9,34 @@ Find the cause with checks, then give the one fix. Read before you change anythi
 
 - Docs: https://straitlink.in/docs/troubleshooting/ (Markdown copy: same path with `.md`, e.g.
   https://straitlink.in/docs/troubleshooting.md). If this file and the docs disagree, the docs win.
-- MCP tools (Strait plugin connected): `get_workspace` (link domain), `get_link`, `check_app_links`, `simulate_tap`,
-  `trace_tap`, `list_taps`, `list_events`, `search_docs`. Starter prompts: `why_not_open`, `debug_link`, `setup_check`.
-- No MCP? `curl` the two files and run `npx @straitlink/cli doctor --host <handle>.strait.link --android <package> --ios <bundle ID>`
-  (add `--cert <SHA-256>`): https://straitlink.in/docs/cli/
+- MCP tools (Strait plugin connected): `verify_app_setup` and `get_app_setup` (read or full secret key), `get_workspace`
+  (link domain), `get_link`, `check_app_links`, `simulate_tap`, `trace_tap`, `list_taps`, `list_events`, `search_docs`.
+  Starter prompts: `why_not_open`, `debug_link`, `setup_check`.
+- No MCP? `STRAIT_SECRET_KEY=st_live_… npx @straitlink/cli app verify` runs the same checks; for one domain,
+  `npx @straitlink/cli doctor --host <handle>.strait.link --android <package> --ios <bundle ID>` (add `--cert <SHA-256>`):
+  https://straitlink.in/docs/cli/
 - Ask the user for the slug, the phone (Android / iPhone), where they tapped (WhatsApp, Gmail, browser) and what happened.
+
+## 0. Start here: `verify_app_setup`
+
+It checks the whole setup now; each check is pass / warn / fail / unknown / skip with a `fix`. Work through every check
+that is not pass or skip, most likely cause first (a fail before a warn), then run it again until `ok` is true.
+At most 6 runs a minute. A 403 `key_scope` means a links-only key: use a read or full key, or go to the sections below.
+
+- `android_app` / `ios_app` fail: package name, SHA-256 fingerprints, Team ID or bundle ID missing in Dashboard →
+  Apps & stores. `get_app_setup` shows what Strait has; compare with the app's applicationId, signing keys (debug,
+  upload, Play App signing) and bundle ID, then give the user the values to add (only a person can save them).
+- `app_file.<android|ios>.<host>` fail: that domain's file doesn't work; `check_app_links` on that host, then section 3.
+  warn "still has older app details": wait 10 minutes and run it again.
+- `sdk_connected` fail: the app never reported, so the SDK isn't installed or `start()` isn't called at launch with the
+  publishable key (strait-setup skill). warn: nothing in 24 hours; open the current build on a phone.
+- `sdk_current.<platform>.<version>` warn: update to the version in its fix and ship a build (it names the fixes missed).
+- `link_opens` warn: its detail says why opens missed their screen (expired, paused or deleted link, or the app doesn't
+  pass the URL it was opened with to the SDK: section 1 and the platform's docs page).
+- `webhooks` fail or warn: `list_webhooks`, `list_webhook_deliveries`, then `test_webhook` after a yes.
+- `unknown`: Strait couldn't check just now; run it again in a minute.
+
+All pass but one link still misbehaves? The checks are workspace-wide: continue with the section for the symptom.
 
 ## 1. The link opens the browser, not the app
 
@@ -38,7 +61,7 @@ Find the cause with checks, then give the one fix. Read before you change anythi
 
 - **Android** needs a build installed **from Google Play** (internal testing is fine); sideloaded builds have no
   install referrer. While the app isn't public, set "When someone without the app taps a link" to Always Google Play.
-- **iPhone** is opt-in: Dashboard → Settings → iPhone installs must be on, the person taps **Get the app** on the Safari
+- **iPhone** is opt-in: device matching must be on in Dashboard → Settings → iPhone installs, the person taps **Get the app** on the Safari
   page and opens the app within an hour on the same network.
 - The deferred check runs **once per install**: uninstall and reinstall to test again. Expo Go can't run the SDK.
 - The code must subscribe with `onLink` and route only when `matched` is true; read `reason` when it is false

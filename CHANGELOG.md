@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.1 (10 Nov 2026)
+
+- Troubleshooting starts with `verify_app_setup`: the `why_not_open`, `debug_link` and `setup_check` prompts run it first
+  and list every check that is not pass or skip with its fix (a links-only key gets a 403 and they go on); `get_started`
+  ends with it; the server instructions say to start there when something doesn't work. The `strait-troubleshoot` skill
+  has a new first section that walks each check the engine returns (`android_app`, `ios_app`, `app_file`, `sdk_connected`,
+  `sdk_current`, `link_opens`, `webhooks`, `unknown`) to its fix and the tool to dig in with, then runs it again until
+  `ok` is true; without the MCP, `strait app verify` (CLI 0.3.6). iPhone deferred links: "device matching" on, as the docs say.
+- Checked for stale advice: SDK versions in `strait-setup` and the `search_docs` index match the registries and the live site
+  (unchanged), no web `resolveDeferredLink` advice, 34 tools. Claude Code plugin 0.2.1, so installed plugins pick up the skill.
+
 ## 0.9.0 (10 Nov 2026)
 
 - New read tools `get_app_setup` (`GET /v1/app`) and `verify_app_setup` (`GET /v1/app/verify`, engine ADR 0108): the app

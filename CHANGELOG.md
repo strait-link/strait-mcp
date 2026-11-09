@@ -1,5 +1,12 @@
 # Changelog
 
+## Claude Code plugin 0.2.2 (10 Nov 2026, no npm release)
+
+- `strait-setup` skill (synced from the site, `npm run skill:sync`): the Verify step starts with `verify_app_setup` (MCP 0.9.0 or later),
+  or `strait app verify` (CLI 0.3.6) without the MCP, applies each check's fix and runs it again until `ok` is true, then
+  the manual checks. Its install lines carry the 10 Nov SDK versions (Android 0.10.5, iOS 0.11.5, Flutter 0.10.7,
+  React Native 0.11.4, Unity 0.9.5, Capacitor 0.4.5, web 0.8.5). Plugin 0.2.2, so installed plugins pick it up.
+
 ## 0.9.1 (10 Nov 2026)
 
 - Troubleshooting starts with `verify_app_setup`: the `why_not_open`, `debug_link` and `setup_check` prompts run it first

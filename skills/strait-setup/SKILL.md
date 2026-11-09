@@ -11,7 +11,7 @@ store or website when it is not, and keep the destination through the install (d
 - Docs: https://straitlink.in/docs/ . Every docs page has a Markdown copy: add `.md` to its path (for example
   https://straitlink.in/docs/quick-start.md). Index for agents: https://straitlink.in/llms.txt . All docs in one file: https://straitlink.in/llms-full.txt .
 - If the docs disagree with this file, the docs win. Read the platform's docs page before you write code.
-- If the Strait MCP server is connected, prefer its tools: `search_docs`, `check_app_links`, `create_link`, `trace_tap`.
+- If the Strait MCP server is connected, prefer its tools: `verify_app_setup`, `search_docs`, `check_app_links`, `create_link`, `trace_tap`.
 
 ## Rules (never break these)
 
@@ -49,17 +49,17 @@ store or website when it is not, and keep the destination through the install (d
    - Expo: `scheme`, `android.intentFilters` (with `autoVerify`) and `ios.associatedDomains` in `app.json`, then a
      **development build** (`npx expo run:android` or EAS). Expo Go cannot test this.
 4. **Install the SDK** (versions are pinned here and on each docs page):
-   - React Native / Expo: `npm install @straitlink/react-native@0.11.3 @react-native-async-storage/async-storage react-native-play-install-referrer`
+   - React Native / Expo: `npm install @straitlink/react-native@0.11.4 @react-native-async-storage/async-storage react-native-play-install-referrer`
      → https://straitlink.in/docs/sdks/react-native/ (Expo: https://straitlink.in/docs/sdks/expo/)
-   - Flutter: in `pubspec.yaml`, `strait_sdk: ^0.10.6` (pub.dev),
+   - Flutter: in `pubspec.yaml`, `strait_sdk: ^0.10.7` (pub.dev),
      then `flutter pub add app_links shared_preferences play_install_referrer flutter_timezone`
      → https://straitlink.in/docs/sdks/flutter/
-   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.10.4")` (JitPack: add `maven("https://jitpack.io")`) plus
+   - Android: `implementation("com.github.strait-link:strait-sdk-android:v0.10.5")` (JitPack: add `maven("https://jitpack.io")`) plus
      `com.android.installreferrer:installreferrer:2.2` → https://straitlink.in/docs/sdks/android/
-   - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.11.4` → https://straitlink.in/docs/sdks/ios/
-   - Unity: Package Manager → Add package from git URL → `https://github.com/strait-link/strait-sdk-unity.git?path=src#v0.9.4` → https://straitlink.in/docs/sdks/unity/
-   - Web (count tap visits and sales on a website; deferred links resolve in the app, not on the web): `npm install @straitlink/web@0.8.4` → https://straitlink.in/docs/sdks/web/
-   - Capacitor / Ionic: `npm install @straitlink/capacitor@0.4.4 && npx cap sync` (Swift Package Manager on iOS; JitPack is added for you on Android)
+   - iOS: Swift Package `https://github.com/strait-link/strait-sdk-swift` from `0.11.5` → https://straitlink.in/docs/sdks/ios/
+   - Unity: Package Manager → Add package from git URL → `https://github.com/strait-link/strait-sdk-unity.git?path=src#v0.9.5` → https://straitlink.in/docs/sdks/unity/
+   - Web (count tap visits and sales on a website; deferred links resolve in the app, not on the web): `npm install @straitlink/web@0.8.5` → https://straitlink.in/docs/sdks/web/
+   - Capacitor / Ionic: `npm install @straitlink/capacitor@0.4.5 && npx cap sync` (Swift Package Manager on iOS; JitPack is added for you on Android)
      → https://straitlink.in/docs/sdks/capacitor/
    - Server (creates links, sends events; secret key from an environment variable): `npm install @straitlink/node@0.8.2`
      → https://straitlink.in/docs/sdks/node/
@@ -73,6 +73,19 @@ store or website when it is not, and keep the destination through the install (d
    API returns (slugs are unique per workspace). For many links use `POST /v1/links/batch` (up to 500 per call).
 
 ## Verify (run these, don't assume)
+
+Start with the one setup check. It runs every check the dashboard's Integration health runs (app details, the
+app files on each domain, SDK reporting, SDK version, link opens, webhooks), each as pass, warn, fail, unknown or
+skip, with a `fix` when not passing:
+
+- MCP connected (MCP 0.9.0 or later, or the hosted one): run `verify_app_setup`. It uses the secret key (read or
+  full) in the MCP config; if none is set, tell the user to add it there.
+- No MCP (CLI 0.3.6 or later): ask the user to run `STRAIT_SECRET_KEY=st_live_… npx @straitlink/cli app verify` and
+  paste the output (exit 0 means `ok`). Never ask for the key in chat or put it in app code.
+
+Apply each check's `fix` that isn't pass or skip, then run it again until `ok` is true (no fail, no unknown).
+`sdk_connected` and `link_opens` need the app opened on a phone: do the device steps below, then run it again.
+At most 6 runs a minute; if a check stays unknown after two runs a minute apart, tell the user and move on.
 
 ```sh
 # 1. The domain serves the verification files with your app in them

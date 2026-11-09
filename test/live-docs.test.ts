@@ -66,21 +66,59 @@ describe('docsSections (live with a bundled fallback)', () => {
     expect(calls).toHaveLength(2);
   });
 
-  it('after an hour answers at once from the last copy and refreshes behind it', async () => {
+  it('after an hour answers at once from the last copy and swaps in the new one when it lands', async () => {
     online();
-    const calls: string[] = [];
-    await docsSections({ fetch: fetchOf(LIVE, calls), now: 0 });
-    let release!: () => void;
+    await docsSections({ fetch: fetchOf(LIVE), now: 0 });
+    const releases: (() => void)[] = [];
+    const newer: Record<string, string> = { ...LIVE, [LIVE_DOCS_URLS[0]]: big.replace('^9.9.9', '^10.0.0') };
     const slow = (async (url: string | URL) => {
-      calls.push(String(url));
-      await new Promise<void>((r) => (release = r));
-      return new Response(LIVE[String(url)]);
+      await new Promise<void>((r) => releases.push(r));
+      return new Response(newer[String(url)]);
     }) as unknown as typeof fetch;
     const b = await docsSections({ fetch: slow, now: LIVE_DOCS_TTL_MS + 1 });
     expect(b.from).toBe('live');
-    expect(calls.length).toBeGreaterThan(2);
-    release();
-    await new Promise((r) => setTimeout(r, 20)); // let the refresh land before the next test resets
+    expect(searchDocs('flutter strait_sdk', 1, b.sections)[0]!.markdown).toContain('^9.9.9'); // the last copy, at once
+    for (const r of releases) r();
+    await new Promise((r) => setTimeout(r, 20));
+    const c = await docsSections({ fetch: fetchOf({}), now: LIVE_DOCS_TTL_MS + 2 });
+    expect(searchDocs('flutter strait_sdk', 1, c.sections)[0]!.markdown).toContain('^10.0.0');
+  });
+
+  it('calls that arrive while the first download runs all wait for it', async () => {
+    online();
+    const calls: string[] = [];
+    const f = fetchOf(LIVE, calls);
+    const all = await Promise.all([docsSections({ fetch: f, now: 0 }), docsSections({ fetch: f, now: 0 }), docsSections({ fetch: f, now: 0 })]);
+    expect(all.map((x) => x.from)).toEqual(['live', 'live', 'live']);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('only the very first try makes a call wait: later retries run behind a bundled answer', async () => {
+    online();
+    await docsSections({ fetch: fetchOf({}), now: 0 });
+    const hang = (() => new Promise(() => {})) as unknown as typeof fetch;
+    const t0 = Date.now();
+    expect((await docsSections({ fetch: hang, now: 5 * 60_000, timeoutMs: 1000 })).from).toBe('bundled');
+    expect(Date.now() - t0).toBeLessThan(200);
+  });
+
+  it('a download that never settles (a cut-off request) does not block later ones', async () => {
+    online();
+    const never = (() => new Promise(() => {})) as unknown as typeof fetch;
+    void docsSections({ fetch: never, now: 0, timeoutMs: 10_000 }); // never settles, as if its request was cut off
+    await new Promise((r) => setTimeout(r, 0));
+    expect((await docsSections({ fetch: fetchOf(LIVE), now: 60_000, timeoutMs: 10_000 })).from).toBe('live');
+  });
+
+  it('stops reading a file past 4 MB even without a content-length', async () => {
+    online();
+    let sent = 0;
+    const endless = (async (url: string | URL) =>
+      String(url) === LIVE_DOCS_URLS[1]
+        ? new Response(RECIPES)
+        : new Response(new ReadableStream({ pull(c) { sent += 65536; c.enqueue(new Uint8Array(65536).fill(97)); } }))) as unknown as typeof fetch;
+    expect((await docsSections({ fetch: endless, now: 0 })).from).toBe('bundled');
+    expect(sent).toBeLessThan(6_000_000);
   });
 
   it('falls back to the bundled index when the site fails, and waits 5 minutes before trying again', async () => {
@@ -93,7 +131,9 @@ describe('docsSections (live with a bundled fallback)', () => {
     const n = calls.length;
     await docsSections({ fetch: down, now: 60_000 });
     expect(calls).toHaveLength(n);
-    expect((await docsSections({ fetch: fetchOf(LIVE), now: 5 * 60_000 })).from).toBe('live');
+    expect((await docsSections({ fetch: fetchOf(LIVE), now: 5 * 60_000 })).from).toBe('bundled'); // the retry runs behind this answer
+    await new Promise((r) => setTimeout(r, 20));
+    expect((await docsSections({ fetch: fetchOf({}), now: 5 * 60_000 + 1 })).from).toBe('live');
   });
 
   it('rejects a page that is not the docs (an HTML error page, a truncated file)', async () => {

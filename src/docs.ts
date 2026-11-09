@@ -132,16 +132,38 @@ export function parseLlmsText(...texts: string[]): DocSection[] {
   return out;
 }
 
+/** The body as text, read in pieces and cut off past MAX_BYTES (the site sends it compressed, with no length). */
+async function readCapped(res: Response, url: string): Promise<string> {
+  if (!res.body) return '';
+  const reader = res.body.getReader();
+  const parts: Uint8Array[] = [];
+  let n = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    n += value.byteLength;
+    if (n > MAX_BYTES) {
+      await reader.cancel().catch(() => {});
+      throw new Error(`${url}: over ${MAX_BYTES} bytes`);
+    }
+    parts.push(value);
+  }
+  const all = new Uint8Array(n);
+  let at = 0;
+  for (const p of parts) all.set(p, (at += p.byteLength) - p.byteLength);
+  return new TextDecoder().decode(all);
+}
+
 async function fetchLive(f: typeof fetch, timeoutMs: number): Promise<DocSection[]> {
   const signal = AbortSignal.timeout(timeoutMs);
   const texts = await Promise.all(
     LIVE_DOCS_URLS.map(async (url) => {
       const res = await f(url, { signal, redirect: 'manual', headers: { accept: 'text/plain' } }); // a redirect is a failure: only this host
-      if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
-      if (Number(res.headers.get('content-length') ?? 0) > MAX_BYTES) throw new Error(`${url}: too big`);
-      const text = await res.text();
-      if (text.length > MAX_BYTES) throw new Error(`${url}: too big`);
-      return text;
+      if (!res.ok) {
+        await res.body?.cancel().catch(() => {});
+        throw new Error(`${url}: HTTP ${res.status}`);
+      }
+      return readCapped(res, url);
     }),
   );
   const sections = parseLlmsText(...texts);
@@ -152,26 +174,31 @@ async function fetchLive(f: typeof fetch, timeoutMs: number): Promise<DocSection
 
 let live: { sections: DocSection[]; at: number } | null = null;
 let failedAt = -Infinity;
-let refreshing = false;
+/** The download under way; wait = callers without a live copy wait for it (only on the very first try). */
+let inflight: { job: Promise<void>; until: number; wait: boolean } | null = null;
 
 const offline = () => /^(1|true|yes)$/i.test((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.STRAIT_DOCS_OFFLINE ?? '');
 
 /**
- * The sections search_docs searches. The first call waits for the live docs (at most timeoutMs);
- * later calls answer at once and, once the copy is an hour old, refresh it in the background.
- * After a failed fetch the bundled (or last live) copy is used and the site is tried again in 5 minutes.
+ * The sections search_docs searches. The very first try waits for the live docs (at most timeoutMs), and so does
+ * every call that arrives during it; later calls answer at once from what is there (the last live copy, else the
+ * bundled one) and, when that copy is an hour old or the last try failed 5 minutes ago, refresh in the background.
  */
 export async function docsSections(opts: { fetch?: typeof fetch; now?: number; timeoutMs?: number } = {}): Promise<{ sections: DocSection[]; from: 'live' | 'bundled' }> {
   if (offline()) return { sections: SECTIONS, from: 'bundled' };
   const now = opts.now ?? Date.now();
-  if (!refreshing && (!live || now - live.at >= LIVE_DOCS_TTL_MS) && now - failedAt >= RETRY_AFTER_FAIL_MS) {
-    refreshing = true;
-    const job = fetchLive(opts.fetch ?? ((...a) => fetch(...a)), opts.timeoutMs ?? 3000)
+  const timeoutMs = opts.timeoutMs ?? 3000;
+  // A download that never settled (its request was cut off, e.g. in a Worker) stops counting after its time is up.
+  if (inflight && now > inflight.until) inflight = null;
+  if (!inflight && (!live || now - live.at >= LIVE_DOCS_TTL_MS) && now - failedAt >= RETRY_AFTER_FAIL_MS) {
+    const mine = { job: Promise.resolve(), until: now + 2 * timeoutMs, wait: !live && failedAt === -Infinity };
+    inflight = mine;
+    mine.job = fetchLive(opts.fetch ?? ((...a) => fetch(...a)), timeoutMs)
       .then((sections) => void (live = { sections, at: now }))
       .catch(() => void (failedAt = now))
-      .finally(() => void (refreshing = false));
-    if (!live) await job;
+      .finally(() => void (inflight === mine && (inflight = null)));
   }
+  if (!live && inflight?.wait) await inflight.job;
   return live ? { sections: live.sections, from: 'live' } : { sections: SECTIONS, from: 'bundled' };
 }
 
@@ -179,5 +206,5 @@ export async function docsSections(opts: { fetch?: typeof fetch; now?: number; t
 export function resetLiveDocs() {
   live = null;
   failedAt = -Infinity;
-  refreshing = false;
+  inflight = null;
 }

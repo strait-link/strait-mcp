@@ -27,10 +27,13 @@ Reuse: the site's published llms files and its `slugify` rule (copied, 1 line); 
 per section list).
 
 ## Behaviour
-- First `search_docs` call: download both files (one 3 s budget), parse, use them. Later calls answer from memory; after
-  an hour the next call answers at once from the last copy and refreshes in the background (stale-while-revalidate).
-- Fallback: any failure (timeout, non-200, a redirect, > 4 MB, fewer than half the bundled sections, e.g. an HTML error
-  page) → the bundled index (or the last good live copy), and no retry for 5 minutes.
+- The very first `search_docs` call downloads both files (one 3 s budget), parses them and uses them; calls that arrive
+  meanwhile wait for the same download. Later calls answer from memory; after an hour the next call answers at once from
+  the last copy and refreshes in the background (stale-while-revalidate).
+- Fallback: any failure (timeout, non-200, a redirect, a body over 4 MB, counted while streaming since the site sends it
+  compressed with no length, fewer than half the bundled sections, e.g. an HTML error page) → the bundled index (or the
+  last good live copy). Retries come 5 minutes later, in the background: only the very first try makes a call wait.
+- A download that never settles (a Worker request that ended under it) stops blocking new ones after 2x its timeout.
 - `STRAIT_DOCS_OFFLINE=1` → bundled only, no network. The test suite sets it; `test/live-docs.test.ts` covers the live path
   with an injected fetch.
 - Parity (10 Nov, site `492a10c`): the live parse has all 550 bundled sections at the same URLs (+1: the API page's
@@ -38,8 +41,9 @@ per section list).
 
 ## Security lens (STRIDE)
 - Spoofing / tampering: fixed https URLs on our own domain, no user input in the URL (no SSRF), redirects refused. The
-  text is treated like the bundled docs (both come from the site); a site compromise would already reach the bundled
-  index at the next release.
+  text comes from the same site as the bundled docs, but it now reaches agents without this repo's release checks (for
+  example `test/skills.test.ts`, no web `resolveDeferredLink` advice). Those checks belong at the source: the site's own
+  `npm run check` gates every docs deploy. `openWorldHint` stays false: one fixed first-party source, not the open web.
 - Data exposure: a plain GET of a public file, no query, no key, no cookies; no new tracker. The site sees one request per
   process per hour.
 - DoS: at most one download per hour per process (5 min after a failure), size-capped, time-bounded; a slow site costs
@@ -49,6 +53,11 @@ per section list).
 No new dependency, no new state beyond a module-level cache (Node: the engine and stdio). The Worker variant (not
 deployed) works the same; a background refresh there may be cut short with the request and is retried later.
 Load: 2 cached static files (~590 KB) from Cloudflare per hour per engine instance. Memory: one extra parsed copy.
+
+## Follow-up
+The engine's `test/mcp-route.test.ts` calls `search_docs`; with 0.9.2 that one call reads the live docs in CI (bounded
+by the 3 s timeout, falls back, so it cannot fail the test). Set `STRAIT_DOCS_OFFLINE=1` in the engine's vitest config
+when that repo is next touched (kept out of the 0.9.2 bump PR on purpose).
 
 ## Cost
 None.

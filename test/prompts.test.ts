@@ -50,6 +50,16 @@ describe('prompts', () => {
     }
   });
 
+  it('the troubleshooting prompts start with verify_app_setup and walk each check that is not pass or skip', () => {
+    const names = TOOLS.map((t) => t.name);
+    for (const name of ['why_not_open', 'debug_link', 'setup_check']) {
+      const text = PROMPTS.find((p) => p.name === name)!.text({ slug: 'summer' });
+      const first = names.filter((n) => text.includes(n)).sort((a, b) => text.indexOf(a) - text.indexOf(b))[0];
+      expect(first, name).toBe('verify_app_setup');
+      expect(text, name).toMatch(/not pass or skip/);
+    }
+  });
+
   it('get_started: key check first, the platform picks its SDK docs page, never the secret key in the app, verifies with test mode', async () => {
     const c = await connected();
     const { prompts } = await c.listPrompts();
@@ -66,6 +76,7 @@ describe('prompts', () => {
     expect(bare).toMatch(/checkDeferred\(\)/);
     expect(bare).toMatch(/list_taps/);
     expect(bare).toMatch(/check_app_links/);
+    expect(bare.indexOf('verify_app_setup')).toBeGreaterThan(bare.indexOf('checkDeferred()')); // after the test-mode run
     const flutter = await get({ platform: 'flutter' });
     expect(flutter).toContain('https://straitlink.in/docs/sdks/flutter.md');
     expect(flutter).not.toMatch(/pubspec\.yaml\)/);

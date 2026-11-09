@@ -7,12 +7,16 @@ import docs from '../src/docs-index.json' with { type: 'json' };
 
 const SKILLS = ['strait-troubleshoot', 'strait-events', 'strait-migration'];
 const file = (s: string) => new URL(`../skills/${s}/SKILL.md`, import.meta.url);
+// The check ids GET /v1/app/verify returns (redirect-engine src/core/app-config.ts, 10 Nov 2026); app_file and
+// sdk_current come back as app_file.<platform>.<host> and sdk_current[.<platform>.<version>].
+const VERIFY_CHECKS = ['android_app', 'ios_app', 'app_file', 'sdk_connected', 'sdk_current', 'link_opens', 'webhooks'];
 const real = new Set([...TOOLS.map((t) => t.name), ...PROMPTS.map((p) => p.name)]);
 // snake_case words in backticks that are not tools: link-event reasons, API fields, Branch keys, test-mode reasons.
 const NOT_TOOLS = new Set([
   'not_found', 'no_match', 'no_tap', 'other_device',
   'utm_source', 'pending_dns', 'deeplink_path', 'canonical_url', 'ios_url', 'android_url',
   'og_title', 'og_description', 'og_image_url', 'fallback_url', 'desktop_url', 'one_time_use',
+  'key_scope', ...VERIFY_CHECKS,
 ]);
 const pages = new Set(docs.sections.map((s: { url: string }) => s.url.split('#')[0]));
 
@@ -35,6 +39,25 @@ describe.each(SKILLS)('skill %s', (name) => {
     expect(links.length).toBeGreaterThan(0);
     expect(links.filter((u) => !pages.has(u))).toEqual([]);
     expect(text).not.toMatch(/st_live_[0-9a-f]/);
+  });
+});
+
+// MCP 0.9.0 (ADR 0003): troubleshooting starts with the one tool that names what is wrong, then walks each check's fix.
+describe('strait-troubleshoot starts with verify_app_setup', () => {
+  const text = readFileSync(file('strait-troubleshoot'), 'utf8');
+  const body = text.slice(text.indexOf('\n# '));
+  const steps = body.slice(body.indexOf('\n## '));
+
+  it('the first step calls verify_app_setup, before any other tool, and says to run it again until ok is true', () => {
+    const tools = [...steps.matchAll(/`([a-z]+(?:_[a-z]+)+)`/g)].map((m) => m[1]!).filter((n) => real.has(n));
+    expect(tools[0]).toBe('verify_app_setup');
+    expect(steps.slice(0, steps.indexOf('\n## ', 4))).toMatch(/again[^\n]*`ok`[^\n]*true/);
+    expect(text.split('\n')[2]).toMatch(/verify_app_setup/); // the description, so the skill is picked for it
+  });
+
+  it('walks every check id the engine returns, and the CLI fallback when there is no MCP', () => {
+    for (const id of VERIFY_CHECKS) expect(steps, id).toMatch(new RegExp('`' + id + '[`.]'));
+    expect(text).toContain('npx @straitlink/cli app verify');
   });
 });
 

@@ -259,6 +259,14 @@ export class StraitClient {
   getUsage() {
     return this.call<Record<string, unknown>>('getUsage', 'GET', '/v1/usage');
   }
+  /** GET /v1/app (engine ADR 0108): the app setup Strait has; read or full key. */
+  getAppSetup() {
+    return this.call<Record<string, unknown>>('getAppSetup', 'GET', '/v1/app');
+  }
+  /** GET /v1/app/verify (engine ADR 0108): every setup check as pass / warn / fail / unknown / skip with a fix. */
+  verifyAppSetup() {
+    return this.call<Record<string, unknown>>('verifyAppSetup', 'GET', '/v1/app/verify');
+  }
   /** Referral report (preview): the engine answers 404 until referrals are switched on. */
   getReferrals(q: { from?: string; to?: string } = {}) {
     return this.call<Record<string, unknown>>('getReferrals', 'GET', '/v1/referrals', { query: q });

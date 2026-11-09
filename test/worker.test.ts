@@ -60,7 +60,7 @@ describe('remote MCP worker', () => {
     const list = await worker.fetch(rpc({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} }, { ...auth, 'mcp-protocol-version': '2025-06-18' }), env(), ctx);
     expect(list.status).toBe(200);
     const names = ((await list.json()) as any).result.tools.map((t: { name: string }) => t.name);
-    expect(names).toHaveLength(32);
+    expect(names).toHaveLength(34);
     expect(names).toContain('create_link');
   });
 
@@ -216,7 +216,7 @@ describe('remote MCP worker', () => {
         ctx,
       );
       expect(list.status).toBe(200);
-      expect(((await list.json()) as any).result.tools).toHaveLength(32);
+      expect(((await list.json()) as any).result.tools).toHaveLength(34);
     });
 
     it('a publishable key is refused on the consent form without calling the API', async () => {

@@ -21,8 +21,8 @@ Find the cause with checks, then give the one fix. Read before you change anythi
 ## 0. Start here: `verify_app_setup`
 
 It checks the whole setup now; each check is pass / warn / fail / unknown / skip, with a `fix` when not passing. Work
-through every check that is not pass or skip, most likely cause first (a fail before a warn), then run it again until `ok`
-is true. At most 6 runs a minute; a check still unknown after two tries a minute apart: tell the user and go on.
+through every check that is not pass or skip, most likely cause first (a fail before a warn), then run it
+again until `ok` is true. At most 6 runs a minute; a check still unknown after two tries a minute apart: tell the user and go on.
 A 403 `key_scope` means a links-only key: use a read or full key, or go to the sections below.
 
 - `android_app` / `ios_app` fail: package name, SHA-256 fingerprints, Team ID or bundle ID missing in Dashboard →

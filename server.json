@@ -3,14 +3,14 @@
   "name": "in.straitlink/mcp",
   "title": "Strait",
   "description": "Create, search and pause deep links; QR codes; analytics, taps, events; domains; webhooks.",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "websiteUrl": "https://straitlink.in",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@straitlink/mcp",
-      "version": "0.9.1",
+      "version": "0.9.2",
       "transport": {
         "type": "stdio"
       },
@@ -24,6 +24,12 @@
         {
           "name": "STRAIT_API_URL",
           "description": "Engine URL. Default https://strait.link",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "STRAIT_DOCS_OFFLINE",
+          "description": "Set to 1 to make search_docs use only the docs bundled with this version (no fetch of the live docs from straitlink.in).",
           "isRequired": false,
           "isSecret": false
         }

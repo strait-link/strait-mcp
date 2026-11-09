@@ -5,6 +5,7 @@
  *   STRAIT_SECRET_KEY  a secret key (st_live_…) from Dashboard → Settings → Secret keys. Without it only
  *                      check_app_links, search_docs and demo trace_tap work.
  *   STRAIT_API_URL     engine URL, default https://strait.link (e.g. http://localhost:3000 for a local engine)
+ *   STRAIT_DOCS_OFFLINE=1  search_docs uses only the bundled docs (no fetch of straitlink.in/llms-full.txt)
  */
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StraitClient, isSecretKey } from './client.js';

@@ -7,6 +7,8 @@ export default defineConfig({
   },
   test: {
     testTimeout: 30_000,
+    // search_docs uses the bundled docs in tests (no network); test/live-docs.test.ts covers the live path.
+    env: { STRAIT_DOCS_OFFLINE: '1' },
     hookTimeout: 60_000,
     // inline it so the alias above applies inside the package too
     server: { deps: { inline: ['@cloudflare/workers-oauth-provider'] } },

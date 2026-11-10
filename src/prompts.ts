@@ -51,7 +51,7 @@ function sdkStep(p?: string): string {
     pick +
     `If you cannot open web pages, use search_docs for "${name} install" and "${name} create the client" instead. ` +
     'Then paste the install command and the setup code exactly as the page shows them: same package names, same versions, same order; ' +
-    'never guess a package or a version. The app gets the publishable key from Dashboard → Get started and the endpoint ' +
+    'never guess a package or a version. The app gets the publishable key from Dashboard → Setup → Your keys and the endpoint ' +
     "https://<link domain from step 1>; never put a secret key in the app (that includes the one I gave you). " +
     'Give me the dashboard steps the page lists (package name, SHA-256 fingerprints, Team ID and bundle ID in Dashboard → Apps & stores) ' +
     'as a short list, because only I can do them. '
@@ -89,7 +89,7 @@ export const PROMPTS: StraitPrompt[] = [
     text: ({ platform: p }) =>
       'Take me from zero to a working Strait link in my app. Go one step at a time and tell me what you found after each step. ' +
       '1) get_workspace to check the key: the workspace name, its link domain and what the key may do. ' +
-      'If it fails, stop and tell me to make a secret key in Dashboard → Settings → Secret keys and add it to this AI tool (https://straitlink.in/docs/mcp/). ' +
+      'If it fails, stop and tell me to make a secret key in Dashboard → Settings → Keys and add it to this AI tool (https://straitlink.in/docs/mcp/). ' +
       'If the key is read only, say that you cannot create links with it and that I can make the first link in Dashboard → Links instead. ' +
       '2) list_links: if I already have a link, offer to use it. Otherwise propose one link: slug first-link and a longUrl I give you ' +
       "(an https page on my app's website, for example the home page; the app receives its path). Show me the slug and longUrl and ask me to answer yes. " +
@@ -98,7 +98,7 @@ export const PROMPTS: StraitPrompt[] = [
       sdkStep(p) +
       '4) check_app_links on the link domain: list each error finding with its fix (most are in Dashboard → Apps & stores). ' +
       '5) Verify with Test mode (https://straitlink.in/docs/test-mode.md, or search_docs for "test mode run a test"): ' +
-      "add a debug-only button that calls the SDK's checkDeferred() as the page shows; I turn on Test mode in Dashboard → Get started (a 15-minute window), " +
+      "add a debug-only button that calls the SDK's checkDeferred() as the page shows; I turn on Test mode in Dashboard → Setup → Test a link (a 15-minute window), " +
       "tap the shortUrl on my phone, install and open the debug build and press the button. onLink should fire with kind deferred, matched true and matchMethod test. " +
       'Then list_taps for the slug over the last hour to confirm my tap arrived. If the reply says no tap was seen, I tap the link again and press the button again; ' +
       'if another phone checked in first, I start a new test. ' +

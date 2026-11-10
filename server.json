@@ -3,21 +3,21 @@
   "name": "in.straitlink/mcp",
   "title": "Strait",
   "description": "Create, search and pause deep links; QR codes; analytics, taps, events; domains; webhooks.",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "websiteUrl": "https://straitlink.in",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@straitlink/mcp",
-      "version": "0.9.2",
+      "version": "0.9.3",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "STRAIT_SECRET_KEY",
-          "description": "Strait secret key (st_live_...) from Dashboard > Settings > Secret keys. Optional: without it only check_app_links, search_docs and demo trace_tap work.",
+          "description": "Strait secret key (st_live_...) from Dashboard > Settings > Keys. Optional: without it only check_app_links, search_docs and demo trace_tap work.",
           "isRequired": false,
           "isSecret": true
         },
@@ -47,7 +47,7 @@
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer and a Strait secret key: \"Bearer st_live_...\" from Dashboard > Settings > Secret keys (a Read only key is enough for reading).",
+          "description": "Bearer and a Strait secret key: \"Bearer st_live_...\" from Dashboard > Settings > Keys (a Read only key is enough for reading).",
           "isRequired": true,
           "isSecret": true
         }

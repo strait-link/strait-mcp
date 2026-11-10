@@ -160,7 +160,7 @@ export class StraitClient {
   private async send(operation: string, method: string, path: string, opts: CallOptions = {}): Promise<Response> {
     const auth = opts.auth ?? true;
     if (auth && !this.hasSecretKey) {
-      throw new StraitApiError(401, { error: 'no secret key configured: set STRAIT_SECRET_KEY to a key from Dashboard → Settings → Secret keys (st_live_…)' }, operation);
+      throw new StraitApiError(401, { error: 'no secret key configured: set STRAIT_SECRET_KEY to a key from Dashboard → Settings → Keys, https://app.straitlink.in/settings#keys (st_live_…)' }, operation);
     }
     const url = new URL(this.apiUrl + path);
     for (const [k, v] of Object.entries(opts.query ?? {})) if (v !== undefined && v !== '') url.searchParams.set(k, String(v));

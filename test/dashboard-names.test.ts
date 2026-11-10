@@ -5,7 +5,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const OLD = /(?:→|›|->| >)\s*\*{0,2}(?:Get started|Secret keys)\b|\bGet started\*{0,2}\s*(?:→|›|->)|\b(?:from|on|in) \*{0,2}Get started\b(?! free)/;
+const OLD = /(?:→|›|->| >)\s*\*{0,2}(?:Get started|Secret keys)\b|\bGet started\*{0,2}\s*(?:→|›|->)|\b(?:[Ff]rom|[Oo]n|[Ii]n|[Oo]pen) \*{0,2}(?:Get started|Secret keys)\b(?! free)|\bGet started (?:page|checklist|screen|tab)\b/;
 const files = (p: string): string[] => (statSync(p).isDirectory() ? readdirSync(p).flatMap((n) => files(join(p, n))) : [p]);
 
 describe('dashboard screen names', () => {

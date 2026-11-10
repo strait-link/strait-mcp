@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.3 (10 Nov 2026)
+
+- Errors, prompts, skills and the listings name the dashboard screens as they are: secret keys are in
+  **Dashboard → Settings → Keys** (https://app.straitlink.in/settings#keys), the publishable key in
+  **Dashboard → Setup → Your keys**, test mode in **Dashboard → Setup → Test a link**. They used to say
+  "Settings → Secret keys" and "Dashboard → Get started", screens the dashboard no longer has. The "no secret key"
+  errors carry the link. A test fails if the old names come back. Plugin 0.2.3.
+- Bundled docs rebuilt from the site (`30fc87a`, the same fix in the docs).
+
 ## 0.9.2 (10 Nov 2026)
 
 - `search_docs` reads the live docs: it downloads `straitlink.in/llms-full.txt` and `llms-recipes.txt` (the files the site

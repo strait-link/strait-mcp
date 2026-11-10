@@ -29,4 +29,4 @@ from `STRAIT_SECRET_KEY`. Keep it in an environment variable, never in a flag
 you leave in shell history, an app, a web page or a public repo. Apps and web
 pages use the **publishable** key (`st_pub_live_…` / `st_pub_test_…`) with the
 mobile and web SDKs instead. If a secret key leaks, revoke it in the dashboard
-(Settings → Secret keys) right away and create a new one.
+(Settings → Keys) right away and create a new one.

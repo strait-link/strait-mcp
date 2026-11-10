@@ -90,7 +90,7 @@ export function consentPage(clientName: string, redirectUri: string, error?: str
 <title>Connect Strait</title><style>${PAGE_STYLE}</style></head><body>
 <h1>Connect ${esc(clientName)} to Strait</h1>
 <p>${esc(clientName)} will be able to create and update links and read analytics in your workspace.</p>
-<p>Paste a secret key from Dashboard → Settings → Secret keys (it starts with <code>st_live_</code>). Create a separate key for this connection so you can revoke it on its own. It is checked with Strait and stored encrypted with this connection.</p>
+<p>Paste a secret key from <a href="https://app.straitlink.in/settings#keys" target="_blank" rel="noopener">Dashboard → Settings → Keys</a> (it starts with <code>st_live_</code>). Create a separate key for this connection so you can revoke it on its own. It is checked with Strait and stored encrypted with this connection.</p>
 <p class="muted">After you connect, you go back to <strong>${esc(returnHost(redirectUri))}</strong>. Only continue if you started this from ${esc(clientName)}.</p>
 ${error ? `<p class="err" role="alert">${esc(error)}</p>` : ''}
 <form method="post"><label for="k">Secret key</label><input id="k" name="secretKey" type="password" autocomplete="off" required pattern="st_(live|test)_.+">
@@ -141,7 +141,7 @@ const defaultHandler = {
     try {
       await new StraitClient({ apiUrl: env.STRAIT_API_URL, secretKey, userAgent: USER_AGENT }).listLinks({ limit: 1 });
     } catch {
-      return consentPage(clientName, authReq.redirectUri, 'Strait did not accept that key. Check it in Dashboard → Settings → Secret keys (a key is shown only once; create a new one if needed).');
+      return consentPage(clientName, authReq.redirectUri, 'Strait did not accept that key. Check it in Dashboard → Settings → Keys (a key is shown only once; create a new one if needed).');
     }
     const { redirectTo } = await env.OAUTH_PROVIDER.completeAuthorization({
       request: authReq,

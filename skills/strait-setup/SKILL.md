@@ -15,8 +15,8 @@ store or website when it is not, and keep the destination through the install (d
 
 ## Rules (never break these)
 
-1. **Two keys.** The **publishable key** (`st_pub_live_…`, Dashboard → Get started) goes in app and website code.
-   The **secret key** (`st_live_…`, Dashboard → Settings → Secret keys) is for servers only. Never put a secret key
+1. **Two keys.** The **publishable key** (`st_pub_live_…`, Dashboard → Setup → Your keys: https://app.straitlink.in/setup#keys) goes in app and website code.
+   The **secret key** (`st_live_…`, Dashboard → Settings → Keys: https://app.straitlink.in/settings#keys) is for servers only. Never put a secret key
    in an app, a website, a repo or a client bundle. If you find one there, tell the user to revoke it.
 2. **One callback.** Every mobile SDK delivers every kind of link open (app closed, background, foreground, first
    open after install) through one `onLink` callback. Route from `e.path` and `e.params` when `e.matched` is

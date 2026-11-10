@@ -43,7 +43,7 @@ Link opens and installs are reported by the SDK by itself. Only conversions (pur
 ## Verify
 
 1. The call returns `true` (log it in a debug build).
-2. Test mode: Dashboard → Get started → Test mode, tap a link, open the debug build, fire the event. The dashboard lists
+2. Test mode: Dashboard → Setup → Test a link, tap a link, open the debug build, fire the event. The dashboard lists
    **Events since the match**: https://straitlink.in/docs/test-mode/
 3. MCP `list_events` (owner or admin secret key) shows the event with its channel and campaign, or Dashboard → Analytics
    shows it at the bottom of the funnel with its revenue.

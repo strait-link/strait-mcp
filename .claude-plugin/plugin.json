@@ -1,6 +1,6 @@
 {
   "name": "strait",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Strait deep links in Claude Code: the hosted Strait MCP server (create, find, pause links, analytics, App Links checks, webhooks) and four skills: strait-setup (add Strait to an app), strait-troubleshoot, strait-events (track in-app events) and strait-migration (from Firebase Dynamic Links or Branch).",
   "author": {
     "name": "The Strait team",
@@ -23,7 +23,7 @@
     "secret_key": {
       "type": "string",
       "title": "Strait secret key",
-      "description": "A secret key from Dashboard → Settings → Secret keys (st_live_…). Make one just for Claude Code; Read only is enough if Claude should only look.",
+      "description": "A secret key from Dashboard → Settings → Keys (st_live_…). Make one just for Claude Code; Read only is enough if Claude should only look.",
       "sensitive": true,
       "required": true
     }

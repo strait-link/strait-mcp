@@ -38,7 +38,7 @@ matches are labelled Estimated until measured. Android uses the Play Install Ref
 
 ## Tools
 
-A read-only secret key (Dashboard → Settings → Secret keys, access "Read only") is offered only the tools that read
+A read-only secret key (Dashboard → Settings → Keys, access "Read only") is offered only the tools that read
 (0.5.1; the hosted server already did this). Full and links-only keys see every tool; the API still refuses anything
 outside the key's access.
 
@@ -101,7 +101,7 @@ Clients that show MCP prompts (Claude Code: type `/`) offer six starters. All bu
 
 ## Keys
 
-The server needs a **secret key** (`st_live_…`) from **Dashboard → Settings → Secret keys**. A secret key can change your
+The server needs a **secret key** (`st_live_…`) from **Dashboard → Settings → Keys**. A secret key can change your
 links, so:
 
 - Create a separate key for your AI tools, so you can revoke it on its own.

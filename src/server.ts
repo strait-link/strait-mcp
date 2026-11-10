@@ -8,7 +8,7 @@ import { PROMPTS, type StraitPrompt } from './prompts.js';
 import { SERVER_INSTRUCTIONS, TOOLS, ToolContent, type ContentBlock, type StraitTool } from './tools.js';
 
 export const SERVER_NAME = 'strait';
-export const SERVER_VERSION = '0.9.2';
+export const SERVER_VERSION = '0.9.3';
 
 /** Anything shaped like a secret key (st_live_… / st_test_…) never leaves the server in a tool result. */
 const SECRET_KEY_SHAPE = /(?<![A-Za-z0-9])st_(?:live|test)_[A-Za-z0-9_-]+/g;
@@ -22,7 +22,7 @@ export async function runTool(t: StraitTool, client: StraitClient, args: unknown
     if (t.needsKey && !client.hasSecretKey) {
       return {
         isError: true,
-        content: [{ type: 'text', text: `${t.name} needs a Strait secret key. Set STRAIT_SECRET_KEY (st_live_…, from Dashboard → Settings → Secret keys) in this MCP server's environment.` }],
+        content: [{ type: 'text', text: `${t.name} needs a Strait secret key. Set STRAIT_SECRET_KEY (st_live_…, from Dashboard → Settings → Keys: https://app.straitlink.in/settings#keys) in this MCP server's environment.` }],
       };
     }
     const out = await t.run(client, args as never);
